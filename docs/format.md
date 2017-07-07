@@ -2,15 +2,15 @@
 | --- | --- | --- |
 | 1 |  |  |
 |  |  Must be `CIV5` | File signature |
-|  | `1.0.3.279(130961)` | Version |
+|  | `1.0.3.18 (379995)`<br>`1.0.3.279(130961)` | Version |
 |  | `403694` | Build |
-|  | `CIVILIZATION_MOROCCO` | Player 1 civilization |
-|  | `HANDICAP_SETTLER` | Difficulty |
+|  | `CIVILIZATION_IROQUOIS`<br>`CIVILIZATION_MOROCCO` | Player 1 civilization |
+|  | `HANDICAP_CHIEFTAIN`<br>`HANDICAP_SETTLER` | Difficulty |
 |  | `ERA_ANCIENT` | Starting era |
-|  | `ERA_ANCIENT` | Current era |
-|  | `GAMESPEED_QUICK` | Game pace |
-|  | `WORLDSIZE_DUEL` | Map size |
-|  | `Assets\Maps\Earth_Duel.Civ5Map` | Map |
+|  | `ERA_ANCIENT`<br>`ERA_RENAISSANCE` | Current era |
+|  | `GAMESPEED_STANDARD`<br>`GAMESPEED_QUICK` | Game pace |
+|  | `WORLDSIZE_DUEL`<br>`WORLDSIZE_SMALL` | Map size |
+|  | `Assets\Maps\Continents.lua`<br>`Assets\Maps\Earth_Duel.Civ5Map` | Map |
 | 3 |  | Player information |
 | 8 |  | Civilizations |
 | 9 |  | Leaders |
