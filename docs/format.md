@@ -1,9 +1,9 @@
 | Section | Type | Sample values | Notes |
 | --- | --- | --- | --- |
 | 1 |  |  |  |
-|  |  | Must be `CIV5` | File signature |
-|  | String | `1.0.3.18 (379995)`<br>`1.0.3.279(130961)` | Version |
-|  | String | `379995`<br>`403694` | Build |
+|  | String | Must be `CIV5` | File signature |
+|  | String | `1.0.3.18 (379995)`<br>`1.0.3.80 (389545)`<br>`1.0.3.142 (395070)`<br>`1.0.3.144 (395131)`<br>`1.0.3.279(130961)` | Version |
+|  | String | `379995`<br>`395131`<br>`403694` | Build |
 |  | String | `CIVILIZATION_IROQUOIS`<br>`CIVILIZATION_MOROCCO` | Player 1 civilization |
 |  | String | `HANDICAP_CHIEFTAIN`<br>`HANDICAP_SETTLER` | Difficulty |
 |  | String | `ERA_ANCIENT` | Starting era |
@@ -31,12 +31,13 @@ Notes:
 ---
 - Sections are separated by 0x40000000
 - Savegames may contain different number of sections
-  - Version 1.0.3.279
+  - Version 1.0.3.142 (build 395070)+
     - Contains 33 sections
     - Section 18 is an additional section that contains mostly 0xff
-      - TODO: figure out exact version/build number this extra section was added
-  - Version 1.0.3.18
+  - Version 1.0.3.18 (379995) - 1.0.3.80 (build 389545)
     - Contains 32 sections
+  - [Versions < 1.0.3.18 (379995)](http://www.kynosarges.org/misc/Civ5PatchNotes.txt)
+    - ???
 - Within each section, string values are prefixed by their length. For example:  
   `1400 0000 4349 5649 4c49 5a41 5449 4f4e 5f4d 4f52 4f43 434f`
   - `1400 0000` = 0x14 (little endian) = 20 bytes
