@@ -2,8 +2,9 @@
 | --- | --- | --- | --- |
 | 1 |  |  |  |
 |  | String | Must be `CIV5` | File signature |
-|  | String | `1.0.3.18 (379995)`<br>`1.0.3.80 (389545)`<br>`1.0.3.142 (395070)`<br>`1.0.3.144 (395131)`<br>`1.0.3.279(130961)` | Version |
-|  | String | `379995`<br>`395131`<br>`403694` | Build |
+|  | 32-bit integer | 0x4<br>0x5<br>0x8 | Save game version:<br>4 = 1.0.0<br>5 = 1.0.1<br>8 = 1.0.2 - 1.0.3 |
+|  | String | `1.0.2.13 (341540)`<br>`1.0.3.18 (379995)`<br>`1.0.3.80 (389545)`<br>`1.0.3.142 (395070)`<br>`1.0.3.144 (395131)`<br>`1.0.3.279(130961)` | Civ 5 version |
+|  | String | `379995`<br>`395131`<br>`403694` | Civ 5 build |
 |  | String | `CIVILIZATION_IROQUOIS`<br>`CIVILIZATION_MOROCCO` | Player 1 civilization |
 |  | String | `HANDICAP_CHIEFTAIN`<br>`HANDICAP_SETTLER` | Difficulty |
 |  | String | `ERA_ANCIENT` | Starting era |
@@ -17,7 +18,7 @@
 | 14 |  |  | Climate |
 | 18 |  |  | See notes below |
 | 18/19 |  |  |  |
-|  | Short | 0x0<br>0x14a<br>0x1f4 | Max turns |
+|  | 16-bit integer | 0x0<br>0x14a<br>0x1f4 | Max turns |
 | 19/20 |  |  | City states |
 | 24/25 |  |  | Player colours |
 | 25/26 |  |  | Sea level |
@@ -38,7 +39,7 @@ Notes:
     - Contains 32 sections
   - [Versions < 1.0.3.18 (379995)](http://www.kynosarges.org/misc/Civ5PatchNotes.txt)
     - ???
-- Within each section, string values are prefixed by their length. For example:  
+- Within each section, string values are prefixed by their length as a little-endian 32-bit integer. For example:  
   `1400 0000 4349 5649 4c49 5a41 5449 4f4e 5f4d 4f52 4f43 434f`
   - `1400 0000` = 0x14 (little endian) = 20 bytes
   - `4349...` = `CIVILIZATION_MOROCCO` (20 bytes long)
