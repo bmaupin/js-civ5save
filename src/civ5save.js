@@ -1,3 +1,5 @@
+import Civ5SaveProperties from "./civ5saveproperties";
+
 const repoUrl = "https://github.com/bmaupin/civ5save";
 
 export default class Civ5Save {
@@ -51,7 +53,7 @@ export default class Civ5Save {
   }
 
   verifyFileSignature() {
-    if (this.saveData.getAsciiString(0, 4) !== "CIV5") {
+    if (this.saveData.getAsciiString(Civ5SaveProperties.fileSignature.byteOffset, 4) !== "CIV5") {
       throw new Error("File signature does not match. Is this a Civ 5 savegame?");
     }
   }
@@ -63,10 +65,15 @@ export default class Civ5Save {
   }
 
   get saveGameVersion() {
-    return this.saveData.getInt32(4, true);
+    return this.saveData.getInt32(Civ5SaveProperties.saveGameVersion.byteOffset, true);
   }
 
   get gameVersion() {
-    return this.saveData.getVariableLengthString(8);
+    return this.saveData.getVariableLengthString(Civ5SaveProperties.gameVersion.byteOffset);
+  }
+
+  // TODO
+  get gameBuild() {
+
   }
 }
