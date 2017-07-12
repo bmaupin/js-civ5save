@@ -1,0 +1,8 @@
+{
+  "author": "https://bmaupin.github.io",
+  "devDependencies": {
+    "babel-preset-env": "^1.6.0",
+  },
+  "license": "MIT",
+  "version": "0.0.1"
+}
