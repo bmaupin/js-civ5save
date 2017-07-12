@@ -1,8 +1,13 @@
 {
   "author": "https://bmaupin.github.io",
   "devDependencies": {
+    "babel-jest": "^20.0.3",
     "babel-preset-env": "^1.6.0",
+    "jest": "^20.0.4"
   },
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
   "version": "0.0.1"
 }
