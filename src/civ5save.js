@@ -65,31 +65,28 @@ export default class Civ5Save {
   }
 
   getProperty(propertyName) {
-    switch (Civ5SaveProperties[propertyName].type) {
-      case "fixedLengthString":
-        break;
+    this.populatePropertyOffsetAndLength(propertyName);
 
+    switch (Civ5SaveProperties[propertyName].type) {
       case "int32":
         return this.saveData.getInt32(Civ5SaveProperties[propertyName].byteOffset, true);
 
       case "variableLengthString":
-        this.populatePropertyOffsetAndLength(propertyName);
-        console.log(`${propertyName} byteOffset=${Civ5SaveProperties[propertyName].byteOffset}`);
-        console.log(`${propertyName} length=${Civ5SaveProperties[propertyName].length}`);
         return this.saveData.getVariableLengthString(Civ5SaveProperties[propertyName].byteOffset);
+
+      default:
+        throw new Error(`Property type ${Civ5SaveProperties[propertyName].type} not handled`)
     }
   }
 
   populatePropertyOffsetAndLength(propertyName) {
-    console.log(`populatePropertyOffsetAndLength(${propertyName})`);
     if (Civ5SaveProperties[propertyName].byteOffset === null) {
-      console.log(`${propertyName} byteOffset is null`);
       let previousPropertyName = Civ5SaveProperties[propertyName].previousProperty;
       this.populatePropertyOffsetAndLength(previousPropertyName);
-      Civ5SaveProperties[propertyName].byteOffset = Civ5SaveProperties[previousPropertyName].byteOffset + Civ5SaveProperties[previousPropertyName].length;
+      Civ5SaveProperties[propertyName].byteOffset = Civ5SaveProperties[previousPropertyName].byteOffset +
+        Civ5SaveProperties[previousPropertyName].length;
     }
     if (Civ5SaveProperties[propertyName].length === null) {
-      console.log(`${propertyName} length is null`);
       Civ5SaveProperties[propertyName].length = this.saveData.getStringLength(
         Civ5SaveProperties[propertyName].byteOffset) + 4;
     }
