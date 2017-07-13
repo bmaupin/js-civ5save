@@ -24,5 +24,11 @@ function getFileBlob(url) {
 test("Get game version", async () => {
   let fileBlob = await getFileBlob(noOptionsSavegamePath);
   let savegame = await Civ5Save.fromFile(fileBlob);
-  console.log(savegame.gameVersion);
+  expect(savegame.gameVersion).toBe("1.0.3.279(130961)");
+});
+
+test("Get game build", async () => {
+  let fileBlob = await getFileBlob(noOptionsSavegamePath);
+  let savegame = await Civ5Save.fromFile(fileBlob);
+  expect(savegame.gameBuild).toBe("403694");
 });
