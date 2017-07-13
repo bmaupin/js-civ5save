@@ -22,16 +22,17 @@ export default class Civ5Save {
       }
       return string;
     }
+
+    this.verifyFileSignature();
+    this.sectionOffsets = this.getSectionOffsets();
+    this.verifySaveGameVersion();
   }
 
   // Use a static factory to instantiate the object since it relies on data that needs to be fetched asynchronously
   // https://stackoverflow.com/a/24686979/399105
   static async fromFile(saveFile) {
     let saveData = await Civ5Save.loadData(saveFile);
-    let civ5save = new Civ5Save(saveData);
-    civ5save.verifyFileSignature();
-    civ5save.verifySaveGameVersion();
-    return civ5save;
+    return new Civ5Save(saveData);
   }
 
   static loadData(saveFile) {
@@ -56,6 +57,32 @@ export default class Civ5Save {
     if (this.saveData.getAsciiString(Civ5SaveProperties.fileSignature.byteOffset, 4) !== "CIV5") {
       throw new Error("File signature does not match. Is this a Civ 5 savegame?");
     }
+  }
+
+  getSectionOffsets() {
+    let saveDataBytes = new Int8Array(this.saveData.buffer);
+    let sectionOffsets = [];
+
+    function areArraysEqual(array1, array2) {
+      return (array1.length == array2.length) && array1.every(function(element, index) {
+        return element === array2[index];
+      });
+    }
+
+    saveDataBytes.forEach((byte, byteOffset) => {
+      if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), [64, 0, 0, 0])) {
+        let section = {
+          start: byteOffset,
+        };
+        sectionOffsets.push(section);
+
+        if (sectionOffsets.length >= 2) {
+          sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;
+        }
+      }
+    });
+
+    return sectionOffsets;
   }
 
   verifySaveGameVersion() {
