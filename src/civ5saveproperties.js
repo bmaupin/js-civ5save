@@ -1,26 +1,77 @@
 export default {
   "fileSignature": {
     "byteOffset": 0,
+    "byteOffsetInSection": 0,
     "length": 4,
     "previousProperty": null,
+    "section": 1,
+    "sectionByBuild": {
+      "4": 0
+    },
     "type": "fixedLengthString"
   },
   "saveGameVersion": {
     "byteOffset": 4,
+    "byteOffsetInSection": 4,
     "length": 4,
     "previousProperty": "fileSignature",
+    "section": 1,
+    "sectionByBuild": {
+      "4": 0
+    },
     "type": "int32"
   },
   "gameVersion": {
-    "byteOffset": 8,
-    "length":  null,
+    "byteOffsetInSection": 8,
+    "length": null,
     "previousProperty": "saveGameVersion",
+    "section": 1,
+    "sectionByBuild": {
+      "341540": 0
+    },
     "type": "variableLengthString"
   },
   "gameBuild": {
-    "byteOffset": null,
-    "length":  null,
+    "byteOffsetInSection": null,
+    "length": null,
     "previousProperty": "gameVersion",
+    "section": 1,
+    "sectionByBuild": {
+      "341540": 0
+    },
     "type": "variableLengthString"
+  },
+  "section17Map": {
+    "byteOffsetInSection": 275,
+    "length": null,
+    "previousProperty": null,
+    "sectionByBuild": {
+      "4": 17,
+      "341540": 18,
+      "395070": 19
+    },
+    "type": "variableLengthString"
+  },
+  "section17Skip1": {
+    "byteOffsetInSection": null,
+    "length": 4,
+    "previousProperty": "section17Map",
+    "sectionByBuild": {
+      "4": 17,
+      "341540": 18,
+      "395070": 19
+    },
+    "type": "variableLengthString"
+  },
+  "maxTurns": {
+    "byteOffsetInSection": null,
+    "length": 2,
+    "previousProperty": "section17Skip1",
+    "sectionByBuild": {
+      "4": 17,
+      "341540": 18,
+      "395070": 19
+    },
+    "type": "int16"
   }
 }
