@@ -32,3 +32,9 @@ test("Get game build", async () => {
   let savegame = await Civ5Save.fromFile(fileBlob);
   expect(savegame.gameBuild).toBe("403694");
 });
+
+test("Get max turns", async () => {
+  let fileBlob = await getFileBlob(noOptionsSavegamePath);
+  let savegame = await Civ5Save.fromFile(fileBlob);
+  expect(savegame.maxTurns).toBe(330);
+});
