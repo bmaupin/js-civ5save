@@ -4,25 +4,8 @@ const repoUrl = "https://github.com/bmaupin/civ5save";
 
 export default class Civ5Save {
   constructor(saveData) {
-    this.saveData = saveData;
-
-    this.saveData.getVariableLengthString = function (byteOffset) {
-      let stringLength = this.getStringLength(byteOffset);
-      return this.getAsciiString(byteOffset + 4, stringLength);
-    }
-
-    this.saveData.getStringLength = function (byteOffset) {
-      return saveData.getInt32(byteOffset, true);
-    }
-
-    this.saveData.getAsciiString = function (byteOffset, byteLength) {
-      let string = "";
-      for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
-        string += String.fromCharCode(this.getInt8(byte));
-      }
-      return string;
-    }
-
+    // this.saveData = new Civ5SaveDataView(saveData.buffer);
+    this.saveData = new DataView(saveData.buffer);
     this.verifyFileSignature();
     this.sectionOffsets = this.getSectionOffsets();
     this.verifySaveGameVersion();
@@ -66,12 +49,6 @@ export default class Civ5Save {
       start: 0,
     };
     sectionOffsets.push(section);
-
-    function areArraysEqual(array1, array2) {
-      return (array1.length == array2.length) && array1.every(function(element, index) {
-        return element === array2[index];
-      });
-    }
 
     saveDataBytes.forEach((byte, byteOffset) => {
       if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), [64, 0, 0, 0])) {
@@ -164,6 +141,51 @@ export default class Civ5Save {
   }
 }
 
+// FIXME: Causes error Constructor DataView requires 'new'
+// class Civ5SaveDataView extends DataView {
+//   getVariableLengthString(byteOffset) {
+//     let stringLength = this.getStringLength(byteOffset);
+//     return this.getAsciiString(byteOffset + 4, stringLength);
+//   }
+
+//   getStringLength(byteOffset) {
+//     return this.getInt32(byteOffset, true);
+//   }
+
+//   getAsciiString(byteOffset, byteLength) {
+//     let string = "";
+//     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
+//       string += String.fromCharCode(this.getInt8(byte));
+//     }
+//     return string;
+//   }
+// }
+
+DataView.prototype.getVariableLengthString = function(byteOffset) {
+  let stringLength = this.getStringLength(byteOffset);
+  return this.getAsciiString(byteOffset + 4, stringLength);
+}
+
+DataView.prototype.getStringLength = function(byteOffset) {
+  return this.getInt32(byteOffset, true);
+}
+
+DataView.prototype.getAsciiString = function(byteOffset, byteLength) {
+  let string = "";
+  for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
+    string += String.fromCharCode(this.getInt8(byte));
+  }
+  return string;
+}
+
+// https://stackoverflow.com/a/22395463/399105
+function areArraysEqual(array1, array2) {
+  return (array1.length == array2.length) && array1.every(function(element, index) {
+    return element === array2[index];
+  });
+}
+
+// https://stackoverflow.com/a/416327/399105
 function isNullOrUndefined(variable) {
-  return typeof variable === "undefined" || variable === null
+  return typeof variable === "undefined" || variable === null;
 }
