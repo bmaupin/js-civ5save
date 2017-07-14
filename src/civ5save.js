@@ -62,6 +62,10 @@ export default class Civ5Save {
   getSectionOffsets() {
     let saveDataBytes = new Int8Array(this.saveData.buffer);
     let sectionOffsets = [];
+    let section = {
+      start: 0,
+    };
+    sectionOffsets.push(section);
 
     function areArraysEqual(array1, array2) {
       return (array1.length == array2.length) && array1.every(function(element, index) {
@@ -75,10 +79,7 @@ export default class Civ5Save {
           start: byteOffset,
         };
         sectionOffsets.push(section);
-
-        if (sectionOffsets.length >= 2) {
-          sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;
-        }
+        sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;
       }
     });
 
@@ -92,9 +93,12 @@ export default class Civ5Save {
   }
 
   getProperty(propertyName) {
-    this.populatePropertyOffsetAndLength(propertyName);
+    this.populatePropertyAttributes(propertyName);
 
     switch (Civ5SaveProperties[propertyName].type) {
+      case "int16":
+        return this.saveData.getInt16(Civ5SaveProperties[propertyName].byteOffset, true);
+
       case "int32":
         return this.saveData.getInt32(Civ5SaveProperties[propertyName].byteOffset, true);
 
@@ -106,16 +110,40 @@ export default class Civ5Save {
     }
   }
 
-  populatePropertyOffsetAndLength(propertyName) {
-    if (Civ5SaveProperties[propertyName].byteOffset === null) {
-      let previousPropertyName = Civ5SaveProperties[propertyName].previousProperty;
-      this.populatePropertyOffsetAndLength(previousPropertyName);
-      Civ5SaveProperties[propertyName].byteOffset = Civ5SaveProperties[previousPropertyName].byteOffset +
-        Civ5SaveProperties[previousPropertyName].length;
+  populatePropertyAttributes(propertyName) {
+    this.populatePropertySection(propertyName);
+    this.populatePropertyOffsetAndLength(propertyName);
+  }
+
+  populatePropertySection(propertyName) {
+    let property = Civ5SaveProperties[propertyName];
+    if (isNullOrUndefined(property.section)) {
+      for (var build in property.sectionByBuild) {
+        if (Number.parseInt(this.gameBuild) > Number.parseInt(build)) {
+          property.section = property.sectionByBuild[build];
+        }
+      }
     }
-    if (Civ5SaveProperties[propertyName].length === null) {
-      Civ5SaveProperties[propertyName].length = this.saveData.getStringLength(
-        Civ5SaveProperties[propertyName].byteOffset) + 4;
+  }
+
+  populatePropertyOffsetAndLength(propertyName) {
+    let property = Civ5SaveProperties[propertyName];
+    if (isNullOrUndefined(property.byteOffsetInSection)) {
+      let previousPropertyName = property.previousProperty;
+      let previousProperty = Civ5SaveProperties[previousPropertyName];
+      this.populatePropertyAttributes(previousPropertyName);
+      property.byteOffsetInSection =
+        previousProperty.byteOffsetInSection +
+        previousProperty.length;
+    }
+    if (isNullOrUndefined(property.byteOffset)) {
+      property.byteOffset =
+        this.sectionOffsets[property.section - 1].start +
+        property.byteOffsetInSection;
+    }
+    if (isNullOrUndefined(property.length)) {
+      property.length = this.saveData.getStringLength(
+        property.byteOffset) + 4;
     }
   }
 
@@ -130,4 +158,12 @@ export default class Civ5Save {
   get gameBuild() {
     return this.getProperty("gameBuild");
   }
+
+  get maxTurns() {
+    return this.getProperty("maxTurns");
+  }
+}
+
+function isNullOrUndefined(variable) {
+  return typeof variable === "undefined" || variable === null
 }
