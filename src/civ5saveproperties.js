@@ -8,7 +8,7 @@ export default {
     "sectionByBuild": {
       "201080": 0
     },
-    "type": "fixedLengthString"
+    "type": "string"
   },
   "saveGameVersion": {
     "byteOffset": 4,
@@ -29,7 +29,7 @@ export default {
     "sectionByBuild": {
       "341540": 0
     },
-    "type": "variableLengthString"
+    "type": "string"
   },
   "gameBuild": {
     "byteOffsetInSection": null,
@@ -39,7 +39,7 @@ export default {
     "sectionByBuild": {
       "341540": 0
     },
-    "type": "variableLengthString"
+    "type": "string"
   },
   "section17Map": {
     "byteOffsetInSection": 275,
@@ -50,7 +50,7 @@ export default {
       "341540": 18,
       "395070": 19
     },
-    "type": "variableLengthString"
+    "type": "string"
   },
   "section17Skip1": {
     "byteOffsetInSection": null,
