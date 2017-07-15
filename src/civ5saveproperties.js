@@ -6,7 +6,7 @@ export default {
     "previousProperty": null,
     "section": 1,
     "sectionByBuild": {
-      "4": 0
+      "201080": 0
     },
     "type": "fixedLengthString"
   },
@@ -17,7 +17,7 @@ export default {
     "previousProperty": "fileSignature",
     "section": 1,
     "sectionByBuild": {
-      "4": 0
+      "201080": 0
     },
     "type": "int32"
   },
@@ -46,7 +46,7 @@ export default {
     "length": null,
     "previousProperty": null,
     "sectionByBuild": {
-      "4": 17,
+      "201080": 17,
       "341540": 18,
       "395070": 19
     },
@@ -57,7 +57,7 @@ export default {
     "length": 4,
     "previousProperty": "section17Map",
     "sectionByBuild": {
-      "4": 17,
+      "201080": 17,
       "341540": 18,
       "395070": 19
     },
@@ -68,7 +68,7 @@ export default {
     "length": 2,
     "previousProperty": "section17Skip1",
     "sectionByBuild": {
-      "4": 17,
+      "201080": 17,
       "341540": 18,
       "395070": 19
     },
