@@ -88,7 +88,9 @@ export default class Civ5Save {
 
   populatePropertyAttributes(propertyName) {
     this.populatePropertySection(propertyName);
-    this.populatePropertyOffsetAndLength(propertyName);
+    this.populatePropertyByteOffsetInSection(propertyName);
+    this.populatePropertyByteOffset(propertyName);
+    this.populatePropertyLength(propertyName);
   }
 
   populatePropertySection(propertyName) {
@@ -102,24 +104,27 @@ export default class Civ5Save {
     }
   }
 
-  populatePropertyOffsetAndLength(propertyName) {
+  populatePropertyByteOffsetInSection(propertyName) {
     let property = Civ5SaveProperties[propertyName];
     if (isNullOrUndefined(property.byteOffsetInSection)) {
       let previousPropertyName = property.previousProperty;
       let previousProperty = Civ5SaveProperties[previousPropertyName];
       this.populatePropertyAttributes(previousPropertyName);
-      property.byteOffsetInSection =
-        previousProperty.byteOffsetInSection +
-        previousProperty.length;
+      property.byteOffsetInSection = previousProperty.byteOffsetInSection + previousProperty.length;
     }
+  }
+
+  populatePropertyByteOffset(propertyName) {
+    let property = Civ5SaveProperties[propertyName];
     if (isNullOrUndefined(property.byteOffset)) {
-      property.byteOffset =
-        this.sectionOffsets[property.section - 1].start +
-        property.byteOffsetInSection;
+      property.byteOffset = this.sectionOffsets[property.section - 1].start + property.byteOffsetInSection;
     }
+  }
+
+  populatePropertyLength(propertyName) {
+    let property = Civ5SaveProperties[propertyName];
     if (isNullOrUndefined(property.length)) {
-      property.length = this.saveData.getStringLength(
-        property.byteOffset) + 4;
+      property.length = this.saveData.getStringLength(property.byteOffset) + 4;
     }
   }
 
