@@ -6,7 +6,7 @@ export default {
     "previousProperty": null,
     "section": 1,
     "sectionByBuild": {
-      "201080": 0
+      "201080": 1
     },
     "type": "string"
   },
@@ -17,7 +17,7 @@ export default {
     "previousProperty": "fileSignature",
     "section": 1,
     "sectionByBuild": {
-      "201080": 0
+      "201080": 1
     },
     "type": "int32"
   },
@@ -27,7 +27,7 @@ export default {
     "previousProperty": "saveGameVersion",
     "section": 1,
     "sectionByBuild": {
-      "341540": 0
+      "341540": 1
     },
     "type": "string"
   },
@@ -37,7 +37,7 @@ export default {
     "previousProperty": "gameVersion",
     "section": 1,
     "sectionByBuild": {
-      "341540": 0
+      "341540": 1
     },
     "type": "string"
   },
