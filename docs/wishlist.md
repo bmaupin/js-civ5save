@@ -1,0 +1,19 @@
+- Read properties
+  - [x] Save game version
+  - [x] Game version
+  - [x] Game build
+  - [x] [Max turns](https://gaming.stackexchange.com/a/273907/154341)
+  - [ ] [Victory conditions](https://gaming.stackexchange.com/a/273907/154341)
+  - [ ] [Multiplayer turn types](http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/)
+  - [ ] [Multiplayer lobby public/private](https://github.com/Canardlaquay/Civ5SavePrivate/blob/master/Civ5PrivateSave/Form1.cs)
+  - [ ] [Multiplayer pitboss setting](https://github.com/Bownairo/Civ5SaveEditor/blob/master/SaveEditor.c)
+- Write properties
+  - [ ] [Max turns](https://gaming.stackexchange.com/a/273907/154341)
+  - [ ] [Victory conditions](https://gaming.stackexchange.com/a/273907/154341)
+  - [ ] [Multiplayer turn types](http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/)
+  - [ ] [Multiplayer lobby public/private](https://github.com/Canardlaquay/Civ5SavePrivate/blob/master/Civ5PrivateSave/Form1.cs)
+  - [ ] [Multiplayer pitboss setting](https://github.com/Bownairo/Civ5SaveEditor/blob/master/SaveEditor.c)
+- [ ] Support for all save game versions
+  - Requirements
+    - Game build will need to be retrieved from the last non-compressed section instead of the first section
+    - Logic for handling properties that don't exist in all versions will need to be added
