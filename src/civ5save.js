@@ -4,8 +4,7 @@ const repoUrl = "https://github.com/bmaupin/civ5save";
 
 export default class Civ5Save {
   constructor(saveData) {
-    // this.saveData = new Civ5SaveDataView(saveData.buffer);
-    this.saveData = new DataView(saveData.buffer);
+    this.saveData = new Civ5SaveDataView(saveData.buffer);
     this.verifyFileSignature();
     this.sectionOffsets = this.getSectionOffsets();
     this.verifySaveGameVersion();
@@ -141,41 +140,24 @@ export default class Civ5Save {
   }
 }
 
-// FIXME: Causes error Constructor DataView requires 'new'
-// class Civ5SaveDataView extends DataView {
-//   getVariableLengthString(byteOffset) {
-//     let stringLength = this.getStringLength(byteOffset);
-//     return this.getAsciiString(byteOffset + 4, stringLength);
-//   }
-
-//   getStringLength(byteOffset) {
-//     return this.getInt32(byteOffset, true);
-//   }
-
-//   getAsciiString(byteOffset, byteLength) {
-//     let string = "";
-//     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
-//       string += String.fromCharCode(this.getInt8(byte));
-//     }
-//     return string;
-//   }
-// }
-
-DataView.prototype.getVariableLengthString = function(byteOffset) {
-  let stringLength = this.getStringLength(byteOffset);
-  return this.getAsciiString(byteOffset + 4, stringLength);
-}
-
-DataView.prototype.getStringLength = function(byteOffset) {
-  return this.getInt32(byteOffset, true);
-}
-
-DataView.prototype.getAsciiString = function(byteOffset, byteLength) {
-  let string = "";
-  for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
-    string += String.fromCharCode(this.getInt8(byte));
+// Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
+class Civ5SaveDataView extends DataView {
+  getVariableLengthString(byteOffset) {
+    let stringLength = this.getStringLength(byteOffset);
+    return this.getAsciiString(byteOffset + 4, stringLength);
   }
-  return string;
+
+  getStringLength(byteOffset) {
+    return this.getInt32(byteOffset, true);
+  }
+
+  getAsciiString(byteOffset, byteLength) {
+    let string = "";
+    for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
+      string += String.fromCharCode(this.getInt8(byte));
+    }
+    return string;
+  }
 }
 
 // https://stackoverflow.com/a/22395463/399105
