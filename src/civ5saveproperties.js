@@ -61,7 +61,7 @@ export default {
       "341540": 18,
       "395070": 19
     },
-    "type": "variableLengthString"
+    "type": "skip"
   },
   "maxTurns": {
     "byteOffsetInSection": null,

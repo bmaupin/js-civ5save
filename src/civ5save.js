@@ -42,6 +42,8 @@ export default class Civ5Save {
   }
 
   getSectionOffsets() {
+    const sectionDelimiter = [0x40, 0, 0, 0];
+
     let saveDataBytes = new Int8Array(this.saveData.buffer);
     let sectionOffsets = [];
     let section = {
@@ -50,7 +52,7 @@ export default class Civ5Save {
     sectionOffsets.push(section);
 
     saveDataBytes.forEach((byte, byteOffset) => {
-      if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), [64, 0, 0, 0])) {
+      if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), sectionDelimiter)) {
         let section = {
           start: byteOffset,
         };
@@ -71,18 +73,20 @@ export default class Civ5Save {
   getProperty(propertyName) {
     this.populatePropertyAttributes(propertyName);
 
-    switch (Civ5SaveProperties[propertyName].type) {
+    let property = Civ5SaveProperties[propertyName];
+
+    switch (property.type) {
       case "int16":
-        return this.saveData.getInt16(Civ5SaveProperties[propertyName].byteOffset, true);
+        return this.saveData.getInt16(property.byteOffset, true);
 
       case "int32":
-        return this.saveData.getInt32(Civ5SaveProperties[propertyName].byteOffset, true);
+        return this.saveData.getInt32(property.byteOffset, true);
 
       case "variableLengthString":
-        return this.saveData.getVariableLengthString(Civ5SaveProperties[propertyName].byteOffset);
+        return this.saveData.getVariableLengthString(property.byteOffset);
 
       default:
-        throw new Error(`Property type ${Civ5SaveProperties[propertyName].type} not handled`)
+        throw new Error(`Property type ${property.type} not handled`)
     }
   }
 
