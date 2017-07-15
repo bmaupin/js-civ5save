@@ -37,7 +37,7 @@ export default class Civ5Save {
   }
 
   verifyFileSignature() {
-    if (this.saveData.getAsciiString(0, 4) !== "CIV5") {
+    if (this.saveData.getString(0, 4) !== "CIV5") {
       throw new Error("File signature does not match. Is this a Civ 5 savegame?");
     }
   }
@@ -111,7 +111,6 @@ export default class Civ5Save {
     this.populatePropertySection(propertyName);
     this.populatePropertyByteOffsetInSection(propertyName);
     this.populatePropertyByteOffset(propertyName);
-    this.populatePropertyLength(propertyName);
   }
 
   populatePropertySection(propertyName) {
@@ -142,13 +141,6 @@ export default class Civ5Save {
     }
   }
 
-  populatePropertyLength(propertyName) {
-    let property = this.properties[propertyName];
-    if (isNullOrUndefined(property.length)) {
-      property.length = this.saveData.getStringLength(property.byteOffset) + 4;
-    }
-  }
-
   get saveGameVersion() {
     return this.getProperty("saveGameVersion");
   }
@@ -158,26 +150,25 @@ export default class Civ5Save {
   }
 
   get gameBuild() {
-    return this.getProperty("gameBuild");
+    // return this.getProperty("gameBuild");
+
+    let gameVersion = this.getProperty("gameBuild");
+    // console.log(this.properties);
+    return gameVersion;
   }
 
   get maxTurns() {
-    return this.getProperty("maxTurns");
+    // return this.getProperty("maxTurns");
+
+    let gameVersion = this.getProperty("maxTurns");
+    // console.log(this.properties);
+    return gameVersion;
   }
 }
 
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 class Civ5SaveDataView extends DataView {
-  getVariableLengthString(byteOffset) {
-    let stringLength = this.getStringLength(byteOffset);
-    return this.getAsciiString(byteOffset + 4, stringLength);
-  }
-
-  getStringLength(byteOffset) {
-    return this.getInt32(byteOffset, true);
-  }
-
-  getAsciiString(byteOffset, byteLength) {
+  getString(byteOffset, byteLength) {
     let string = "";
     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
       string += String.fromCharCode(this.getInt8(byte));
@@ -190,11 +181,15 @@ class Civ5SaveProperty {
   constructor(propertyDefinition, saveData) {
     this.byteOffset = propertyDefinition.byteOffset;
     this.byteOffsetInSection = propertyDefinition.byteOffsetInSection;
-    this.length = propertyDefinition.length;
+    this._length = propertyDefinition.length;
     this.previousProperty = propertyDefinition.previousProperty;
     this.saveData = saveData;
     this.section = propertyDefinition.section;
     this.sectionByBuild = propertyDefinition.sectionByBuild;
+  }
+
+  get length() {
+    return this._length;
   }
 }
 
@@ -211,8 +206,19 @@ class Civ5SaveInt32Property extends Civ5SaveProperty {
 }
 
 class Civ5SaveStringProperty extends Civ5SaveProperty {
+  get length() {
+    if (isNullOrUndefined(this._length)) {
+      this._length = this.getStringLength(this.byteOffset) + 4;
+    }
+    return this._length;
+  }
+
   get value() {
-    return this.saveData.getVariableLengthString(this.byteOffset);
+    return this.saveData.getString(this.byteOffset + 4, this.length - 4);
+  }
+
+  getStringLength(byteOffset) {
+    return this.saveData.getInt32(byteOffset, true);
   }
 }
 
