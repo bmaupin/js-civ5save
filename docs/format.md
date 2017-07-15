@@ -47,6 +47,7 @@ Notes:
 References:
 ---
 - https://github.com/rivarolle/civ5-saveparser
+- https://github.com/omni-resources/civ5-save-parser
 - https://github.com/urbanski/010_Civ5Save/blob/master/civ5.bt
 - Victory conditions/max turns
   - https://gaming.stackexchange.com/a/273907/154341
@@ -54,5 +55,6 @@ References:
   - http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
 - Multiplayer lobby public/private
   - https://github.com/Canardlaquay/Civ5SavePrivate/blob/master/Civ5PrivateSave/Form1.cs
+  - https://github.com/Renophaston/DefectiveCivSavePrivatizer/blob/master/main.c
 - Multiplayer pitboss setting
   - https://github.com/Bownairo/Civ5SaveEditor/blob/master/SaveEditor.c
