@@ -42,6 +42,39 @@ export default class Civ5Save {
     }
   }
 
+  // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the
+  // game build for all savegame versions
+  getGameBuild() {
+    const GAME_BUILD_MARKER = "FINAL_RELEASE";
+    const GAME_BUILD_MARKER_ARRAY = (function() {
+      let gameBuildMarkerArray = [];
+      for (let i = 0; i < GAME_BUILD_MARKER.length; i++) {
+        gameBuildMarkerArray.push(GAME_BUILD_MARKER.charCodeAt(i));
+      }
+      return gameBuildMarkerArray;
+    }());
+
+    let gameBuildMarkerByteOffset = 0;
+    let saveDataBytes = new Int8Array(this.saveData.buffer);
+    for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
+      if (areArraysEqual(
+          saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
+          GAME_BUILD_MARKER_ARRAY)) {
+        gameBuildMarkerByteOffset = byteOffset;
+        break;
+      }
+    }
+
+    let gameBuild = "";
+    let byteOffset = gameBuildMarkerByteOffset - 2;
+    while (saveDataBytes.slice(byteOffset, byteOffset + 1)[0] !== 0) {
+      gameBuild = String.fromCharCode(saveDataBytes.slice(byteOffset, byteOffset + 1)) + gameBuild;
+      byteOffset--;
+    }
+
+    return gameBuild;
+  }
+
   getProperties() {
     let properties = new Map();
     for (let propertyName in Civ5SavePropertyDefinitions) {
@@ -150,11 +183,11 @@ export default class Civ5Save {
   }
 
   get gameBuild() {
-    // return this.getProperty("gameBuild");
+    if (isNullOrUndefined(this._gameBuild)) {
+      this._gameBuild = this.getGameBuild();
+    }
 
-    let gameVersion = this.getProperty("gameBuild");
-    // console.log(this.properties);
-    return gameVersion;
+    return this._gameBuild;
   }
 
   get maxTurns() {
