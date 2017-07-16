@@ -1,13 +1,13 @@
 import Civ5SavePropertyDefinitions from "./civ5saveproperties";
 
-const repoUrl = "https://github.com/bmaupin/civ5save";
+const REPO_URL = "https://github.com/bmaupin/civ5save";
 
 export default class Civ5Save {
   constructor(saveData) {
     this.saveData = new Civ5SaveDataView(saveData.buffer);
     this.verifyFileSignature();
-    this.loadProperties();
     this.verifySaveGameVersion();
+    this.loadProperties();
   }
 
   // Use a static factory to instantiate the object since it relies on data that needs to be fetched asynchronously
@@ -41,37 +41,10 @@ export default class Civ5Save {
     }
   }
 
-  // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the
-  // game build for all savegame versions
-  getGameBuild() {
-    const GAME_BUILD_MARKER = "FINAL_RELEASE";
-    const GAME_BUILD_MARKER_ARRAY = (function() {
-      let gameBuildMarkerArray = [];
-      for (let i = 0; i < GAME_BUILD_MARKER.length; i++) {
-        gameBuildMarkerArray.push(GAME_BUILD_MARKER.charCodeAt(i));
-      }
-      return gameBuildMarkerArray;
-    }());
-
-    let gameBuildMarkerByteOffset = 0;
-    let saveDataBytes = new Int8Array(this.saveData.buffer);
-    for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
-      if (areArraysEqual(
-          saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
-          GAME_BUILD_MARKER_ARRAY)) {
-        gameBuildMarkerByteOffset = byteOffset;
-        break;
-      }
+  verifySaveGameVersion() {
+    if (this.saveData.getInt32(4, true) !== 8) {
+      throw new Error(`Savegame version ${this.saveGameVersion} unsupported. Please file an issue at ${REPO_URL}.`);
     }
-
-    let gameBuild = "";
-    let byteOffset = gameBuildMarkerByteOffset - 2;
-    while (saveDataBytes.slice(byteOffset, byteOffset + 1)[0] !== 0) {
-      gameBuild = String.fromCharCode(saveDataBytes.slice(byteOffset, byteOffset + 1)) + gameBuild;
-      byteOffset--;
-    }
-
-    return gameBuild;
   }
 
   loadProperties() {
@@ -143,26 +116,49 @@ export default class Civ5Save {
     return propertyDefinition.section;
   }
 
-  verifySaveGameVersion() {
-    if (this.saveGameVersion !== 8) {
-      throw new Error(`Savegame version ${this.saveGameVersion} unsupported. Please file an issue at ${repoUrl}.`);
-    }
-  }
-
-  get saveGameVersion() {
-    return this.properties["saveGameVersion"].value;
-  }
-
-  get gameVersion() {
-    return this.properties["gameVersion"].value;
-  }
-
   get gameBuild() {
     if (isNullOrUndefined(this._gameBuild)) {
       this._gameBuild = this.getGameBuild();
     }
 
     return this._gameBuild;
+  }
+
+  // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the
+  // game build for all savegame versions
+  getGameBuild() {
+    const GAME_BUILD_MARKER = "FINAL_RELEASE";
+    const GAME_BUILD_MARKER_ARRAY = (function() {
+      let gameBuildMarkerArray = [];
+      for (let i = 0; i < GAME_BUILD_MARKER.length; i++) {
+        gameBuildMarkerArray.push(GAME_BUILD_MARKER.charCodeAt(i));
+      }
+      return gameBuildMarkerArray;
+    }());
+
+    let gameBuildMarkerByteOffset = 0;
+    let saveDataBytes = new Int8Array(this.saveData.buffer);
+    for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
+      if (areArraysEqual(
+          saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
+          GAME_BUILD_MARKER_ARRAY)) {
+        gameBuildMarkerByteOffset = byteOffset;
+        break;
+      }
+    }
+
+    let gameBuild = "";
+    let byteOffset = gameBuildMarkerByteOffset - 2;
+    while (saveDataBytes.slice(byteOffset, byteOffset + 1)[0] !== 0) {
+      gameBuild = String.fromCharCode(saveDataBytes.slice(byteOffset, byteOffset + 1)) + gameBuild;
+      byteOffset--;
+    }
+
+    return gameBuild;
+  }
+
+  get gameVersion() {
+    return this.properties["gameVersion"].value;
   }
 
   get maxTurns() {
