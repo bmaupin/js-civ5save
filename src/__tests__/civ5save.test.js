@@ -21,16 +21,16 @@ function getFileBlob(url) {
   });
 };
 
-test("Get game version", async () => {
-  let fileBlob = await getFileBlob(noOptionsSavegamePath);
-  let savegame = await Civ5Save.fromFile(fileBlob);
-  expect(savegame.gameVersion).toBe("1.0.3.279(130961)");
-});
-
 test("Get game build", async () => {
   let fileBlob = await getFileBlob(noOptionsSavegamePath);
   let savegame = await Civ5Save.fromFile(fileBlob);
   expect(savegame.gameBuild).toBe("403694");
+});
+
+test("Get game version", async () => {
+  let fileBlob = await getFileBlob(noOptionsSavegamePath);
+  let savegame = await Civ5Save.fromFile(fileBlob);
+  expect(savegame.gameVersion).toBe("1.0.3.279(130961)");
 });
 
 test("Get max turns", async () => {
