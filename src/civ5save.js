@@ -6,8 +6,7 @@ export default class Civ5Save {
   constructor(saveData) {
     this.saveData = new Civ5SaveDataView(saveData.buffer);
     this.verifyFileSignature();
-    this.properties = this.getProperties();
-    this.sectionOffsets = this.getSectionOffsets();
+    this.loadProperties();
     this.verifySaveGameVersion();
   }
 
@@ -75,38 +74,42 @@ export default class Civ5Save {
     return gameBuild;
   }
 
-  getProperties() {
-    let properties = new Map();
+  loadProperties() {
+    let previousPropertyName = "";
+    let previousPropertySection = 0;
+    this.properties = new Map();
+    let sectionOffsets = this.getSectionOffsets();
+
     for (let propertyName in Civ5SavePropertyDefinitions) {
       let propertyDefinition = Civ5SavePropertyDefinitions[propertyName];
-      switch (propertyDefinition.type) {
-        case "int16":
-          properties[propertyName] = (new Civ5SaveInt16Property(propertyDefinition, this.saveData));
-          break;
 
-        case "int32":
-          properties[propertyName] = (new Civ5SaveInt32Property(propertyDefinition, this.saveData));
-          break;
+      if (isNullOrUndefined(propertyDefinition.byteOffset)) {
+        propertyDefinition.section = this.getPropertySection(propertyDefinition);
 
-        case "skip":
-          properties[propertyName] = (new Civ5SaveProperty(propertyDefinition, this.saveData));
-          break;
+        if (propertyDefinition.section === previousPropertySection) {
+          let previousProperty = this.properties[previousPropertyName];
+          propertyDefinition.byteOffset = previousProperty.byteOffset + previousProperty.length;
 
-        case "string":
-          properties[propertyName] = (new Civ5SaveStringProperty(propertyDefinition, this.saveData));
-          break;
-
-        default: {
-          throw new Error(`Property type ${propertyDefinition.type} not handled: ${propertyName}, ${propertyDefinition}`);
+        } else {
+          propertyDefinition.byteOffset =
+            sectionOffsets[propertyDefinition.section - 1].start +
+            propertyDefinition.byteOffsetInSection;
         }
       }
-    }
 
-    return properties;
+      this.properties[propertyName] = new Civ5SaveProperty.fromType(
+        propertyDefinition.type,
+        propertyDefinition.byteOffset,
+        propertyDefinition.length,
+        this.saveData);
+
+      previousPropertyName = propertyName;
+      previousPropertySection = propertyDefinition.section;
+    }
   }
 
   getSectionOffsets() {
-    const sectionDelimiter = [0x40, 0, 0, 0];
+    const SECTION_DELIMITER = [0x40, 0, 0, 0];
 
     let saveDataBytes = new Int8Array(this.saveData.buffer);
     let sectionOffsets = [];
@@ -116,7 +119,7 @@ export default class Civ5Save {
     sectionOffsets.push(section);
 
     saveDataBytes.forEach((byte, byteOffset) => {
-      if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), sectionDelimiter)) {
+      if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
         let section = {
           start: byteOffset,
         };
@@ -128,58 +131,30 @@ export default class Civ5Save {
     return sectionOffsets;
   }
 
+  getPropertySection(propertyDefinition) {
+    if (isNullOrUndefined(propertyDefinition.section)) {
+      for (let build in propertyDefinition.sectionByBuild) {
+        if (Number.parseInt(this.gameBuild) > Number.parseInt(build)) {
+          propertyDefinition.section = propertyDefinition.sectionByBuild[build];
+        }
+      }
+    }
+
+    return propertyDefinition.section;
+  }
+
   verifySaveGameVersion() {
     if (this.saveGameVersion !== 8) {
       throw new Error(`Savegame version ${this.saveGameVersion} unsupported. Please file an issue at ${repoUrl}.`);
     }
   }
 
-  getProperty(propertyName) {
-    this.populatePropertyAttributes(propertyName);
-
-    return this.properties[propertyName].value;
-  }
-
-  populatePropertyAttributes(propertyName) {
-    this.populatePropertySection(propertyName);
-    this.populatePropertyByteOffsetInSection(propertyName);
-    this.populatePropertyByteOffset(propertyName);
-  }
-
-  populatePropertySection(propertyName) {
-    let property = this.properties[propertyName];
-    if (isNullOrUndefined(property.section)) {
-      for (var build in property.sectionByBuild) {
-        if (Number.parseInt(this.gameBuild) > Number.parseInt(build)) {
-          property.section = property.sectionByBuild[build];
-        }
-      }
-    }
-  }
-
-  populatePropertyByteOffsetInSection(propertyName) {
-    let property = this.properties[propertyName];
-    if (isNullOrUndefined(property.byteOffsetInSection)) {
-      let previousPropertyName = property.previousProperty;
-      let previousProperty = this.properties[previousPropertyName];
-      this.populatePropertyAttributes(previousPropertyName);
-      property.byteOffsetInSection = previousProperty.byteOffsetInSection + previousProperty.length;
-    }
-  }
-
-  populatePropertyByteOffset(propertyName) {
-    let property = this.properties[propertyName];
-    if (isNullOrUndefined(property.byteOffset)) {
-      property.byteOffset = this.sectionOffsets[property.section - 1].start + property.byteOffsetInSection;
-    }
-  }
-
   get saveGameVersion() {
-    return this.getProperty("saveGameVersion");
+    return this.properties["saveGameVersion"].value;
   }
 
   get gameVersion() {
-    return this.getProperty("gameVersion");
+    return this.properties["gameVersion"].value;
   }
 
   get gameBuild() {
@@ -191,11 +166,7 @@ export default class Civ5Save {
   }
 
   get maxTurns() {
-    // return this.getProperty("maxTurns");
-
-    let gameVersion = this.getProperty("maxTurns");
-    // console.log(this.properties);
-    return gameVersion;
+    return this.properties["maxTurns"].value;
   }
 }
 
@@ -211,18 +182,34 @@ class Civ5SaveDataView extends DataView {
 }
 
 class Civ5SaveProperty {
-  constructor(propertyDefinition, saveData) {
-    this.byteOffset = propertyDefinition.byteOffset;
-    this.byteOffsetInSection = propertyDefinition.byteOffsetInSection;
-    this._length = propertyDefinition.length;
-    this.previousProperty = propertyDefinition.previousProperty;
+  constructor(byteOffset, length, saveData) {
+    this.byteOffset = byteOffset;
+    this._length = length;
     this.saveData = saveData;
-    this.section = propertyDefinition.section;
-    this.sectionByBuild = propertyDefinition.sectionByBuild;
   }
 
   get length() {
     return this._length;
+  }
+
+  static fromType(type, byteOffset, length, saveData) {
+    switch (type) {
+      case "int16":
+        return new Civ5SaveInt16Property(byteOffset, length, saveData);
+
+      case "int32":
+        return new Civ5SaveInt32Property(byteOffset, length, saveData);
+
+      case "skip":
+        return new Civ5SaveProperty(byteOffset, length, saveData);
+
+      case "string":
+        return new Civ5SaveStringProperty(byteOffset, length, saveData);
+
+      default: {
+        throw new Error(`Property type ${type} not handled`);
+      }
+    }
   }
 }
 
