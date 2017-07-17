@@ -31,6 +31,78 @@ export default {
     },
     "type": "string"
   },
+  "currentTurn": {
+    "byteOffsetInSection": null,
+    "length": 4,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "int32"
+  },
+  "section1Skip1": {
+    "byteOffsetInSection": null,
+    "length": 1,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "skip"
+  },
+  "player1Civilization": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "string"
+  },
+  "difficulty": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "string"
+  },
+  "startingEra": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "string"
+  },
+  "currentEra": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "string"
+  },
+  "gamePace": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "string"
+  },
+  "mapSize": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "string"
+  },
+  "map": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 1
+    },
+    "type": "string"
+  },
   "section17Map": {
     "byteOffsetInSection": 275,
     "length": null,
