@@ -6,7 +6,6 @@ export default class Civ5Save {
   constructor(saveData) {
     this.saveData = new Civ5SaveDataView(saveData.buffer);
     this.verifyFileSignature();
-    this.verifySaveGameVersion();
     this.properties = this.getProperties();
   }
 
@@ -38,12 +37,6 @@ export default class Civ5Save {
   verifyFileSignature() {
     if (this.saveData.getString(0, 4) !== "CIV5") {
       throw new Error("File signature does not match. Is this a Civ 5 savegame?");
-    }
-  }
-
-  verifySaveGameVersion() {
-    if (this.saveData.getInt32(4, true) !== 8) {
-      throw new Error(`Savegame version ${this.saveGameVersion} unsupported. Please file an issue at ${REPO_URL}.`);
     }
   }
 
@@ -161,7 +154,9 @@ export default class Civ5Save {
   }
 
   get gameVersion() {
-    return this.properties["gameVersion"].value;
+    if (this.properties.hasOwnProperty("gameVersion")) {
+      return this.properties["gameVersion"].value;
+    }
   }
 
   get maxTurns() {
