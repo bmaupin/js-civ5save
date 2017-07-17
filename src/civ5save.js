@@ -7,7 +7,7 @@ export default class Civ5Save {
     this.saveData = new Civ5SaveDataView(saveData.buffer);
     this.verifyFileSignature();
     this.verifySaveGameVersion();
-    this.loadProperties();
+    this.properties = this.getProperties();
   }
 
   // Use a static factory to instantiate the object since it relies on data that needs to be fetched asynchronously
@@ -47,10 +47,10 @@ export default class Civ5Save {
     }
   }
 
-  loadProperties() {
+  getProperties() {
     let previousPropertyName = "";
     let previousPropertySection = 0;
-    this.properties = new Map();
+    let properties = new Map();
     let sectionOffsets = this.getSectionOffsets();
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
@@ -60,7 +60,7 @@ export default class Civ5Save {
         propertyDefinition.section = this.getPropertySection(propertyDefinition);
 
         if (propertyDefinition.section === previousPropertySection) {
-          let previousProperty = this.properties[previousPropertyName];
+          let previousProperty = properties[previousPropertyName];
           propertyDefinition.byteOffset = previousProperty.byteOffset + previousProperty.length;
 
         } else {
@@ -70,7 +70,7 @@ export default class Civ5Save {
         }
       }
 
-      this.properties[propertyName] = new Civ5SaveProperty.fromType(
+      properties[propertyName] = new Civ5SaveProperty.fromType(
         propertyDefinition.type,
         propertyDefinition.byteOffset,
         propertyDefinition.length,
@@ -79,6 +79,8 @@ export default class Civ5Save {
       previousPropertyName = propertyName;
       previousPropertySection = propertyDefinition.section;
     }
+
+    return properties;
   }
 
   getSectionOffsets() {
