@@ -188,11 +188,8 @@ class Civ5SaveProperty {
 
   static fromType(type, byteOffset, length, saveData) {
     switch (type) {
-      case "int16":
-        return new Civ5SaveInt16Property(byteOffset, length, saveData);
-
-      case "int32":
-        return new Civ5SaveInt32Property(byteOffset, length, saveData);
+      case "int":
+        return new Civ5SaveIntProperty(byteOffset, length, saveData);
 
       case "skip":
         return new Civ5SaveProperty(byteOffset, length, saveData);
@@ -207,13 +204,7 @@ class Civ5SaveProperty {
   }
 }
 
-class Civ5SaveInt16Property extends Civ5SaveProperty {
-  get value() {
-    return this.saveData.getInt16(this.byteOffset, true);
-  }
-}
-
-class Civ5SaveInt32Property extends Civ5SaveProperty {
+class Civ5SaveIntProperty extends Civ5SaveProperty {
   get value() {
     return this.saveData.getInt32(this.byteOffset, true);
   }
