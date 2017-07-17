@@ -54,30 +54,32 @@ export default class Civ5Save {
     let sectionOffsets = this.getSectionOffsets();
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
-      let propertyDefinition = Civ5SavePropertyDefinitions[propertyName];
+      // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
+      let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);
 
-      if (isNullOrUndefined(propertyDefinition.byteOffset)) {
-        propertyDefinition.section = this.getPropertySection(propertyDefinition);
+      let propertySection = this.getPropertySection(propertyDefinition);
+      // If propertySection is null, it means the property isn't available for the particular game build
+      if (isNullOrUndefined(propertySection)) {
+        continue;
+      }
 
-        if (propertyDefinition.section === previousPropertySection) {
-          let previousProperty = properties[previousPropertyName];
-          propertyDefinition.byteOffset = previousProperty.byteOffset + previousProperty.length;
+      let propertyByteOffset = null;
+      if (propertySection === previousPropertySection) {
+        let previousProperty = properties[previousPropertyName];
+        propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
 
-        } else {
-          propertyDefinition.byteOffset =
-            sectionOffsets[propertyDefinition.section - 1].start +
-            propertyDefinition.byteOffsetInSection;
-        }
+      } else {
+        propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
       }
 
       properties[propertyName] = new Civ5SaveProperty.fromType(
         propertyDefinition.type,
-        propertyDefinition.byteOffset,
+        propertyByteOffset,
         propertyDefinition.length,
         this.saveData);
 
       previousPropertyName = propertyName;
-      previousPropertySection = propertyDefinition.section;
+      previousPropertySection = propertySection;
     }
 
     return properties;
@@ -107,15 +109,14 @@ export default class Civ5Save {
   }
 
   getPropertySection(propertyDefinition) {
-    if (isNullOrUndefined(propertyDefinition.section)) {
-      for (let build in propertyDefinition.sectionByBuild) {
-        if (Number.parseInt(this.gameBuild) > Number.parseInt(build)) {
-          propertyDefinition.section = propertyDefinition.sectionByBuild[build];
-        }
+    let propertySection = null;
+    for (let build in propertyDefinition.sectionByBuild) {
+      if (Number.parseInt(this.gameBuild) >= Number.parseInt(build)) {
+        propertySection = propertyDefinition.sectionByBuild[build];
       }
     }
 
-    return propertyDefinition.section;
+    return propertySection;
   }
 
   get gameBuild() {
