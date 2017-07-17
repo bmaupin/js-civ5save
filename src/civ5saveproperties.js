@@ -13,7 +13,7 @@ export default {
     "sectionByBuild": {
       "201080": 1
     },
-    "type": "int32"
+    "type": "int"
   },
   "gameVersion": {
     "byteOffsetInSection": 8,
@@ -37,7 +37,7 @@ export default {
     "sectionByBuild": {
       "201080": 1
     },
-    "type": "int32"
+    "type": "int"
   },
   "section1Skip1": {
     "byteOffsetInSection": null,
@@ -125,12 +125,12 @@ export default {
   },
   "maxTurns": {
     "byteOffsetInSection": null,
-    "length": 2,
+    "length": 4,
     "sectionByBuild": {
       "201080": 17,
       "341540": 18,
       "395070": 19
     },
-    "type": "int16"
+    "type": "int"
   }
 }

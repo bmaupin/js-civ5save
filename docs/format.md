@@ -18,7 +18,7 @@
 | 14 |  |  | Climate |
 | 18 |  |  | See notes below |
 | 18/19 |  |  |  |
-|  | 16-bit integer | 0x0<br>0x14a<br>0x1f4 | Max turns |
+|  | 32-bit integer | 0x0<br>0x14a<br>0x1f4 | Max turns |
 | 19/20 |  |  | City states |
 | 24/25 |  |  | Player colours |
 | 25/26 |  |  | Sea level |
