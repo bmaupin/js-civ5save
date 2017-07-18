@@ -45,7 +45,7 @@ export default {
     "sectionByBuild": {
       "201080": 1
     },
-    "type": "skip"
+    "type": "bytes"
   },
   "player1Civilization": {
     "byteOffsetInSection": null,
@@ -95,7 +95,7 @@ export default {
     },
     "type": "string"
   },
-  "map": {
+  "mapFile": {
     "byteOffsetInSection": null,
     "length": null,
     "sectionByBuild": {
@@ -103,7 +103,7 @@ export default {
     },
     "type": "string"
   },
-  "section17Map": {
+  "section19Map": {
     "byteOffsetInSection": 275,
     "length": null,
     "sectionByBuild": {
@@ -113,7 +113,7 @@ export default {
     },
     "type": "string"
   },
-  "section17Skip1": {
+  "section19Skip1": {
     "byteOffsetInSection": null,
     "length": 4,
     "sectionByBuild": {
@@ -121,7 +121,7 @@ export default {
       "341540": 18,
       "395070": 19
     },
-    "type": "skip"
+    "type": "bytes"
   },
   "maxTurns": {
     "byteOffsetInSection": null,
@@ -132,5 +132,104 @@ export default {
       "395070": 19
     },
     "type": "int"
+  },
+  "section29Timer1": {
+    "byteOffsetInSection": 269,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "string"
+  },
+  "section29Skip1": {
+    "byteOffsetInSection": null,
+    "length": 12,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "bytes"
+  },
+  "section29TurnTimer": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "string"
+  },
+  "section29TxtKeyTurnTimer": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "string"
+  },
+  "section29Timer2": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "string"
+  },
+  "section29Skip2": {
+    "byteOffsetInSection": null,
+    "length": 25,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "bytes"
+  },
+  "timeVictory": {
+    "byteOffsetInSection": null,
+    "length": 1,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "bool"
+  },
+  "scienceVictory": {
+    "byteOffsetInSection": null,
+    "length": 1,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "bool"
+  },
+  "dominationVictory": {
+    "byteOffsetInSection": null,
+    "length": 1,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "bool"
+  },
+  "culturalVictory": {
+    "byteOffsetInSection": null,
+    "length": 1,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "bool"
+  },
+  "diplomaticVictory": {
+    "byteOffsetInSection": null,
+    "length": 1,
+    "sectionByBuild": {
+      "201080": 28,
+      "403694": 29
+    },
+    "type": "bool"
   }
 }
