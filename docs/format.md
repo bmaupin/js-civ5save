@@ -1,3 +1,5 @@
+**Note: these are notes taken during research. For a more accurate description of the Civ5Save file format, see [../src/civ5saveproperties.js](../src/civ5saveproperties.js)**
+
 | Section | Type | Sample values | Notes |
 | --- | --- | --- | --- |
 | 1 |  |  |  |
@@ -24,7 +26,7 @@
 | 25/26 |  |  | Sea level |
 | 28/29 |  |  |  |
 |  |  |  | Turn timer |
-|  | Byte |  | Victory conditions |
+|  | Boolean |  | Victory conditions |
 | 29/30 |  |  | Various map and game options |
 | 32/33 |  |  | zlib compressed data starts with 0x789c |
 
