@@ -159,8 +159,60 @@ export default class Civ5Save {
     }
   }
 
+  get currentTurn() {
+    return this.properties["currentTurn"].value;
+  }
+
+  get player1Civilization() {
+    return this.properties["player1Civilization"].value;
+  }
+
+  get difficulty() {
+    return this.properties["difficulty"].value;
+  }
+
+  get startingEra() {
+    return this.properties["startingEra"].value;
+  }
+
+  get currentEra() {
+    return this.properties["currentEra"].value;
+  }
+
+  get gamePace() {
+    return this.properties["gamePace"].value;
+  }
+
+  get mapSize() {
+    return this.properties["mapSize"].value;
+  }
+
+  get mapFile() {
+    return this.properties["mapFile"].value;
+  }
+
   get maxTurns() {
     return this.properties["maxTurns"].value;
+  }
+
+  get timeVictory() {
+    return this.properties["timeVictory"].value;
+  }
+
+  get scienceVictory() {
+    return this.properties["scienceVictory"].value;
+  }
+
+  get dominationVictory() {
+    return this.properties["dominationVictory"].value;
+  }
+
+  get culturalVictory() {
+    return this.properties["culturalVictory"].value;
+  }
+
+  get diplomaticVictory() {
+    return this.properties["diplomaticVictory"].value;
   }
 }
 
