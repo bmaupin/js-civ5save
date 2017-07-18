@@ -166,6 +166,10 @@ export default class Civ5Save {
 
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 class Civ5SaveDataView extends DataView {
+  getBoolean(byteOffset) {
+    return !!this.getInt8(byteOffset, true);
+  }
+
   getString(byteOffset, byteLength) {
     let string = "";
     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
@@ -188,11 +192,14 @@ class Civ5SaveProperty {
 
   static fromType(type, byteOffset, length, saveData) {
     switch (type) {
-      case "int":
-        return new Civ5SaveIntProperty(byteOffset, length, saveData);
+      case "bool":
+        return new Civ5SaveBoolProperty(byteOffset, 1, saveData);
 
-      case "skip":
+      case "bytes":
         return new Civ5SaveProperty(byteOffset, length, saveData);
+
+      case "int":
+        return new Civ5SaveIntProperty(byteOffset, 4, saveData);
 
       case "string":
         return new Civ5SaveStringProperty(byteOffset, length, saveData);
@@ -201,6 +208,12 @@ class Civ5SaveProperty {
         throw new Error(`Property type ${type} not handled`);
       }
     }
+  }
+}
+
+class Civ5SaveBoolProperty extends Civ5SaveProperty {
+  get value() {
+    return this.saveData.getBoolean(this.byteOffset);
   }
 }
 
