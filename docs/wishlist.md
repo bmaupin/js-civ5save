@@ -2,7 +2,7 @@
   - [x] Game version
   - [x] Game build
   - [x] [Max turns](https://gaming.stackexchange.com/a/273907/154341)
-  - [ ] [Victory conditions](https://gaming.stackexchange.com/a/273907/154341)
+  - [x] [Victory conditions](https://gaming.stackexchange.com/a/273907/154341)
   - [ ] [Multiplayer turn types](http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/)
   - [ ] [Multiplayer lobby public/private](https://github.com/Canardlaquay/Civ5SavePrivate/blob/master/Civ5PrivateSave/Form1.cs)
   - [ ] [Multiplayer pitboss setting](https://github.com/Bownairo/Civ5SaveEditor/blob/master/SaveEditor.c)
