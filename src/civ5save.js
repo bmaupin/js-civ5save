@@ -195,31 +195,59 @@ export default class Civ5Save {
     return this.properties["maxTurns"].value;
   }
 
+  set maxTurns(newValue) {
+    this.properties["maxTurns"].value = newValue;
+  }
+
   get timeVictory() {
     return this.properties["timeVictory"].value;
+  }
+
+  set timeVictory(newValue) {
+    this.properties["timeVictory"].value = newValue;
   }
 
   get scienceVictory() {
     return this.properties["scienceVictory"].value;
   }
 
+  set scienceVictory(newValue) {
+    this.properties["scienceVictory"].value = newValue;
+  }
+
   get dominationVictory() {
     return this.properties["dominationVictory"].value;
+  }
+
+  set dominationVictory(newValue) {
+    this.properties["dominationVictory"].value = newValue;
   }
 
   get culturalVictory() {
     return this.properties["culturalVictory"].value;
   }
 
+  set culturalVictory(newValue) {
+    this.properties["culturalVictory"].value = newValue;
+  }
+
   get diplomaticVictory() {
     return this.properties["diplomaticVictory"].value;
+  }
+
+  set diplomaticVictory(newValue) {
+    this.properties["diplomaticVictory"].value = newValue;
   }
 }
 
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 class Civ5SaveDataView extends DataView {
   getBoolean(byteOffset) {
-    return !!this.getInt8(byteOffset, true);
+    return Boolean(this.getInt8(byteOffset));
+  }
+
+  setBoolean(byteOffset, newValue) {
+    this.setInt8(byteOffset, Number(newValue));
   }
 
   getString(byteOffset, byteLength) {
@@ -267,11 +295,19 @@ class Civ5SaveBoolProperty extends Civ5SaveProperty {
   get value() {
     return this.saveData.getBoolean(this.byteOffset);
   }
+
+  set value(newValue) {
+    this.saveData.setBoolean(this.byteOffset, newValue);
+  }
 }
 
 class Civ5SaveIntProperty extends Civ5SaveProperty {
   get value() {
     return this.saveData.getInt32(this.byteOffset, true);
+  }
+
+  set value(newValue) {
+    this.saveData.setInt32(this.byteOffset, newValue, true);
   }
 }
 
