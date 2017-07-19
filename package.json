@@ -5,6 +5,7 @@
     "babel-jest": "^20.0.3",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-preset-env": "^1.6.0",
+    "coveralls": "^2.13.1",
     "eslint": "^4.2.0",
     "jest": "^20.0.4"
   },
@@ -18,7 +19,7 @@
   },
   "scripts": {
     "lint": "eslint src",
-    "test": "jest"
+    "test": "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "version": "0.0.1"
 }
