@@ -1,7 +1,5 @@
 import Civ5SavePropertyDefinitions from "./civ5saveproperties";
 
-const REPO_URL = "https://github.com/bmaupin/civ5save";
-
 export default class Civ5Save {
   constructor(saveData) {
     this.saveData = new Civ5SaveDataView(saveData.buffer);
@@ -25,10 +23,10 @@ export default class Civ5Save {
         // manipulate the data. A typed array such as Int8Array wouldn't be ideal either since the data contains types
         // of variable lengths
         resolve(new DataView(reader.result));
-      }
+      };
       reader.onerror = function () {
         reject(reader.error);
-      }
+      };
 
       reader.readAsArrayBuffer(saveFile);
     });
@@ -136,8 +134,8 @@ export default class Civ5Save {
     let saveDataBytes = new Int8Array(this.saveData.buffer);
     for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
       if (areArraysEqual(
-          saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
-          GAME_BUILD_MARKER_ARRAY)) {
+        saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
+        GAME_BUILD_MARKER_ARRAY)) {
         gameBuildMarkerByteOffset = byteOffset;
         break;
       }
@@ -272,21 +270,21 @@ class Civ5SaveProperty {
 
   static fromType(type, byteOffset, length, saveData) {
     switch (type) {
-      case "bool":
-        return new Civ5SaveBoolProperty(byteOffset, 1, saveData);
+    case "bool":
+      return new Civ5SaveBoolProperty(byteOffset, 1, saveData);
 
-      case "bytes":
-        return new Civ5SaveProperty(byteOffset, length, saveData);
+    case "bytes":
+      return new Civ5SaveProperty(byteOffset, length, saveData);
 
-      case "int":
-        return new Civ5SaveIntProperty(byteOffset, 4, saveData);
+    case "int":
+      return new Civ5SaveIntProperty(byteOffset, 4, saveData);
 
-      case "string":
-        return new Civ5SaveStringProperty(byteOffset, length, saveData);
+    case "string":
+      return new Civ5SaveStringProperty(byteOffset, length, saveData);
 
-      default: {
-        throw new Error(`Property type ${type} not handled`);
-      }
+    default: {
+      throw new Error(`Property type ${type} not handled`);
+    }
     }
   }
 }

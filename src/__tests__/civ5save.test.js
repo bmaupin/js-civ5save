@@ -1,6 +1,6 @@
 import Civ5Save from "../civ5save";
 
-const path = require('path');
+const path = require("path");
 
 const TEST_SAVEGAME_V100 = path.join(__dirname, "resources", "1.0.0.17 (test).Civ5Save");
 const TEST_SAVEGAME_V103 = path.join(__dirname, "resources", "1.0.3.279.victory-none-advanced-none.Civ5Save");
@@ -28,7 +28,7 @@ function getFileBlob(url) {
     });
     xhr.send();
   });
-};
+}
 
 beforeAll(async () => {
   let fileBlob = await getFileBlob(TEST_SAVEGAME_V100);
