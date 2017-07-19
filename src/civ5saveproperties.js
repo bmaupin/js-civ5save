@@ -1,235 +1,235 @@
 export default {
-  "fileSignature": {
-    "byteOffsetInSection": 0,
-    "length": 4,
-    "sectionByBuild": {
-      "201080": 1
+  'fileSignature': {
+    'byteOffsetInSection': 0,
+    'length': 4,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "saveGameVersion": {
-    "byteOffsetInSection": 4,
-    "length": 4,
-    "sectionByBuild": {
-      "201080": 1
+  'saveGameVersion': {
+    'byteOffsetInSection': 4,
+    'length': 4,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "int"
+    'type': 'int'
   },
-  "gameVersion": {
-    "byteOffsetInSection": 8,
-    "length": null,
-    "sectionByBuild": {
-      "341540": 1
+  'gameVersion': {
+    'byteOffsetInSection': 8,
+    'length': null,
+    'sectionByBuild': {
+      '341540': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "gameBuild": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "341540": 1
+  'gameBuild': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '341540': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "currentTurn": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "201080": 1
+  'currentTurn': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "int"
+    'type': 'int'
   },
-  "section1Skip1": {
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "201080": 1
+  'section1Skip1': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "player1Civilization": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 1
+  'player1Civilization': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "difficulty": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 1
+  'difficulty': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "startingEra": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 1
+  'startingEra': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "currentEra": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 1
+  'currentEra': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "gamePace": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 1
+  'gamePace': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "mapSize": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 1
+  'mapSize': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "mapFile": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 1
+  'mapFile': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section19Map": {
-    "byteOffsetInSection": 275,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 17,
-      "341540": 18,
-      "395070": 19
+  'section19Map': {
+    'byteOffsetInSection': 275,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 17,
+      '341540': 18,
+      '395070': 19
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section19Skip1": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "201080": 17,
-      "341540": 18,
-      "395070": 19
+  'section19Skip1': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '201080': 17,
+      '341540': 18,
+      '395070': 19
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "maxTurns": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "201080": 17,
-      "341540": 18,
-      "395070": 19
+  'maxTurns': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '201080': 17,
+      '341540': 18,
+      '395070': 19
     },
-    "type": "int"
+    'type': 'int'
   },
-  "section29Timer1": {
-    "byteOffsetInSection": 269,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'section29Timer1': {
+    'byteOffsetInSection': 269,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29Skip1": {
-    "byteOffsetInSection": null,
-    "length": 12,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'section29Skip1': {
+    'byteOffsetInSection': null,
+    'length': 12,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "section29TurnTimer": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'section29TurnTimer': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29TxtKeyTurnTimer": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'section29TxtKeyTurnTimer': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29Timer2": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'section29Timer2': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29Skip2": {
-    "byteOffsetInSection": null,
-    "length": 25,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'section29Skip2': {
+    'byteOffsetInSection': null,
+    'length': 25,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "timeVictory": {
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'timeVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "scienceVictory": {
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'scienceVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "dominationVictory": {
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'dominationVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "culturalVictory": {
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'culturalVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "diplomaticVictory": {
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "201080": 28,
-      "403694": 29
+  'diplomaticVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '201080': 28,
+      '403694': 29
     },
-    "type": "bool"
+    'type': 'bool'
   }
 };

@@ -1,4 +1,4 @@
-import Civ5SavePropertyDefinitions from "./civ5saveproperties";
+import Civ5SavePropertyDefinitions from './civ5saveproperties';
 
 export default class Civ5Save {
   constructor(saveData) {
@@ -33,13 +33,13 @@ export default class Civ5Save {
   }
 
   verifyFileSignature() {
-    if (this.saveData.getString(0, 4) !== "CIV5") {
-      throw new Error("File signature does not match. Is this a Civ 5 savegame?");
+    if (this.saveData.getString(0, 4) !== 'CIV5') {
+      throw new Error('File signature does not match. Is this a Civ 5 savegame?');
     }
   }
 
   getProperties() {
-    let previousPropertyName = "";
+    let previousPropertyName = '';
     let previousPropertySection = 0;
     let properties = new Map();
     let sectionOffsets = this.getSectionOffsets();
@@ -121,7 +121,7 @@ export default class Civ5Save {
   // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the
   // game build for all savegame versions
   getGameBuild() {
-    const GAME_BUILD_MARKER = "FINAL_RELEASE";
+    const GAME_BUILD_MARKER = 'FINAL_RELEASE';
     const GAME_BUILD_MARKER_ARRAY = (function() {
       let gameBuildMarkerArray = [];
       for (let i = 0; i < GAME_BUILD_MARKER.length; i++) {
@@ -141,7 +141,7 @@ export default class Civ5Save {
       }
     }
 
-    let gameBuild = "";
+    let gameBuild = '';
     let byteOffset = gameBuildMarkerByteOffset - 2;
     while (saveDataBytes.slice(byteOffset, byteOffset + 1)[0] !== 0) {
       gameBuild = String.fromCharCode(saveDataBytes.slice(byteOffset, byteOffset + 1)) + gameBuild;
@@ -152,89 +152,89 @@ export default class Civ5Save {
   }
 
   get gameVersion() {
-    if (this.properties.hasOwnProperty("gameVersion")) {
-      return this.properties["gameVersion"].value;
+    if (this.properties.hasOwnProperty('gameVersion')) {
+      return this.properties['gameVersion'].value;
     }
   }
 
   get currentTurn() {
-    return this.properties["currentTurn"].value;
+    return this.properties['currentTurn'].value;
   }
 
   get player1Civilization() {
-    return this.properties["player1Civilization"].value;
+    return this.properties['player1Civilization'].value;
   }
 
   get difficulty() {
-    return this.properties["difficulty"].value;
+    return this.properties['difficulty'].value;
   }
 
   get startingEra() {
-    return this.properties["startingEra"].value;
+    return this.properties['startingEra'].value;
   }
 
   get currentEra() {
-    return this.properties["currentEra"].value;
+    return this.properties['currentEra'].value;
   }
 
   get gamePace() {
-    return this.properties["gamePace"].value;
+    return this.properties['gamePace'].value;
   }
 
   get mapSize() {
-    return this.properties["mapSize"].value;
+    return this.properties['mapSize'].value;
   }
 
   get mapFile() {
-    return this.properties["mapFile"].value;
+    return this.properties['mapFile'].value;
   }
 
   get maxTurns() {
-    return this.properties["maxTurns"].value;
+    return this.properties['maxTurns'].value;
   }
 
   set maxTurns(newValue) {
-    this.properties["maxTurns"].value = newValue;
+    this.properties['maxTurns'].value = newValue;
   }
 
   get timeVictory() {
-    return this.properties["timeVictory"].value;
+    return this.properties['timeVictory'].value;
   }
 
   set timeVictory(newValue) {
-    this.properties["timeVictory"].value = newValue;
+    this.properties['timeVictory'].value = newValue;
   }
 
   get scienceVictory() {
-    return this.properties["scienceVictory"].value;
+    return this.properties['scienceVictory'].value;
   }
 
   set scienceVictory(newValue) {
-    this.properties["scienceVictory"].value = newValue;
+    this.properties['scienceVictory'].value = newValue;
   }
 
   get dominationVictory() {
-    return this.properties["dominationVictory"].value;
+    return this.properties['dominationVictory'].value;
   }
 
   set dominationVictory(newValue) {
-    this.properties["dominationVictory"].value = newValue;
+    this.properties['dominationVictory'].value = newValue;
   }
 
   get culturalVictory() {
-    return this.properties["culturalVictory"].value;
+    return this.properties['culturalVictory'].value;
   }
 
   set culturalVictory(newValue) {
-    this.properties["culturalVictory"].value = newValue;
+    this.properties['culturalVictory'].value = newValue;
   }
 
   get diplomaticVictory() {
-    return this.properties["diplomaticVictory"].value;
+    return this.properties['diplomaticVictory'].value;
   }
 
   set diplomaticVictory(newValue) {
-    this.properties["diplomaticVictory"].value = newValue;
+    this.properties['diplomaticVictory'].value = newValue;
   }
 }
 
@@ -249,7 +249,7 @@ class Civ5SaveDataView extends DataView {
   }
 
   getString(byteOffset, byteLength) {
-    let string = "";
+    let string = '';
     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
       string += String.fromCharCode(this.getInt8(byte));
     }
@@ -270,16 +270,16 @@ class Civ5SaveProperty {
 
   static fromType(type, byteOffset, length, saveData) {
     switch (type) {
-    case "bool":
+    case 'bool':
       return new Civ5SaveBoolProperty(byteOffset, 1, saveData);
 
-    case "bytes":
+    case 'bytes':
       return new Civ5SaveProperty(byteOffset, length, saveData);
 
-    case "int":
+    case 'int':
       return new Civ5SaveIntProperty(byteOffset, 4, saveData);
 
-    case "string":
+    case 'string':
       return new Civ5SaveStringProperty(byteOffset, length, saveData);
 
     default: {
@@ -335,5 +335,5 @@ function areArraysEqual(array1, array2) {
 
 // https://stackoverflow.com/a/416327/399105
 function isNullOrUndefined(variable) {
-  return typeof variable === "undefined" || variable === null;
+  return typeof variable === 'undefined' || variable === null;
 }
