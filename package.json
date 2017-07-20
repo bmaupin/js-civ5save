@@ -19,7 +19,7 @@
   },
   "scripts": {
     "lint": "eslint src",
-    "test": "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "test": "jest --coverage"
   },
   "version": "0.0.1"
 }
