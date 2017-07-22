@@ -63,7 +63,7 @@ export default class Civ5Save {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
       }
 
-      properties[propertyName] = new Civ5SaveProperty.fromType(
+      properties[propertyName] = Civ5SaveProperty.fromType(
         propertyDefinition.type,
         propertyByteOffset,
         propertyDefinition.length,
