@@ -103,8 +103,8 @@ export default {
     },
     'type': 'string'
   },
-  'section19Map': {
-    'byteOffsetInSection': 275,
+  'section19Skip1': {
+    'byteOffsetInSection': 264,
     'length': null,
     'sectionByBuild': {
       '201080': 17,
@@ -113,7 +113,27 @@ export default {
     },
     'type': 'string'
   },
-  'section19Skip1': {
+  'section19Skip2': {
+    'byteOffsetInSection': null,
+    'length': 7,
+    'sectionByBuild': {
+      '201080': 17,
+      '341540': 18,
+      '395070': 19
+    },
+    'type': 'bytes'
+  },
+  'section19Map': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '201080': 17,
+      '341540': 18,
+      '395070': 19
+    },
+    'type': 'string'
+  },
+  'section19Skip3': {
     'byteOffsetInSection': null,
     'length': 4,
     'sectionByBuild': {
