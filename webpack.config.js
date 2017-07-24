@@ -5,6 +5,16 @@ var env = process.env.NODE_ENV;
 
 module.exports = {
   entry: './src/civ5save.js',
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: {
+          loader: 'eslint-loader'
+        }
+      }
+    ]
+  },
   output: {
     filename: env === 'production' ? 'civ5save.min.js' : 'civ5save.js',
     // library and libraryTarget are necessary so this can be imported as a module
@@ -14,5 +24,5 @@ module.exports = {
   },
   plugins: env === 'production' ? [
     new BabiliPlugin()
-  ] : []
+  ] : [],
 };

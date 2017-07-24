@@ -12,6 +12,7 @@
     "babili-webpack-plugin": "^0.1.2",
     "coveralls": "^2.13.1",
     "eslint": "^4.2.0",
+    "eslint-loader": "^1.9.0",
     "jest": "^20.0.4",
     "webpack": "^3.3.0"
   },
