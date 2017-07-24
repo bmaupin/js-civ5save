@@ -16,6 +16,9 @@
     "jest": "^20.0.4",
     "webpack": "^3.3.0"
   },
+  "files": [
+    "dist/"
+  ],
   "homepage": "https://github.com/bmaupin/js-civ5save#readme",
   "jest": {
     "testURL": "file://test"
@@ -28,7 +31,7 @@
     "Civilization V"
   ],
   "license": "MIT",
-  "main": "src/civ5save.js",
+  "main": "dist/civ5save.js",
   "name": "civ5save",
   "repository": {
     "type": "git",
