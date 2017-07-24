@@ -35,19 +35,12 @@ function getFileBlob(url) {
 beforeAll(async () => {
   let fileBlob = await getFileBlob(TEST_SAVEGAME_V100);
   savegame100 = await Civ5Save.fromFile(fileBlob);
-  return savegame100;
-});
 
-beforeAll(async () => {
-  let fileBlob = await getFileBlob(TEST_SAVEGAME_V101);
+  fileBlob = await getFileBlob(TEST_SAVEGAME_V101);
   savegame101 = await Civ5Save.fromFile(fileBlob);
-  return savegame101;
-});
 
-beforeAll(async () => {
-  let fileBlob = await getFileBlob(TEST_SAVEGAME_V103);
+  fileBlob = await getFileBlob(TEST_SAVEGAME_V103);
   savegame103 = await Civ5Save.fromFile(fileBlob);
-  return savegame103;
 });
 
 test('Get game build', () => {
