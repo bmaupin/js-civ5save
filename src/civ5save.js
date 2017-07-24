@@ -1,4 +1,4 @@
-import Civ5SavePropertyDefinitions from './civ5saveproperties';
+import Civ5SavePropertyDefinitions from './civ5saveproperties.json';
 
 export default class Civ5Save {
   constructor(saveData) {

@@ -1,4 +1,4 @@
-**Note: these are notes taken during research. For a more accurate description of the Civ5Save file format, see [../src/civ5saveproperties.js](../src/civ5saveproperties.js)**
+**Note: these are notes taken during research. For a more accurate description of the Civ5Save file format, see [../src/civ5saveproperties.js](../src/civ5saveproperties.json)**
 
 | Section | Type | Sample values | Notes |
 | --- | --- | --- | --- |
