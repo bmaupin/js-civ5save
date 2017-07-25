@@ -115,6 +115,12 @@ class Civ5Save {
     });
   }
 
+  toFile(fileName) {
+    return new File([this.saveData], fileName, {
+      type: 'application/octet-stream'
+    });
+  }
+
   verifyFileSignature() {
     if (this.saveData.getString(0, 4) !== 'CIV5') {
       throw new Error('File signature does not match. Is this a Civ 5 savegame?');

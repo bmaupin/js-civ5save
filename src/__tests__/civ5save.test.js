@@ -10,6 +10,7 @@ const NEW_CULTURAL_VICTORY = false;
 const NEW_DIPLOMATIC_VICTORY = true;
 const NEW_DOMINATION_VICTORY = true;
 const NEW_MAX_TURNS = 123;
+const NEW_SAVEGAME_FILENAME = 'New.Civ5Save';
 const NEW_SCIENCE_VICTORY = false;
 const NEW_TIME_VICTORY = true;
 
@@ -191,4 +192,16 @@ test('Set diplomatic victory', () => {
   expect(savegame100.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
   expect(savegame101.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
   expect(savegame103.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
+});
+
+test('Save to file', async () => {
+  let newSavegameFile = savegame103.toFile(NEW_SAVEGAME_FILENAME);
+  let newSavegame = await Civ5Save.fromFile(newSavegameFile);
+
+  expect(newSavegame.maxTurns).toBe(NEW_MAX_TURNS);
+  expect(newSavegame.timeVictory).toBe(NEW_TIME_VICTORY);
+  expect(newSavegame.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
+  expect(newSavegame.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
+  expect(newSavegame.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
+  expect(newSavegame.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
 });
