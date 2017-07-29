@@ -59,7 +59,7 @@ test('Get game version', () => {
 test('Get current turn', () => {
   expect(savegame100.currentTurn).toBe(19);
   expect(savegame101.currentTurn).toBe(176);
-  expect(savegame103.currentTurn).toBe(0);
+  expect(savegame103.currentTurn).toBe(264);
 });
 
 test('Get player 1 civilization', () => {
@@ -77,13 +77,13 @@ test('Get difficulty', () => {
 test('Get starting era', () => {
   expect(savegame100.startingEra).toBe('ERA_ANCIENT');
   expect(savegame101.startingEra).toBe('ERA_ANCIENT');
-  expect(savegame103.startingEra).toBe('ERA_ANCIENT');
+  expect(savegame103.startingEra).toBe('ERA_FUTURE');
 });
 
 test('Get current era', () => {
   expect(savegame100.currentEra).toBe('ERA_ANCIENT');
   expect(savegame101.currentEra).toBe('ERA_ANCIENT');
-  expect(savegame103.currentEra).toBe('ERA_ANCIENT');
+  expect(savegame103.currentEra).toBe('ERA_FUTURE');
 });
 
 test('Get game pace', () => {
@@ -137,7 +137,7 @@ test('Set time victory', () => {
 test('Get science victory', () => {
   expect(savegame100.scienceVictory).toBe(true);
   expect(savegame101.scienceVictory).toBe(true);
-  expect(savegame103.scienceVictory).toBe(false);
+  expect(savegame103.scienceVictory).toBe(true);
 });
 
 test('Set science victory', () => {
@@ -167,7 +167,7 @@ test('Set domination victory', () => {
 test('Get cultural victory', () => {
   expect(savegame100.culturalVictory).toBe(true);
   expect(savegame101.culturalVictory).toBe(true);
-  expect(savegame103.culturalVictory).toBe(false);
+  expect(savegame103.culturalVictory).toBe(true);
 });
 
 test('Set cultural victory', () => {

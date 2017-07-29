@@ -3,7 +3,7 @@
   "bugs": {
     "url": "https://github.com/bmaupin/js-civ5save/issues"
   },
-  "description": "Library for managing Civ5Save files",
+  "description": "Library for working with Civilization V save files",
   "devDependencies": {
     "babel-eslint": "^7.2.3",
     "babel-jest": "^20.0.3",
