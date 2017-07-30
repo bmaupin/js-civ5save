@@ -146,6 +146,7 @@
     "type": "bytes"
   },
   "maxTurns": {
+    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
     "byteOffsetInSection": null,
     "length": 4,
     "sectionByBuild": {
@@ -210,6 +211,7 @@
     "type": "bytes"
   },
   "timeVictory": {
+    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
     "byteOffsetInSection": null,
     "length": 1,
     "sectionByBuild": {
@@ -219,6 +221,7 @@
     "type": "bool"
   },
   "scienceVictory": {
+    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
     "byteOffsetInSection": null,
     "length": 1,
     "sectionByBuild": {
@@ -228,6 +231,7 @@
     "type": "bool"
   },
   "dominationVictory": {
+    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
     "byteOffsetInSection": null,
     "length": 1,
     "sectionByBuild": {
@@ -237,6 +241,7 @@
     "type": "bool"
   },
   "culturalVictory": {
+    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
     "byteOffsetInSection": null,
     "length": 1,
     "sectionByBuild": {
@@ -246,6 +251,7 @@
     "type": "bool"
   },
   "diplomaticVictory": {
+    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
     "byteOffsetInSection": null,
     "length": 1,
     "sectionByBuild": {
