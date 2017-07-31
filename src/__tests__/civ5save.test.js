@@ -35,7 +35,7 @@ function getFileBlob(url) {
   });
 }
 
-beforeAll(async () => {
+test('Create new Civ5Save instances from file', async () => {
   let fileBlob = await getFileBlob(TEST_SAVEGAME_V100);
   savegame100 = await Civ5Save.fromFile(fileBlob);
 
