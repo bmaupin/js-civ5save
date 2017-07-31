@@ -85,6 +85,12 @@ export default class Civ5Save {
   getSectionOffsets() {
     const SECTION_DELIMITER = [0x40, 0, 0, 0];
 
+    const LAST_PROPERTY_DEFINITION = Civ5SavePropertyDefinitions[Object.keys(Civ5SavePropertyDefinitions)[Object.keys(
+      Civ5SavePropertyDefinitions).length - 1]];
+    const LAST_SECTION = LAST_PROPERTY_DEFINITION.sectionByBuild[Object.keys(
+      LAST_PROPERTY_DEFINITION.sectionByBuild)[Object.keys(
+      LAST_PROPERTY_DEFINITION.sectionByBuild).length - 1]];
+
     let saveDataBytes = new Int8Array(this.saveData.buffer);
     let sectionOffsets = [];
     let section = {
@@ -92,7 +98,7 @@ export default class Civ5Save {
     };
     sectionOffsets.push(section);
 
-    saveDataBytes.forEach((byte, byteOffset) => {
+    for (let byteOffset = 0, byte = saveDataBytes[byteOffset]; byteOffset < saveDataBytes.length; byteOffset++) {
       if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
         let section = {
           start: byteOffset,
@@ -100,7 +106,11 @@ export default class Civ5Save {
         sectionOffsets.push(section);
         sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;
       }
-    });
+
+      if (sectionOffsets.length === LAST_SECTION) {
+        break;
+      }
+    }
 
     return sectionOffsets;
   }
