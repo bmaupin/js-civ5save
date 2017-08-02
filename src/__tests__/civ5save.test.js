@@ -70,6 +70,13 @@ test('Get current turn', () => {
   expect(savegame103.currentTurn).toBe(264);
 });
 
+test('Get game mode', () => {
+  expect(savegame100.gameMode).not.toBeDefined();
+  expect(savegame101.gameMode).not.toBeDefined();
+  expect(savegame102.gameMode).toBe('singleplayer');
+  expect(savegame103.gameMode).toBe('singleplayer');
+});
+
 test('Get player 1 civilization', () => {
   expect(savegame100.player1Civilization).toBe('CIVILIZATION_PERSIA');
   expect(savegame101.player1Civilization).toBe('CIVILIZATION_ARABIA');

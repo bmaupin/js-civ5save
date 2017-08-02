@@ -98,7 +98,7 @@ export default class Civ5Save {
     };
     sectionOffsets.push(section);
 
-    for (let byteOffset = 0, byte = saveDataBytes[byteOffset]; byteOffset < saveDataBytes.length; byteOffset++) {
+    for (let byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {
       if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
         let section = {
           start: byteOffset,
@@ -175,6 +175,12 @@ export default class Civ5Save {
 
   get currentTurn() {
     return this.properties['currentTurn'].value;
+  }
+
+  get gameMode() {
+    if (Number(this.gameBuild) >= 230620) {
+      return Civ5SavePropertyDefinitions.gameMode.values[this.properties.gameMode.value];
+    }
   }
 
   get player1Civilization() {
@@ -257,17 +263,17 @@ export default class Civ5Save {
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 class Civ5SaveDataView extends DataView {
   getBoolean(byteOffset) {
-    return Boolean(this.getInt8(byteOffset));
+    return Boolean(this.getUint8(byteOffset));
   }
 
   setBoolean(byteOffset, newValue) {
-    this.setInt8(byteOffset, Number(newValue));
+    this.setUint8(byteOffset, Number(newValue));
   }
 
   getString(byteOffset, byteLength) {
     let string = '';
     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
-      string += String.fromCharCode(this.getInt8(byte));
+      string += String.fromCharCode(this.getUint8(byte));
     }
     return string;
   }
@@ -292,8 +298,11 @@ class Civ5SaveProperty {
     case 'bytes':
       return new Civ5SaveProperty(byteOffset, length, saveData);
 
-    case 'int':
-      return new Civ5SaveIntProperty(byteOffset, 4, saveData);
+    case 'int8':
+      return new Civ5SaveInt8Property(byteOffset, 1, saveData);
+
+    case 'int32':
+      return new Civ5SaveInt32Property(byteOffset, 4, saveData);
 
     case 'string':
       return new Civ5SaveStringProperty(byteOffset, length, saveData);
@@ -315,13 +324,23 @@ class Civ5SaveBoolProperty extends Civ5SaveProperty {
   }
 }
 
-class Civ5SaveIntProperty extends Civ5SaveProperty {
+class Civ5SaveInt8Property extends Civ5SaveProperty {
   get value() {
-    return this.saveData.getInt32(this.byteOffset, true);
+    return this.saveData.getUint8(this.byteOffset);
   }
 
   set value(newValue) {
-    this.saveData.setInt32(this.byteOffset, newValue, true);
+    this.saveData.setUint8(this.byteOffset, newValue);
+  }
+}
+
+class Civ5SaveInt32Property extends Civ5SaveProperty {
+  get value() {
+    return this.saveData.getUint32(this.byteOffset, true);
+  }
+
+  set value(newValue) {
+    this.saveData.setUint32(this.byteOffset, newValue, true);
   }
 }
 
@@ -338,7 +357,7 @@ class Civ5SaveStringProperty extends Civ5SaveProperty {
   }
 
   getStringLength(byteOffset) {
-    return this.saveData.getInt32(byteOffset, true);
+    return this.saveData.getUint32(byteOffset, true);
   }
 }
 
