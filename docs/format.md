@@ -45,6 +45,24 @@ Notes:
   `1400 0000 4349 5649 4c49 5a41 5449 4f4e 5f4d 4f52 4f43 434f`
   - `1400 0000` = 0x14 (little endian) = 20 bytes
   - `4349...` = `CIVILIZATION_MOROCCO` (20 bytes long)
+- Somewhere around build 230620 the savegame format had some major changes, including the addition of the game version and build near the beginning of the file
+
+Relationship between time victory and max turns
+---
+- If time victory is checked and max turns is set to greater than 0, the game will end at max turns
+- If time victory is unchecked and max turns is set to greater than 0, the game will end at max turns but it will say that time victory is disabled
+- If time victory is checked and max turns is set to 0, the game will end based on the game speed (quick: 330 turns, standard: 500 turns, etc)
+
+Builds and versions
+---
+| Build | Version |
+| --- | --- |
+| 200405 | 1.0.0.7 |
+| 201080 | 1.0.0.17 |
+| 217984 | 1.0.1.217 |
+| 218015 | 1.0.1.221 |
+| 230620 | 1.0.1.332 |
+
 
 References:
 ---
