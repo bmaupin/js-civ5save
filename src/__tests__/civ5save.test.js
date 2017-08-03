@@ -2,10 +2,11 @@ import Civ5Save from '../civ5save';
 
 const path = require('path');
 
-const TEST_SAVEGAME_V100 = path.join(__dirname, 'resources', '1.0.0.17.Civ5Save');
-const TEST_SAVEGAME_V101 = path.join(__dirname, 'resources', '1.0.1.135.Civ5Save');
-const TEST_SAVEGAME_V102 = path.join(__dirname, 'resources', '1.0.2.13.Civ5Save');
-const TEST_SAVEGAME_V103 = path.join(__dirname, 'resources', '1.0.3.279.Civ5Save');
+const TEST_SAVEGAME_V10017 = path.join(__dirname, 'resources', '1.0.0.17.Civ5Save');
+const TEST_SAVEGAME_V101135 = path.join(__dirname, 'resources', '1.0.1.135.Civ5Save');
+const TEST_SAVEGAME_V101221 = path.join(__dirname, 'resources', '1.0.1.221.Civ5Save');
+const TEST_SAVEGAME_V10213 = path.join(__dirname, 'resources', '1.0.2.13.Civ5Save');
+const TEST_SAVEGAME_V103279 = path.join(__dirname, 'resources', '1.0.3.279.Civ5Save');
 
 const NEW_CULTURAL_VICTORY = false;
 const NEW_DIPLOMATIC_VICTORY = true;
@@ -15,10 +16,11 @@ const NEW_SAVEGAME_FILENAME = 'New.Civ5Save';
 const NEW_SCIENCE_VICTORY = false;
 const NEW_TIME_VICTORY = true;
 
-let savegame100;
-let savegame101;
-let savegame102;
-let savegame103;
+let savegame10017;
+let savegame101135;
+let savegame101221;
+let savegame10213;
+let savegame103279;
 
 function getFileBlob(url) {
   return new Promise(function (resolve, reject) {
@@ -36,206 +38,238 @@ function getFileBlob(url) {
 }
 
 test('Create new Civ5Save instances from file', async () => {
-  let fileBlob = await getFileBlob(TEST_SAVEGAME_V100);
-  savegame100 = await Civ5Save.fromFile(fileBlob);
+  let fileBlob = await getFileBlob(TEST_SAVEGAME_V10017);
+  savegame10017 = await Civ5Save.fromFile(fileBlob);
 
-  fileBlob = await getFileBlob(TEST_SAVEGAME_V101);
-  savegame101 = await Civ5Save.fromFile(fileBlob);
+  fileBlob = await getFileBlob(TEST_SAVEGAME_V101135);
+  savegame101135 = await Civ5Save.fromFile(fileBlob);
 
-  fileBlob = await getFileBlob(TEST_SAVEGAME_V102);
-  savegame102 = await Civ5Save.fromFile(fileBlob);
+  fileBlob = await getFileBlob(TEST_SAVEGAME_V101221);
+  savegame101221 = await Civ5Save.fromFile(fileBlob);
 
-  fileBlob = await getFileBlob(TEST_SAVEGAME_V103);
-  savegame103 = await Civ5Save.fromFile(fileBlob);
+  fileBlob = await getFileBlob(TEST_SAVEGAME_V10213);
+  savegame10213 = await Civ5Save.fromFile(fileBlob);
+
+  fileBlob = await getFileBlob(TEST_SAVEGAME_V103279);
+  savegame103279 = await Civ5Save.fromFile(fileBlob);
 });
 
 test('Get game build', () => {
-  expect(savegame100.gameBuild).toBe('201080');
-  expect(savegame101.gameBuild).toBe('210752');
-  expect(savegame102.gameBuild).toBe('341540');
-  expect(savegame103.gameBuild).toBe('403694');
+  expect(savegame10017.gameBuild).toBe('201080');
+  expect(savegame101135.gameBuild).toBe('210752');
+  expect(savegame101221.gameBuild).toBe('218015');
+  expect(savegame10213.gameBuild).toBe('341540');
+  expect(savegame103279.gameBuild).toBe('403694');
 });
 
 test('Get game version', () => {
-  expect(savegame100.gameVersion).not.toBeDefined();
-  expect(savegame101.gameVersion).not.toBeDefined();
-  expect(savegame102.gameVersion).toBe('1.0.2.13 (341540)');
-  expect(savegame103.gameVersion).toBe('1.0.3.279(130961)');
+  expect(savegame10017.gameVersion).not.toBeDefined();
+  expect(savegame101135.gameVersion).not.toBeDefined();
+  expect(savegame101221.gameVersion).not.toBeDefined();
+  expect(savegame10213.gameVersion).toBe('1.0.2.13 (341540)');
+  expect(savegame103279.gameVersion).toBe('1.0.3.279(130961)');
 });
 
 test('Get current turn', () => {
-  expect(savegame100.currentTurn).toBe(19);
-  expect(savegame101.currentTurn).toBe(176);
-  expect(savegame102.currentTurn).toBe(12);
-  expect(savegame103.currentTurn).toBe(264);
+  expect(savegame10017.currentTurn).toBe(19);
+  expect(savegame101135.currentTurn).toBe(176);
+  expect(savegame101221.currentTurn).toBe(52);
+  expect(savegame10213.currentTurn).toBe(12);
+  expect(savegame103279.currentTurn).toBe(264);
 });
 
 test('Get game mode', () => {
-  expect(savegame100.gameMode).not.toBeDefined();
-  expect(savegame101.gameMode).not.toBeDefined();
-  expect(savegame102.gameMode).toBe('singleplayer');
-  expect(savegame103.gameMode).toBe('singleplayer');
+  expect(savegame10017.gameMode).not.toBeDefined();
+  expect(savegame101135.gameMode).not.toBeDefined();
+  expect(savegame101221.gameMode).not.toBeDefined();
+  expect(savegame10213.gameMode).toBe('singleplayer');
+  expect(savegame103279.gameMode).toBe('singleplayer');
 });
 
 test('Get player 1 civilization', () => {
-  expect(savegame100.player1Civilization).toBe('CIVILIZATION_PERSIA');
-  expect(savegame101.player1Civilization).toBe('CIVILIZATION_ARABIA');
-  expect(savegame102.player1Civilization).toBe('CIVILIZATION_SPAIN');
-  expect(savegame103.player1Civilization).toBe('CIVILIZATION_MOROCCO');
+  expect(savegame10017.player1Civilization).toBe('CIVILIZATION_PERSIA');
+  expect(savegame101135.player1Civilization).toBe('CIVILIZATION_ARABIA');
+  expect(savegame101221.player1Civilization).toBe('CIVILIZATION_FRANCE');
+  expect(savegame10213.player1Civilization).toBe('CIVILIZATION_SPAIN');
+  expect(savegame103279.player1Civilization).toBe('CIVILIZATION_MOROCCO');
 });
 
 test('Get difficulty', () => {
-  expect(savegame100.difficulty).toBe('HANDICAP_CHIEFTAIN');
-  expect(savegame101.difficulty).toBe('HANDICAP_WARLORD');
-  expect(savegame102.difficulty).toBe('HANDICAP_IMMORTAL');
-  expect(savegame103.difficulty).toBe('HANDICAP_SETTLER');
+  expect(savegame10017.difficulty).toBe('HANDICAP_CHIEFTAIN');
+  expect(savegame101135.difficulty).toBe('HANDICAP_WARLORD');
+  expect(savegame101221.difficulty).toBe('HANDICAP_PRINCE');
+  expect(savegame10213.difficulty).toBe('HANDICAP_IMMORTAL');
+  expect(savegame103279.difficulty).toBe('HANDICAP_SETTLER');
 });
 
 test('Get starting era', () => {
-  expect(savegame100.startingEra).toBe('ERA_ANCIENT');
-  expect(savegame101.startingEra).toBe('ERA_ANCIENT');
-  expect(savegame102.startingEra).toBe('ERA_ANCIENT');
-  expect(savegame103.startingEra).toBe('ERA_FUTURE');
+  expect(savegame10017.startingEra).toBe('ERA_ANCIENT');
+  expect(savegame101135.startingEra).toBe('ERA_ANCIENT');
+  expect(savegame101221.startingEra).toBe('ERA_MEDIEVAL');
+  expect(savegame10213.startingEra).toBe('ERA_ANCIENT');
+  expect(savegame103279.startingEra).toBe('ERA_FUTURE');
 });
 
 test('Get current era', () => {
-  expect(savegame100.currentEra).toBe('ERA_ANCIENT');
-  expect(savegame101.currentEra).toBe('ERA_ANCIENT');
-  expect(savegame102.currentEra).toBe('ERA_ANCIENT');
-  expect(savegame103.currentEra).toBe('ERA_FUTURE');
+  expect(savegame10017.currentEra).toBe('ERA_ANCIENT');
+  expect(savegame101135.currentEra).toBe('ERA_ANCIENT');
+  expect(savegame101221.currentEra).toBe('ERA_RENAISSANCE');
+  expect(savegame10213.currentEra).toBe('ERA_ANCIENT');
+  expect(savegame103279.currentEra).toBe('ERA_FUTURE');
 });
 
 test('Get game pace', () => {
-  expect(savegame100.gamePace).toBe('GAMESPEED_STANDARD');
-  expect(savegame101.gamePace).toBe('GAMESPEED_MARATHON');
-  expect(savegame102.gamePace).toBe('GAMESPEED_STANDARD');
-  expect(savegame103.gamePace).toBe('GAMESPEED_QUICK');
+  expect(savegame10017.gamePace).toBe('GAMESPEED_STANDARD');
+  expect(savegame101135.gamePace).toBe('GAMESPEED_MARATHON');
+  expect(savegame101221.gamePace).toBe('GAMESPEED_QUICK');
+  expect(savegame10213.gamePace).toBe('GAMESPEED_STANDARD');
+  expect(savegame103279.gamePace).toBe('GAMESPEED_QUICK');
 });
 
 test('Get map size', () => {
-  expect(savegame100.mapSize).toBe('WORLDSIZE_SMALL');
-  expect(savegame101.mapSize).toBe('WORLDSIZE_HUGE');
-  expect(savegame102.mapSize).toBe('WORLDSIZE_STANDARD');
-  expect(savegame103.mapSize).toBe('WORLDSIZE_DUEL');
+  expect(savegame10017.mapSize).toBe('WORLDSIZE_SMALL');
+  expect(savegame101135.mapSize).toBe('WORLDSIZE_HUGE');
+  expect(savegame101221.mapSize).toBe('WORLDSIZE_STANDARD');
+  expect(savegame10213.mapSize).toBe('WORLDSIZE_STANDARD');
+  expect(savegame103279.mapSize).toBe('WORLDSIZE_DUEL');
 });
 
 test('Get map file', () => {
-  expect(savegame100.mapFile).toBe('Assets\\Maps\\Continents.lua');
-  expect(savegame101.mapFile).toBe('Assets/Maps/Pangaea.lua');
-  expect(savegame102.mapFile).toBe('Assets\\Maps\\Pangaea.lua');
-  expect(savegame103.mapFile).toBe('Assets\\Maps\\Earth_Duel.Civ5Map');
+  expect(savegame10017.mapFile).toBe('Assets\\Maps\\Continents.lua');
+  expect(savegame101135.mapFile).toBe('Assets/Maps/Pangaea.lua');
+  expect(savegame101221.mapFile).toBe('Assets\\DLC\\DLC_02\\Scenarios\\NewWorldScenario\\NewWorld_Scenario_MapScript.lua');
+  expect(savegame10213.mapFile).toBe('Assets\\Maps\\Pangaea.lua');
+  expect(savegame103279.mapFile).toBe('Assets\\Maps\\Earth_Duel.Civ5Map');
 });
 
 test('Get max turns', () => {
-  expect(savegame100.maxTurns).toBe(500);
-  expect(savegame101.maxTurns).toBe(1500);
-  expect(savegame102.maxTurns).toBe(500);
-  expect(savegame103.maxTurns).toBe(0);
+  expect(savegame10017.maxTurns).toBe(500);
+  expect(savegame101135.maxTurns).toBe(1500);
+  expect(savegame101221.maxTurns).toBe(100);
+  expect(savegame10213.maxTurns).toBe(500);
+  expect(savegame103279.maxTurns).toBe(0);
 });
 
 test('Set max turns', () => {
-  savegame100.maxTurns = NEW_MAX_TURNS;
-  savegame101.maxTurns = NEW_MAX_TURNS;
-  savegame102.maxTurns = NEW_MAX_TURNS;
-  savegame103.maxTurns = NEW_MAX_TURNS;
-  expect(savegame100.maxTurns).toBe(NEW_MAX_TURNS);
-  expect(savegame101.maxTurns).toBe(NEW_MAX_TURNS);
-  expect(savegame102.maxTurns).toBe(NEW_MAX_TURNS);
-  expect(savegame103.maxTurns).toBe(NEW_MAX_TURNS);
+  savegame10017.maxTurns = NEW_MAX_TURNS;
+  savegame101135.maxTurns = NEW_MAX_TURNS;
+  savegame101221.maxTurns = NEW_MAX_TURNS;
+  savegame10213.maxTurns = NEW_MAX_TURNS;
+  savegame103279.maxTurns = NEW_MAX_TURNS;
+  expect(savegame10017.maxTurns).toBe(NEW_MAX_TURNS);
+  expect(savegame101135.maxTurns).toBe(NEW_MAX_TURNS);
+  expect(savegame101221.maxTurns).toBe(NEW_MAX_TURNS);
+  expect(savegame10213.maxTurns).toBe(NEW_MAX_TURNS);
+  expect(savegame103279.maxTurns).toBe(NEW_MAX_TURNS);
 });
 
 test('Get time victory', () => {
-  expect(savegame100.timeVictory).toBe(true);
-  expect(savegame101.timeVictory).toBe(true);
-  expect(savegame102.timeVictory).toBe(true);
-  expect(savegame103.timeVictory).toBe(false);
+  expect(savegame10017.timeVictory).toBe(true);
+  expect(savegame101135.timeVictory).toBe(true);
+  expect(savegame101221.timeVictory).toBe(true);
+  expect(savegame10213.timeVictory).toBe(true);
+  expect(savegame103279.timeVictory).toBe(false);
 });
 
 test('Set time victory', () => {
-  savegame100.timeVictory = NEW_TIME_VICTORY;
-  savegame101.timeVictory = NEW_TIME_VICTORY;
-  savegame102.timeVictory = NEW_TIME_VICTORY;
-  savegame103.timeVictory = NEW_TIME_VICTORY;
-  expect(savegame100.timeVictory).toBe(NEW_TIME_VICTORY);
-  expect(savegame101.timeVictory).toBe(NEW_TIME_VICTORY);
-  expect(savegame102.timeVictory).toBe(NEW_TIME_VICTORY);
-  expect(savegame103.timeVictory).toBe(NEW_TIME_VICTORY);
+  savegame10017.timeVictory = NEW_TIME_VICTORY;
+  savegame101135.timeVictory = NEW_TIME_VICTORY;
+  savegame101221.timeVictory = NEW_TIME_VICTORY;
+  savegame10213.timeVictory = NEW_TIME_VICTORY;
+  savegame103279.timeVictory = NEW_TIME_VICTORY;
+  expect(savegame10017.timeVictory).toBe(NEW_TIME_VICTORY);
+  expect(savegame101135.timeVictory).toBe(NEW_TIME_VICTORY);
+  expect(savegame101221.timeVictory).toBe(NEW_TIME_VICTORY);
+  expect(savegame10213.timeVictory).toBe(NEW_TIME_VICTORY);
+  expect(savegame103279.timeVictory).toBe(NEW_TIME_VICTORY);
 });
 
 test('Get science victory', () => {
-  expect(savegame100.scienceVictory).toBe(true);
-  expect(savegame101.scienceVictory).toBe(true);
-  expect(savegame102.scienceVictory).toBe(true);
-  expect(savegame103.scienceVictory).toBe(true);
+  expect(savegame10017.scienceVictory).toBe(true);
+  expect(savegame101135.scienceVictory).toBe(true);
+  expect(savegame101221.scienceVictory).toBe(false);
+  expect(savegame10213.scienceVictory).toBe(true);
+  expect(savegame103279.scienceVictory).toBe(true);
 });
 
 test('Set science victory', () => {
-  savegame100.scienceVictory = NEW_SCIENCE_VICTORY;
-  savegame101.scienceVictory = NEW_SCIENCE_VICTORY;
-  savegame102.scienceVictory = NEW_SCIENCE_VICTORY;
-  savegame103.scienceVictory = NEW_SCIENCE_VICTORY;
-  expect(savegame100.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
-  expect(savegame101.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
-  expect(savegame102.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
-  expect(savegame103.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
+  savegame10017.scienceVictory = NEW_SCIENCE_VICTORY;
+  savegame101135.scienceVictory = NEW_SCIENCE_VICTORY;
+  savegame101221.scienceVictory = NEW_SCIENCE_VICTORY;
+  savegame10213.scienceVictory = NEW_SCIENCE_VICTORY;
+  savegame103279.scienceVictory = NEW_SCIENCE_VICTORY;
+  expect(savegame101221.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
+  expect(savegame10017.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
+  expect(savegame101135.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
+  expect(savegame10213.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
+  expect(savegame103279.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
 });
 
 test('Get domination victory', () => {
-  expect(savegame100.dominationVictory).toBe(true);
-  expect(savegame101.dominationVictory).toBe(true);
-  expect(savegame102.dominationVictory).toBe(true);
-  expect(savegame103.dominationVictory).toBe(false);
+  expect(savegame10017.dominationVictory).toBe(true);
+  expect(savegame101135.dominationVictory).toBe(true);
+  expect(savegame101221.dominationVictory).toBe(false);
+  expect(savegame10213.dominationVictory).toBe(true);
+  expect(savegame103279.dominationVictory).toBe(false);
 });
 
 test('Set domination victory', () => {
-  savegame100.dominationVictory = NEW_DOMINATION_VICTORY;
-  savegame101.dominationVictory = NEW_DOMINATION_VICTORY;
-  savegame102.dominationVictory = NEW_DOMINATION_VICTORY;
-  savegame103.dominationVictory = NEW_DOMINATION_VICTORY;
-  expect(savegame100.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
-  expect(savegame101.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
-  expect(savegame102.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
-  expect(savegame103.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
+  savegame10017.dominationVictory = NEW_DOMINATION_VICTORY;
+  savegame101135.dominationVictory = NEW_DOMINATION_VICTORY;
+  savegame101221.dominationVictory = NEW_DOMINATION_VICTORY;
+  savegame10213.dominationVictory = NEW_DOMINATION_VICTORY;
+  savegame103279.dominationVictory = NEW_DOMINATION_VICTORY;
+  expect(savegame10017.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
+  expect(savegame101135.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
+  expect(savegame101221.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
+  expect(savegame10213.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
+  expect(savegame103279.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
 });
 
 test('Get cultural victory', () => {
-  expect(savegame100.culturalVictory).toBe(true);
-  expect(savegame101.culturalVictory).toBe(true);
-  expect(savegame102.culturalVictory).toBe(true);
-  expect(savegame103.culturalVictory).toBe(true);
+  expect(savegame10017.culturalVictory).toBe(true);
+  expect(savegame101135.culturalVictory).toBe(true);
+  expect(savegame101221.culturalVictory).toBe(false);
+  expect(savegame10213.culturalVictory).toBe(true);
+  expect(savegame103279.culturalVictory).toBe(true);
 });
 
 test('Set cultural victory', () => {
-  savegame100.culturalVictory = NEW_CULTURAL_VICTORY;
-  savegame101.culturalVictory = NEW_CULTURAL_VICTORY;
-  savegame102.culturalVictory = NEW_CULTURAL_VICTORY;
-  savegame103.culturalVictory = NEW_CULTURAL_VICTORY;
-  expect(savegame100.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
-  expect(savegame101.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
-  expect(savegame102.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
-  expect(savegame103.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
+  savegame10017.culturalVictory = NEW_CULTURAL_VICTORY;
+  savegame101135.culturalVictory = NEW_CULTURAL_VICTORY;
+  savegame101221.culturalVictory = NEW_CULTURAL_VICTORY;
+  savegame10213.culturalVictory = NEW_CULTURAL_VICTORY;
+  savegame103279.culturalVictory = NEW_CULTURAL_VICTORY;
+  expect(savegame10017.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
+  expect(savegame101135.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
+  expect(savegame101221.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
+  expect(savegame10213.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
+  expect(savegame103279.culturalVictory).toBe(NEW_CULTURAL_VICTORY);
 });
 
 test('Get diplomatic victory', () => {
-  expect(savegame100.diplomaticVictory).toBe(true);
-  expect(savegame101.diplomaticVictory).toBe(true);
-  expect(savegame102.diplomaticVictory).toBe(true);
-  expect(savegame103.diplomaticVictory).toBe(false);
+  expect(savegame10017.diplomaticVictory).toBe(true);
+  expect(savegame101135.diplomaticVictory).toBe(true);
+  expect(savegame101221.diplomaticVictory).toBe(false);
+  expect(savegame10213.diplomaticVictory).toBe(true);
+  expect(savegame103279.diplomaticVictory).toBe(false);
 });
 
 test('Set diplomatic victory', () => {
-  savegame100.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
-  savegame101.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
-  savegame102.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
-  savegame103.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
-  expect(savegame100.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
-  expect(savegame101.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
-  expect(savegame102.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
-  expect(savegame103.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
+  savegame10017.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
+  savegame101135.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
+  savegame101221.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
+  savegame10213.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
+  savegame103279.diplomaticVictory = NEW_DIPLOMATIC_VICTORY;
+  expect(savegame10017.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
+  expect(savegame101135.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
+  expect(savegame101221.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
+  expect(savegame10213.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
+  expect(savegame103279.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
 });
 
 test('Save to file', async () => {
-  let newSavegameFile = savegame103.toFile(NEW_SAVEGAME_FILENAME);
+  let newSavegameFile = savegame103279.toFile(NEW_SAVEGAME_FILENAME);
   let newSavegame = await Civ5Save.fromFile(newSavegameFile);
 
   expect(newSavegame.maxTurns).toBe(NEW_MAX_TURNS);

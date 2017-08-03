@@ -85,9 +85,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 class Civ5Save {
   constructor(saveData) {
-    this.saveData = new Civ5SaveDataView(saveData.buffer);
-    this.verifyFileSignature();
-    this.properties = this.getProperties();
+    this._saveData = new Civ5SaveDataView(saveData.buffer);
+    this._verifyFileSignature();
+    this._properties = this._getProperties();
   }
 
   // Use a static factory to instantiate the object since it relies on data that needs to be fetched asynchronously
@@ -116,28 +116,28 @@ class Civ5Save {
   }
 
   toFile(fileName) {
-    return new File([this.saveData], fileName, {
+    return new File([this._saveData], fileName, {
       type: 'application/octet-stream'
     });
   }
 
-  verifyFileSignature() {
-    if (this.saveData.getString(0, 4) !== 'CIV5') {
+  _verifyFileSignature() {
+    if (this._saveData.getString(0, 4) !== 'CIV5') {
       throw new Error('File signature does not match. Is this a Civ 5 savegame?');
     }
   }
 
-  getProperties() {
+  _getProperties() {
     let previousPropertyName = '';
     let previousPropertySection = 0;
     let properties = new Map();
-    let sectionOffsets = this.getSectionOffsets();
+    let sectionOffsets = this._getSectionOffsets();
 
     for (let propertyName in __WEBPACK_IMPORTED_MODULE_0__civ5saveproperties_json___default.a) {
       // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
       let propertyDefinition = Object.assign({}, __WEBPACK_IMPORTED_MODULE_0__civ5saveproperties_json___default.a[propertyName]);
 
-      let propertySection = this.getPropertySection(propertyDefinition);
+      let propertySection = this._getPropertySection(propertyDefinition);
       // If propertySection is null, it means the property isn't available for the particular game build
       if (isNullOrUndefined(propertySection)) {
         continue;
@@ -146,7 +146,12 @@ class Civ5Save {
       let propertyByteOffset = null;
       if (propertySection === previousPropertySection) {
         let previousProperty = properties[previousPropertyName];
-        propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
+        // previousProperty.length is a common spot of failure if something went wrong
+        try {
+          propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
+        } catch (e) {
+          break;
+        }
 
       } else {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
@@ -156,7 +161,7 @@ class Civ5Save {
         propertyDefinition.type,
         propertyByteOffset,
         propertyDefinition.length,
-        this.saveData);
+        this._saveData);
 
       previousPropertyName = propertyName;
       previousPropertySection = propertySection;
@@ -165,30 +170,53 @@ class Civ5Save {
     return properties;
   }
 
-  getSectionOffsets() {
+  _getSectionOffsets() {
     const SECTION_DELIMITER = [0x40, 0, 0, 0];
 
-    let saveDataBytes = new Int8Array(this.saveData.buffer);
+    const LAST_PROPERTY_DEFINITION = __WEBPACK_IMPORTED_MODULE_0__civ5saveproperties_json___default.a[Object.keys(__WEBPACK_IMPORTED_MODULE_0__civ5saveproperties_json___default.a)[Object.keys(
+      __WEBPACK_IMPORTED_MODULE_0__civ5saveproperties_json___default.a).length - 1]];
+    const LAST_SECTION = LAST_PROPERTY_DEFINITION.sectionByBuild[Object.keys(
+      LAST_PROPERTY_DEFINITION.sectionByBuild)[Object.keys(
+      LAST_PROPERTY_DEFINITION.sectionByBuild).length - 1]];
+
+    let saveDataBytes = new Int8Array(this._saveData.buffer);
     let sectionOffsets = [];
     let section = {
       start: 0,
     };
     sectionOffsets.push(section);
 
-    saveDataBytes.forEach((byte, byteOffset) => {
+    for (let byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {
       if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
+        // Player colour section before build 310700 contains hex values, which can include the section delimiter
+        if (Number(this.gameBuild) < 310700) {
+          let playerColourSection = 23;
+          if (Number(this.gameBuild) >= 262623) {
+            playerColourSection = 24;
+          }
+          if (sectionOffsets.length === playerColourSection) {
+            if (byteOffset - sectionOffsets[sectionOffsets.length - 1].start < 270) {
+              continue;
+            }
+          }
+        }
+
         let section = {
           start: byteOffset,
         };
         sectionOffsets.push(section);
         sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;
+
+        if (sectionOffsets.length === LAST_SECTION) {
+          break;
+        }
       }
-    });
+    }
 
     return sectionOffsets;
   }
 
-  getPropertySection(propertyDefinition) {
+  _getPropertySection(propertyDefinition) {
     let propertySection = null;
     for (let build in propertyDefinition.sectionByBuild) {
       if (Number.parseInt(this.gameBuild) >= Number.parseInt(build)) {
@@ -201,7 +229,7 @@ class Civ5Save {
 
   get gameBuild() {
     if (isNullOrUndefined(this._gameBuild)) {
-      this._gameBuild = this.getGameBuild();
+      this._gameBuild = this._getGameBuild();
     }
 
     return this._gameBuild;
@@ -209,7 +237,7 @@ class Civ5Save {
 
   // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the
   // game build for all savegame versions
-  getGameBuild() {
+  _getGameBuild() {
     const GAME_BUILD_MARKER = 'FINAL_RELEASE';
     const GAME_BUILD_MARKER_ARRAY = (function() {
       let gameBuildMarkerArray = [];
@@ -220,7 +248,7 @@ class Civ5Save {
     }());
 
     let gameBuildMarkerByteOffset = 0;
-    let saveDataBytes = new Int8Array(this.saveData.buffer);
+    let saveDataBytes = new Int8Array(this._saveData.buffer);
     for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
       if (areArraysEqual(
         saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
@@ -241,89 +269,99 @@ class Civ5Save {
   }
 
   get gameVersion() {
-    if (this.properties.hasOwnProperty('gameVersion')) {
-      return this.properties['gameVersion'].value;
-    }
+    return this._returnPropertyIfDefined('gameVersion');
   }
 
   get currentTurn() {
-    return this.properties['currentTurn'].value;
+    return this._properties['currentTurn'].value;
+  }
+
+  get gameMode() {
+    if (Number(this.gameBuild) >= 230620) {
+      return __WEBPACK_IMPORTED_MODULE_0__civ5saveproperties_json___default.a.gameMode.values[this._properties.gameMode.value];
+    }
   }
 
   get player1Civilization() {
-    return this.properties['player1Civilization'].value;
+    return this._returnPropertyIfDefined('player1Civilization');
   }
 
   get difficulty() {
-    return this.properties['difficulty'].value;
+    return this._returnPropertyIfDefined('difficulty');
   }
 
   get startingEra() {
-    return this.properties['startingEra'].value;
+    return this._returnPropertyIfDefined('startingEra');
   }
 
   get currentEra() {
-    return this.properties['currentEra'].value;
+    return this._returnPropertyIfDefined('currentEra');
   }
 
   get gamePace() {
-    return this.properties['gamePace'].value;
+    return this._returnPropertyIfDefined('gamePace');
   }
 
   get mapSize() {
-    return this.properties['mapSize'].value;
+    return this._returnPropertyIfDefined('mapSize');
   }
 
   get mapFile() {
-    return this.properties['mapFile'].value;
+    return this._returnPropertyIfDefined('mapFile');
   }
 
   get maxTurns() {
-    return this.properties['maxTurns'].value;
+    return this._returnPropertyIfDefined('maxTurns');
   }
 
   set maxTurns(newValue) {
-    this.properties['maxTurns'].value = newValue;
+    this._properties['maxTurns'].value = newValue;
   }
 
   get timeVictory() {
-    return this.properties['timeVictory'].value;
+    return this._returnPropertyIfDefined('timeVictory');
   }
 
   set timeVictory(newValue) {
-    this.properties['timeVictory'].value = newValue;
+    this._properties['timeVictory'].value = newValue;
   }
 
   get scienceVictory() {
-    return this.properties['scienceVictory'].value;
+    return this._returnPropertyIfDefined('scienceVictory');
   }
 
   set scienceVictory(newValue) {
-    this.properties['scienceVictory'].value = newValue;
+    this._properties['scienceVictory'].value = newValue;
   }
 
   get dominationVictory() {
-    return this.properties['dominationVictory'].value;
+    return this._returnPropertyIfDefined('dominationVictory');
   }
 
   set dominationVictory(newValue) {
-    this.properties['dominationVictory'].value = newValue;
+    this._properties['dominationVictory'].value = newValue;
   }
 
   get culturalVictory() {
-    return this.properties['culturalVictory'].value;
+    return this._returnPropertyIfDefined('culturalVictory');
   }
 
   set culturalVictory(newValue) {
-    this.properties['culturalVictory'].value = newValue;
+    this._properties['culturalVictory'].value = newValue;
   }
 
   get diplomaticVictory() {
-    return this.properties['diplomaticVictory'].value;
+    return this._returnPropertyIfDefined('diplomaticVictory');
   }
 
   set diplomaticVictory(newValue) {
-    this.properties['diplomaticVictory'].value = newValue;
+    this._properties['diplomaticVictory'].value = newValue;
+  }
+
+  _returnPropertyIfDefined(propertyName) {
+    if (this._properties.hasOwnProperty(propertyName)) {
+      return this._properties[propertyName].value;
+    }
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["default"] = Civ5Save;
@@ -332,17 +370,17 @@ class Civ5Save {
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 class Civ5SaveDataView extends DataView {
   getBoolean(byteOffset) {
-    return Boolean(this.getInt8(byteOffset));
+    return Boolean(this.getUint8(byteOffset));
   }
 
   setBoolean(byteOffset, newValue) {
-    this.setInt8(byteOffset, Number(newValue));
+    this.setUint8(byteOffset, Number(newValue));
   }
 
   getString(byteOffset, byteLength) {
     let string = '';
     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
-      string += String.fromCharCode(this.getInt8(byte));
+      string += String.fromCharCode(this.getUint8(byte));
     }
     return string;
   }
@@ -367,8 +405,11 @@ class Civ5SaveProperty {
     case 'bytes':
       return new Civ5SaveProperty(byteOffset, length, saveData);
 
-    case 'int':
-      return new Civ5SaveIntProperty(byteOffset, 4, saveData);
+    case 'int8':
+      return new Civ5SaveInt8Property(byteOffset, 1, saveData);
+
+    case 'int32':
+      return new Civ5SaveInt32Property(byteOffset, 4, saveData);
 
     case 'string':
       return new Civ5SaveStringProperty(byteOffset, length, saveData);
@@ -390,13 +431,23 @@ class Civ5SaveBoolProperty extends Civ5SaveProperty {
   }
 }
 
-class Civ5SaveIntProperty extends Civ5SaveProperty {
+class Civ5SaveInt8Property extends Civ5SaveProperty {
   get value() {
-    return this.saveData.getInt32(this.byteOffset, true);
+    return this.saveData.getUint8(this.byteOffset);
   }
 
   set value(newValue) {
-    this.saveData.setInt32(this.byteOffset, newValue, true);
+    this.saveData.setUint8(this.byteOffset, newValue);
+  }
+}
+
+class Civ5SaveInt32Property extends Civ5SaveProperty {
+  get value() {
+    return this.saveData.getUint32(this.byteOffset, true);
+  }
+
+  set value(newValue) {
+    this.saveData.setUint32(this.byteOffset, newValue, true);
   }
 }
 
@@ -413,7 +464,7 @@ class Civ5SaveStringProperty extends Civ5SaveProperty {
   }
 
   getStringLength(byteOffset) {
-    return this.saveData.getInt32(byteOffset, true);
+    return this.saveData.getUint32(byteOffset, true);
   }
 }
 
@@ -439,7 +490,7 @@ module.exports = {
 		"byteOffsetInSection": 0,
 		"length": 4,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -447,15 +498,15 @@ module.exports = {
 		"byteOffsetInSection": 4,
 		"length": 4,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
-		"type": "int"
+		"type": "int32"
 	},
 	"gameVersion": {
 		"byteOffsetInSection": 8,
 		"length": null,
 		"sectionByBuild": {
-			"341540": 1
+			"230620": 1
 		},
 		"type": "string"
 	},
@@ -463,7 +514,7 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"341540": 1
+			"230620": 1
 		},
 		"type": "string"
 	},
@@ -471,24 +522,29 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": 4,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
-		"type": "int"
+		"type": "int32"
 	},
-	"section1Skip1": {
-		"_comment": "'Game mode?' (https://github.com/urbanski/010_Civ5Save/blob/master/civ5.bt#L25)",
+	"gameMode": {
+		"_comment": "This property exists in all versions but only seems to gain significance around build 230620",
 		"byteOffsetInSection": null,
 		"length": 1,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
-		"type": "bytes"
+		"type": "int8",
+		"values": [
+			"singleplayer",
+			"multiplayer",
+			"hotseat"
+		]
 	},
 	"player1Civilization": {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -496,7 +552,7 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -504,7 +560,7 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -512,7 +568,7 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -520,7 +576,7 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -528,7 +584,7 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -537,7 +593,7 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 1
+			"200405": 1
 		},
 		"type": "string"
 	},
@@ -545,8 +601,8 @@ module.exports = {
 		"byteOffsetInSection": 264,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 17,
-			"341540": 18,
+			"200405": 17,
+			"262623": 18,
 			"395070": 19
 		},
 		"type": "string"
@@ -555,8 +611,8 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": 7,
 		"sectionByBuild": {
-			"201080": 17,
-			"341540": 18,
+			"200405": 17,
+			"262623": 18,
 			"395070": 19
 		},
 		"type": "bytes"
@@ -565,8 +621,8 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 17,
-			"341540": 18,
+			"200405": 17,
+			"262623": 18,
 			"395070": 19
 		},
 		"type": "string"
@@ -575,27 +631,29 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": 4,
 		"sectionByBuild": {
-			"201080": 17,
-			"341540": 18,
+			"200405": 17,
+			"262623": 18,
 			"395070": 19
 		},
 		"type": "bytes"
 	},
 	"maxTurns": {
+		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
 		"byteOffsetInSection": null,
 		"length": 4,
 		"sectionByBuild": {
-			"201080": 17,
-			"341540": 18,
+			"200405": 17,
+			"262623": 18,
 			"395070": 19
 		},
-		"type": "int"
+		"type": "int32"
 	},
 	"section29Timer1": {
 		"byteOffsetInSection": 269,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "string"
@@ -604,7 +662,8 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": 12,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "bytes"
@@ -613,7 +672,8 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "string"
@@ -622,7 +682,8 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "string"
@@ -631,7 +692,8 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": null,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "string"
@@ -640,52 +702,63 @@ module.exports = {
 		"byteOffsetInSection": null,
 		"length": 25,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "bytes"
 	},
 	"timeVictory": {
+		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
 		"byteOffsetInSection": null,
 		"length": 1,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "bool"
 	},
 	"scienceVictory": {
+		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
 		"byteOffsetInSection": null,
 		"length": 1,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "bool"
 	},
 	"dominationVictory": {
+		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
 		"byteOffsetInSection": null,
 		"length": 1,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "bool"
 	},
 	"culturalVictory": {
+		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
 		"byteOffsetInSection": null,
 		"length": 1,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "bool"
 	},
 	"diplomaticVictory": {
+		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
 		"byteOffsetInSection": null,
 		"length": 1,
 		"sectionByBuild": {
-			"201080": 28,
+			"200405": 27,
+			"262623": 28,
 			"395070": 29
 		},
 		"type": "bool"
