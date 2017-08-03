@@ -63,7 +63,12 @@ export default class Civ5Save {
       let propertyByteOffset = null;
       if (propertySection === previousPropertySection) {
         let previousProperty = properties[previousPropertyName];
-        propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
+        // previousProperty.length is a common spot of failure if something went wrong
+        try {
+          propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
+        } catch (e) {
+          break;
+        }
 
       } else {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
@@ -168,9 +173,7 @@ export default class Civ5Save {
   }
 
   get gameVersion() {
-    if (this.properties.hasOwnProperty('gameVersion')) {
-      return this.properties['gameVersion'].value;
-    }
+    return this.returnPropertyIfDefined('gameVersion');
   }
 
   get currentTurn() {
@@ -184,35 +187,35 @@ export default class Civ5Save {
   }
 
   get player1Civilization() {
-    return this.properties['player1Civilization'].value;
+    return this.returnPropertyIfDefined('player1Civilization');
   }
 
   get difficulty() {
-    return this.properties['difficulty'].value;
+    return this.returnPropertyIfDefined('difficulty');
   }
 
   get startingEra() {
-    return this.properties['startingEra'].value;
+    return this.returnPropertyIfDefined('startingEra');
   }
 
   get currentEra() {
-    return this.properties['currentEra'].value;
+    return this.returnPropertyIfDefined('currentEra');
   }
 
   get gamePace() {
-    return this.properties['gamePace'].value;
+    return this.returnPropertyIfDefined('gamePace');
   }
 
   get mapSize() {
-    return this.properties['mapSize'].value;
+    return this.returnPropertyIfDefined('mapSize');
   }
 
   get mapFile() {
-    return this.properties['mapFile'].value;
+    return this.returnPropertyIfDefined('mapFile');
   }
 
   get maxTurns() {
-    return this.properties['maxTurns'].value;
+    return this.returnPropertyIfDefined('maxTurns');
   }
 
   set maxTurns(newValue) {
@@ -220,7 +223,7 @@ export default class Civ5Save {
   }
 
   get timeVictory() {
-    return this.properties['timeVictory'].value;
+    return this.returnPropertyIfDefined('timeVictory');
   }
 
   set timeVictory(newValue) {
@@ -228,7 +231,7 @@ export default class Civ5Save {
   }
 
   get scienceVictory() {
-    return this.properties['scienceVictory'].value;
+    return this.returnPropertyIfDefined('scienceVictory');
   }
 
   set scienceVictory(newValue) {
@@ -236,7 +239,7 @@ export default class Civ5Save {
   }
 
   get dominationVictory() {
-    return this.properties['dominationVictory'].value;
+    return this.returnPropertyIfDefined('dominationVictory');
   }
 
   set dominationVictory(newValue) {
@@ -244,7 +247,7 @@ export default class Civ5Save {
   }
 
   get culturalVictory() {
-    return this.properties['culturalVictory'].value;
+    return this.returnPropertyIfDefined('culturalVictory');
   }
 
   set culturalVictory(newValue) {
@@ -252,11 +255,17 @@ export default class Civ5Save {
   }
 
   get diplomaticVictory() {
-    return this.properties['diplomaticVictory'].value;
+    return this.returnPropertyIfDefined('diplomaticVictory');
   }
 
   set diplomaticVictory(newValue) {
     this.properties['diplomaticVictory'].value = newValue;
+  }
+
+  returnPropertyIfDefined(propertyName) {
+    if (this.properties.hasOwnProperty(propertyName)) {
+      return this.properties[propertyName].value;
+    }
   }
 }
 
