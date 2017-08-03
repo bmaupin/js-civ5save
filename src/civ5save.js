@@ -2,9 +2,9 @@ import Civ5SavePropertyDefinitions from './civ5saveproperties.json';
 
 export default class Civ5Save {
   constructor(saveData) {
-    this.saveData = new Civ5SaveDataView(saveData.buffer);
-    this.verifyFileSignature();
-    this.properties = this.getProperties();
+    this._saveData = new Civ5SaveDataView(saveData.buffer);
+    this._verifyFileSignature();
+    this._properties = this._getProperties();
   }
 
   // Use a static factory to instantiate the object since it relies on data that needs to be fetched asynchronously
@@ -33,28 +33,28 @@ export default class Civ5Save {
   }
 
   toFile(fileName) {
-    return new File([this.saveData], fileName, {
+    return new File([this._saveData], fileName, {
       type: 'application/octet-stream'
     });
   }
 
-  verifyFileSignature() {
-    if (this.saveData.getString(0, 4) !== 'CIV5') {
+  _verifyFileSignature() {
+    if (this._saveData.getString(0, 4) !== 'CIV5') {
       throw new Error('File signature does not match. Is this a Civ 5 savegame?');
     }
   }
 
-  getProperties() {
+  _getProperties() {
     let previousPropertyName = '';
     let previousPropertySection = 0;
     let properties = new Map();
-    let sectionOffsets = this.getSectionOffsets();
+    let sectionOffsets = this._getSectionOffsets();
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
       // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
       let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);
 
-      let propertySection = this.getPropertySection(propertyDefinition);
+      let propertySection = this._getPropertySection(propertyDefinition);
       // If propertySection is null, it means the property isn't available for the particular game build
       if (isNullOrUndefined(propertySection)) {
         continue;
@@ -78,7 +78,7 @@ export default class Civ5Save {
         propertyDefinition.type,
         propertyByteOffset,
         propertyDefinition.length,
-        this.saveData);
+        this._saveData);
 
       previousPropertyName = propertyName;
       previousPropertySection = propertySection;
@@ -87,7 +87,7 @@ export default class Civ5Save {
     return properties;
   }
 
-  getSectionOffsets() {
+  _getSectionOffsets() {
     const SECTION_DELIMITER = [0x40, 0, 0, 0];
 
     const LAST_PROPERTY_DEFINITION = Civ5SavePropertyDefinitions[Object.keys(Civ5SavePropertyDefinitions)[Object.keys(
@@ -96,7 +96,7 @@ export default class Civ5Save {
       LAST_PROPERTY_DEFINITION.sectionByBuild)[Object.keys(
       LAST_PROPERTY_DEFINITION.sectionByBuild).length - 1]];
 
-    let saveDataBytes = new Int8Array(this.saveData.buffer);
+    let saveDataBytes = new Int8Array(this._saveData.buffer);
     let sectionOffsets = [];
     let section = {
       start: 0,
@@ -120,7 +120,7 @@ export default class Civ5Save {
     return sectionOffsets;
   }
 
-  getPropertySection(propertyDefinition) {
+  _getPropertySection(propertyDefinition) {
     let propertySection = null;
     for (let build in propertyDefinition.sectionByBuild) {
       if (Number.parseInt(this.gameBuild) >= Number.parseInt(build)) {
@@ -133,7 +133,7 @@ export default class Civ5Save {
 
   get gameBuild() {
     if (isNullOrUndefined(this._gameBuild)) {
-      this._gameBuild = this.getGameBuild();
+      this._gameBuild = this._getGameBuild();
     }
 
     return this._gameBuild;
@@ -141,7 +141,7 @@ export default class Civ5Save {
 
   // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the
   // game build for all savegame versions
-  getGameBuild() {
+  _getGameBuild() {
     const GAME_BUILD_MARKER = 'FINAL_RELEASE';
     const GAME_BUILD_MARKER_ARRAY = (function() {
       let gameBuildMarkerArray = [];
@@ -152,7 +152,7 @@ export default class Civ5Save {
     }());
 
     let gameBuildMarkerByteOffset = 0;
-    let saveDataBytes = new Int8Array(this.saveData.buffer);
+    let saveDataBytes = new Int8Array(this._saveData.buffer);
     for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
       if (areArraysEqual(
         saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
@@ -173,98 +173,98 @@ export default class Civ5Save {
   }
 
   get gameVersion() {
-    return this.returnPropertyIfDefined('gameVersion');
+    return this._returnPropertyIfDefined('gameVersion');
   }
 
   get currentTurn() {
-    return this.properties['currentTurn'].value;
+    return this._properties['currentTurn'].value;
   }
 
   get gameMode() {
     if (Number(this.gameBuild) >= 230620) {
-      return Civ5SavePropertyDefinitions.gameMode.values[this.properties.gameMode.value];
+      return Civ5SavePropertyDefinitions.gameMode.values[this._properties.gameMode.value];
     }
   }
 
   get player1Civilization() {
-    return this.returnPropertyIfDefined('player1Civilization');
+    return this._returnPropertyIfDefined('player1Civilization');
   }
 
   get difficulty() {
-    return this.returnPropertyIfDefined('difficulty');
+    return this._returnPropertyIfDefined('difficulty');
   }
 
   get startingEra() {
-    return this.returnPropertyIfDefined('startingEra');
+    return this._returnPropertyIfDefined('startingEra');
   }
 
   get currentEra() {
-    return this.returnPropertyIfDefined('currentEra');
+    return this._returnPropertyIfDefined('currentEra');
   }
 
   get gamePace() {
-    return this.returnPropertyIfDefined('gamePace');
+    return this._returnPropertyIfDefined('gamePace');
   }
 
   get mapSize() {
-    return this.returnPropertyIfDefined('mapSize');
+    return this._returnPropertyIfDefined('mapSize');
   }
 
   get mapFile() {
-    return this.returnPropertyIfDefined('mapFile');
+    return this._returnPropertyIfDefined('mapFile');
   }
 
   get maxTurns() {
-    return this.returnPropertyIfDefined('maxTurns');
+    return this._returnPropertyIfDefined('maxTurns');
   }
 
   set maxTurns(newValue) {
-    this.properties['maxTurns'].value = newValue;
+    this._properties['maxTurns'].value = newValue;
   }
 
   get timeVictory() {
-    return this.returnPropertyIfDefined('timeVictory');
+    return this._returnPropertyIfDefined('timeVictory');
   }
 
   set timeVictory(newValue) {
-    this.properties['timeVictory'].value = newValue;
+    this._properties['timeVictory'].value = newValue;
   }
 
   get scienceVictory() {
-    return this.returnPropertyIfDefined('scienceVictory');
+    return this._returnPropertyIfDefined('scienceVictory');
   }
 
   set scienceVictory(newValue) {
-    this.properties['scienceVictory'].value = newValue;
+    this._properties['scienceVictory'].value = newValue;
   }
 
   get dominationVictory() {
-    return this.returnPropertyIfDefined('dominationVictory');
+    return this._returnPropertyIfDefined('dominationVictory');
   }
 
   set dominationVictory(newValue) {
-    this.properties['dominationVictory'].value = newValue;
+    this._properties['dominationVictory'].value = newValue;
   }
 
   get culturalVictory() {
-    return this.returnPropertyIfDefined('culturalVictory');
+    return this._returnPropertyIfDefined('culturalVictory');
   }
 
   set culturalVictory(newValue) {
-    this.properties['culturalVictory'].value = newValue;
+    this._properties['culturalVictory'].value = newValue;
   }
 
   get diplomaticVictory() {
-    return this.returnPropertyIfDefined('diplomaticVictory');
+    return this._returnPropertyIfDefined('diplomaticVictory');
   }
 
   set diplomaticVictory(newValue) {
-    this.properties['diplomaticVictory'].value = newValue;
+    this._properties['diplomaticVictory'].value = newValue;
   }
 
-  returnPropertyIfDefined(propertyName) {
-    if (this.properties.hasOwnProperty(propertyName)) {
-      return this.properties[propertyName].value;
+  _returnPropertyIfDefined(propertyName) {
+    if (this._properties.hasOwnProperty(propertyName)) {
+      return this._properties[propertyName].value;
     }
   }
 }
