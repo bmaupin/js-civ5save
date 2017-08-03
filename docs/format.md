@@ -41,10 +41,8 @@ Notes:
   - Build 395070 (version 1.0.3.142)+
     - Contains 33 sections
     - Section 18 is an additional section that contains mostly 0xff
-  - Build 262623 (version 1.0.1.511) - 389545 (version 1.0.3.80)
+  - Build ?????? - 389545 (version 1.0.3.80)
     - Contains 32 sections
-  - Build ?????? - 237603 (version 1.0.1.383)
-    - Contains 31 sections
 - Somewhere around build 230620 the savegame format had some major changes, including the addition of the game version and build near the beginning of the file
 - Starting with build 310700 the player colours are written as strings instead of hex values
 
@@ -58,6 +56,7 @@ Builds and versions
 ---
 | Build | Version |
 | --- | --- |
+| 98650  | 1.0 |
 | 200405 | 1.0.0.7 |
 | 201080 | 1.0.0.17 |
 | 203896 | 1.0.0.62 |
