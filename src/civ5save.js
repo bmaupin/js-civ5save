@@ -105,15 +105,28 @@ export default class Civ5Save {
 
     for (let byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {
       if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
+        // Player colour section before build 310700 contains hex values, which can include the section delimiter
+        if (Number(this.gameBuild) < 310700) {
+          let playerColourSection = 23;
+          if (Number(this.gameBuild) >= 262623) {
+            playerColourSection = 24;
+          }
+          if (sectionOffsets.length === playerColourSection) {
+            if (byteOffset - sectionOffsets[sectionOffsets.length - 1].start < 270) {
+              continue;
+            }
+          }
+        }
+
         let section = {
           start: byteOffset,
         };
         sectionOffsets.push(section);
         sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;
-      }
 
-      if (sectionOffsets.length === LAST_SECTION) {
-        break;
+        if (sectionOffsets.length === LAST_SECTION) {
+          break;
+        }
       }
     }
 

@@ -33,19 +33,20 @@
 Notes:
 ---
 - Sections are separated by 0x40000000
-- Savegames may contain different number of sections
-  - Version 1.0.3.142 (build 395070)+
-    - Contains 33 sections
-    - Section 18 is an additional section that contains mostly 0xff
-  - Version 1.0.3.18 (379995) - 1.0.3.80 (build 389545)
-    - Contains 32 sections
-  - [Versions < 1.0.3.18 (379995)](http://www.kynosarges.org/misc/Civ5PatchNotes.txt)
-    - ???
 - Within each section, string values are prefixed by their length as a little-endian 32-bit integer. For example:  
   `1400 0000 4349 5649 4c49 5a41 5449 4f4e 5f4d 4f52 4f43 434f`
   - `1400 0000` = 0x14 (little endian) = 20 bytes
   - `4349...` = `CIVILIZATION_MOROCCO` (20 bytes long)
+- Savegames contain different number of sections depending on the build/version
+  - Build 395070 (version 1.0.3.142)+
+    - Contains 33 sections
+    - Section 18 is an additional section that contains mostly 0xff
+  - Build 262623 (version 1.0.1.511) - 389545 (version 1.0.3.80)
+    - Contains 32 sections
+  - Build ?????? - 237603 (version 1.0.1.383)
+    - Contains 31 sections
 - Somewhere around build 230620 the savegame format had some major changes, including the addition of the game version and build near the beginning of the file
+- Starting with build 310700 the player colours are written as strings instead of hex values
 
 Relationship between time victory and max turns
 ---
@@ -59,10 +60,17 @@ Builds and versions
 | --- | --- |
 | 200405 | 1.0.0.7 |
 | 201080 | 1.0.0.17 |
+| 203896 | 1.0.0.62 |
+| 210752 | 1.0.1.135 |
 | 217984 | 1.0.1.217 |
 | 218015 | 1.0.1.221 |
 | 230620 | 1.0.1.332 |
-
+|        | 1.0.1.348 |
+| 237603 | 1.0.1.383 |
+| 262623 | 1.0.1.511 |
+| 310700 | 1.0.1.674 |
+| 341540 | 1.0.2.13 |
+| 395070 | 1.0.3.142 |
 
 References:
 ---
@@ -83,3 +91,5 @@ References:
   - https://steamcommunity.com/app/8930/discussions/0/864973761026018000/#c619568192863618582
 - Multiplayer password and player status
   - https://github.com/omni-resources/civ5-save-parser
+- Patch notes for various versions
+  - http://www.kynosarges.org/misc/Civ5PatchNotes.txt
