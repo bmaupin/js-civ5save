@@ -5,7 +5,7 @@ var env = process.env.NODE_ENV;
 
 module.exports = {
   entry: './src/civ5save.js',
-  module: {
+  module: env === 'production' ? {
     rules: [
       {
         test: /\.js$/,
@@ -14,7 +14,7 @@ module.exports = {
         }
       }
     ]
-  },
+  } : {},
   output: {
     filename: env === 'production' ? 'civ5save.min.js' : 'civ5save.js',
     // library and libraryTarget are necessary so this can be imported as a module
