@@ -12,6 +12,7 @@ const NEW_CULTURAL_VICTORY = false;
 const NEW_DIPLOMATIC_VICTORY = true;
 const NEW_DOMINATION_VICTORY = true;
 const NEW_MAX_TURNS = 123;
+const NEW_PRIVATE_GAME = false;
 const NEW_SAVEGAME_FILENAME = 'New.Civ5Save';
 const NEW_SCIENCE_VICTORY = false;
 const NEW_TIME_VICTORY = true;
@@ -83,7 +84,7 @@ test('Get game mode', () => {
   expect(savegame101135.gameMode).not.toBeDefined();
   expect(savegame101221.gameMode).not.toBeDefined();
   expect(savegame10213.gameMode).toBe('singleplayer');
-  expect(savegame103279.gameMode).toBe('singleplayer');
+  expect(savegame103279.gameMode).toBe('multiplayer');
 });
 
 test('Get player 1 civilization', () => {
@@ -91,7 +92,7 @@ test('Get player 1 civilization', () => {
   expect(savegame101135.player1Civilization).toBe('CIVILIZATION_ARABIA');
   expect(savegame101221.player1Civilization).toBe('CIVILIZATION_FRANCE');
   expect(savegame10213.player1Civilization).toBe('CIVILIZATION_SPAIN');
-  expect(savegame103279.player1Civilization).toBe('CIVILIZATION_MOROCCO');
+  expect(savegame103279.player1Civilization).toBe('CIVILIZATION_DENMARK');
 });
 
 test('Get difficulty', () => {
@@ -161,6 +162,27 @@ test('Set max turns', () => {
   expect(savegame101221.maxTurns).toBe(NEW_MAX_TURNS);
   expect(savegame10213.maxTurns).toBe(NEW_MAX_TURNS);
   expect(savegame103279.maxTurns).toBe(NEW_MAX_TURNS);
+});
+
+test('Get privateGame', () => {
+  expect(savegame10017.privateGame).toBe(false);
+  expect(savegame101135.privateGame).toBe(false);
+  expect(savegame101221.privateGame).toBe(false);
+  expect(savegame10213.privateGame).toBe(false);
+  expect(savegame103279.privateGame).toBe(true);
+});
+
+test('Set private game', () => {
+  savegame10017.privateGame = NEW_PRIVATE_GAME;
+  savegame101135.privateGame = NEW_PRIVATE_GAME;
+  savegame101221.privateGame = NEW_PRIVATE_GAME;
+  savegame10213.privateGame = NEW_PRIVATE_GAME;
+  savegame103279.privateGame = NEW_PRIVATE_GAME;
+  expect(savegame10017.privateGame).toBe(NEW_PRIVATE_GAME);
+  expect(savegame101135.privateGame).toBe(NEW_PRIVATE_GAME);
+  expect(savegame101221.privateGame).toBe(NEW_PRIVATE_GAME);
+  expect(savegame10213.privateGame).toBe(NEW_PRIVATE_GAME);
+  expect(savegame103279.privateGame).toBe(NEW_PRIVATE_GAME);
 });
 
 test('Get time victory', () => {
@@ -273,6 +295,7 @@ test('Save to file', async () => {
   let newSavegame = await Civ5Save.fromFile(newSavegameFile);
 
   expect(newSavegame.maxTurns).toBe(NEW_MAX_TURNS);
+  expect(newSavegame.privateGame).toBe(NEW_PRIVATE_GAME);
   expect(newSavegame.timeVictory).toBe(NEW_TIME_VICTORY);
   expect(newSavegame.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
   expect(newSavegame.dominationVictory).toBe(NEW_DOMINATION_VICTORY);
