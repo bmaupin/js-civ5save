@@ -51,6 +51,11 @@ export default class Civ5Save {
     let sectionOffsets = this._getSectionOffsets();
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
+      // Player colours is a variable length list of strings so we'll skip it for now
+      if (propertyName === 'playerColours') {
+        continue;
+      }
+
       // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
       let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);
 
@@ -69,6 +74,10 @@ export default class Civ5Save {
         } catch (e) {
           break;
         }
+
+      // Workaround for private game since the previous property doesn't have a predictable length
+      } else if (propertyName === 'privateGame') {
+        propertyByteOffset = sectionOffsets[propertySection].start - 10;
 
       } else {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
@@ -233,6 +242,14 @@ export default class Civ5Save {
 
   set maxTurns(newValue) {
     this._properties['maxTurns'].value = newValue;
+  }
+
+  get privateGame() {
+    return this._returnPropertyIfDefined('privateGame');
+  }
+
+  set privateGame(newValue) {
+    this._properties['privateGame'].value = newValue;
   }
 
   get timeVictory() {

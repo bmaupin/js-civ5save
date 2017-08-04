@@ -161,6 +161,28 @@
     },
     "type": "int32"
   },
+  "playerColours": {
+    "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list bytes. Seems like it can have 63 or 64 items.",
+    "byteOffsetInSection": 0,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 23,
+      "262623": 24,
+      "395070": 25
+    },
+    "type": "strings"
+  },
+  "privateGame": {
+    "_comment": "https://github.com/Canardlaquay/Civ5SavePrivate",
+    "byteOffsetInSection": null,
+    "length": 1,
+    "sectionByBuild": {
+      "98650": 23,
+      "262623": 24,
+      "395070": 25
+    },
+    "type": "bool"
+  },
   "section29Timer1": {
     "byteOffsetInSection": 269,
     "length": null,
