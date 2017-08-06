@@ -58,8 +58,9 @@ export default class Civ5Save {
     let sectionOffsets = this._getSectionOffsets();
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
-      // Player colours is a variable length list of strings so we'll skip it for now
-      if (propertyName === 'playerColours') {
+      // Skip string array properties since there isn't much value in implementing them until they're needed, plus the
+      // string array containing player colours doesn't seem to have a predictable length (can have 63 or 64 items)
+      if (['playerColours', 'playerNames2', 'section23Skip1'].includes(propertyName)) {
         continue;
       }
 
@@ -82,9 +83,12 @@ export default class Civ5Save {
           break;
         }
 
-      // Workaround for private game since the previous property doesn't have a predictable length
+      // Workaround for a couple values that are preceded by string arrays (see comment above)
       } else if (propertyName === 'privateGame') {
         propertyByteOffset = sectionOffsets[propertySection].start - 10;
+
+      } else if (propertyName === 'turnTimerLength') {
+        propertyByteOffset = sectionOffsets[propertySection].start - 4;
 
       } else {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
@@ -251,6 +255,14 @@ export default class Civ5Save {
     this._properties['maxTurns'].value = newValue;
   }
 
+  get turnTimerLength() {
+    return this._returnPropertyIfDefined('turnTimerLength');
+  }
+
+  set turnTimerLength(newValue) {
+    this._properties['turnTimerLength'].value = newValue;
+  }
+
   get privateGame() {
     return this._returnPropertyIfDefined('privateGame');
   }
@@ -299,10 +311,16 @@ export default class Civ5Save {
     this._properties['diplomaticVictory'].value = newValue;
   }
 
+  // https://github.com/Bownairo/Civ5SaveEditor
   get pitboss() {
     return this._properties.gameOptionsMap.get('GAMEOPTION_PITBOSS');
   }
 
+  get turnTimerEnabled() {
+    return this._properties.gameOptionsMap.get('GAMEOPTION_END_TURN_TIMER_ENABLED');
+  }
+
+  // http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
   get turnType() {
     if (this._properties.gameOptionsMap.get('GAMEOPTION_DYNAMIC_TURNS') === true) {
       return Civ5Save.TURN_TYPES.HYBRID;

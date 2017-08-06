@@ -161,6 +161,38 @@
     },
     "type": "int"
   },
+  "playerNames2": {
+    "_comment": "This seems to be the second place in the file with player names. There's enough space for 64 names",
+    "byteOffsetInSection": 4,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 21,
+      "262623": 22,
+      "395070": 23
+    },
+    "type": "stringArray"
+  },
+  "section23Skip1": {
+    "byteOffsetInSection": null,
+    "length": 4,
+    "sectionByBuild": {
+      "98650": 21,
+      "262623": 22,
+      "395070": 23
+    },
+    "type": "int"
+  },
+  "turnTimerLength": {
+    "_comment": "https://steamcommunity.com/app/8930/discussions/0/864973761026018000/#c619568192863618582",
+    "byteOffsetInSection": null,
+    "length": 4,
+    "sectionByBuild": {
+      "98650": 21,
+      "262623": 22,
+      "395070": 23
+    },
+    "type": "int"
+  },
   "playerColours": {
     "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list bytes. Seems like it can have 63 or 64 items.",
     "byteOffsetInSection": 4,

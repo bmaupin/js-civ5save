@@ -16,6 +16,7 @@ const NEW_PRIVATE_GAME = false;
 const NEW_SAVEGAME_FILENAME = 'New.Civ5Save';
 const NEW_SCIENCE_VICTORY = false;
 const NEW_TIME_VICTORY = true;
+const NEW_TURN_TIMER_VALUE = 321;
 
 let savegame10017;
 let savegame101135;
@@ -164,6 +165,27 @@ test('Set max turns', () => {
   expect(savegame103279.maxTurns).toBe(NEW_MAX_TURNS);
 });
 
+test('Get turn timer length', () => {
+  expect(savegame10017.turnTimerLength).toBe(0);
+  expect(savegame101135.turnTimerLength).toBe(0);
+  expect(savegame101221.turnTimerLength).toBe(0);
+  expect(savegame10213.turnTimerLength).toBe(0);
+  expect(savegame103279.turnTimerLength).toBe(123);
+});
+
+test('Set turn timer length', () => {
+  savegame10017.turnTimerLength = NEW_TURN_TIMER_VALUE;
+  savegame101135.turnTimerLength = NEW_TURN_TIMER_VALUE;
+  savegame101221.turnTimerLength = NEW_TURN_TIMER_VALUE;
+  savegame10213.turnTimerLength = NEW_TURN_TIMER_VALUE;
+  savegame103279.turnTimerLength = NEW_TURN_TIMER_VALUE;
+  expect(savegame10017.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
+  expect(savegame101135.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
+  expect(savegame101221.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
+  expect(savegame10213.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
+  expect(savegame103279.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
+});
+
 test('Get private game', () => {
   expect(savegame10017.privateGame).toBe(false);
   expect(savegame101135.privateGame).toBe(false);
@@ -298,6 +320,14 @@ test('Get pitboss', () => {
   expect(savegame103279.pitboss).toBe(true);
 });
 
+test('Get turn timer enabled', () => {
+  expect(savegame10017.turnTimerEnabled).toBe(false);
+  expect(savegame101135.turnTimerEnabled).toBe(false);
+  expect(savegame101221.turnTimerEnabled).toBe(false);
+  expect(savegame10213.turnTimerEnabled).toBe(false);
+  expect(savegame103279.turnTimerEnabled).toBe(true);
+});
+
 test('Get turn type', () => {
   expect(savegame10017.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
   expect(savegame101135.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
@@ -311,6 +341,7 @@ test('Save to file', async () => {
   let newSavegame = await Civ5Save.fromFile(newSavegameFile);
 
   expect(newSavegame.maxTurns).toBe(NEW_MAX_TURNS);
+  expect(newSavegame.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
   expect(newSavegame.privateGame).toBe(NEW_PRIVATE_GAME);
   expect(newSavegame.timeVictory).toBe(NEW_TIME_VICTORY);
   expect(newSavegame.scienceVictory).toBe(NEW_SCIENCE_VICTORY);
