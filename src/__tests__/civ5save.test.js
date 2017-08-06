@@ -164,7 +164,7 @@ test('Set max turns', () => {
   expect(savegame103279.maxTurns).toBe(NEW_MAX_TURNS);
 });
 
-test('Get privateGame', () => {
+test('Get private game', () => {
   expect(savegame10017.privateGame).toBe(false);
   expect(savegame101135.privateGame).toBe(false);
   expect(savegame101221.privateGame).toBe(false);
@@ -288,6 +288,14 @@ test('Set diplomatic victory', () => {
   expect(savegame101221.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
   expect(savegame10213.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
   expect(savegame103279.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
+});
+
+test('Get pitboss', () => {
+  expect(savegame10017.pitboss).toBe(false);
+  expect(savegame101135.pitboss).toBe(false);
+  expect(savegame101221.pitboss).toBe(false);
+  expect(savegame10213.pitboss).toBe(false);
+  expect(savegame103279.pitboss).toBe(true);
 });
 
 test('Save to file', async () => {

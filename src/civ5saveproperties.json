@@ -13,7 +13,7 @@
     "sectionByBuild": {
       "98650": 1
     },
-    "type": "int32"
+    "type": "int"
   },
   "gameVersion": {
     "byteOffsetInSection": 8,
@@ -37,7 +37,7 @@
     "sectionByBuild": {
       "98650": 1
     },
-    "type": "int32"
+    "type": "int"
   },
   "gameMode": {
     "_comment": "This property exists in all versions but only seems to gain significance around build 230620",
@@ -46,7 +46,7 @@
     "sectionByBuild": {
       "98650": 1
     },
-    "type": "int8",
+    "type": "int",
     "values": [
       "singleplayer",
       "multiplayer",
@@ -159,18 +159,18 @@
       "262623": 18,
       "395070": 19
     },
-    "type": "int32"
+    "type": "int"
   },
   "playerColours": {
     "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list bytes. Seems like it can have 63 or 64 items.",
-    "byteOffsetInSection": 0,
+    "byteOffsetInSection": 4,
     "length": null,
     "sectionByBuild": {
       "98650": 23,
       "262623": 24,
       "395070": 25
     },
-    "type": "strings"
+    "type": "stringArray"
   },
   "privateGame": {
     "_comment": "https://github.com/Canardlaquay/Civ5SavePrivate",
@@ -297,5 +297,122 @@
       "395070": 29
     },
     "type": "bool"
+  },
+  "section30Skip1": {
+    "byteOffsetInSection": 4,
+    "length": 72,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "bytes"
+  },
+  "section30Skip2": {
+    "byteOffsetInSection": 76,
+    "length": 4,
+    "sectionByBuild": {
+      "322813": 29,
+      "395070": 30
+    },
+    "type": "bytes"
+  },
+  "section30MapSize1": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "string"
+  },
+  "section30TxtKeyMapHelp": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "string"
+  },
+  "section30Skip3": {
+    "byteOffsetInSection": null,
+    "length": 8,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "bytes"
+  },
+  "section30MapSize2": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "string"
+  },
+  "section30TxtKeyMapSize": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "string"
+  },
+  "section30MapSize3": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "string"
+  },
+  "section30Skip4": {
+    "byteOffsetInSection": null,
+    "length": 72,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "bytes"
+  },
+  "section30Skip5": {
+    "byteOffsetInSection": null,
+    "length": 4,
+    "sectionByBuild": {
+      "322813": 29,
+      "395070": 30
+    },
+    "type": "bytes"
+  },
+  "section30Skip6": {
+    "byteOffsetInSection": null,
+    "length": 4,
+    "sectionByBuild": {
+      "388272": 29,
+      "395070": 30
+    },
+    "type": "bytes"
+  },
+  "gameOptionsMap": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 28,
+      "262623": 29,
+      "395070": 30
+    },
+    "type": "stringToBoolMap"
   }
 }
