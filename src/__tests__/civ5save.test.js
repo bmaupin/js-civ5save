@@ -83,8 +83,8 @@ test('Get game mode', () => {
   expect(savegame10017.gameMode).not.toBeDefined();
   expect(savegame101135.gameMode).not.toBeDefined();
   expect(savegame101221.gameMode).not.toBeDefined();
-  expect(savegame10213.gameMode).toBe('singleplayer');
-  expect(savegame103279.gameMode).toBe('multiplayer');
+  expect(savegame10213.gameMode).toBe('Single player');
+  expect(savegame103279.gameMode).toBe('Multiplayer');
 });
 
 test('Get player 1 civilization', () => {
@@ -296,6 +296,14 @@ test('Get pitboss', () => {
   expect(savegame101221.pitboss).toBe(false);
   expect(savegame10213.pitboss).toBe(false);
   expect(savegame103279.pitboss).toBe(true);
+});
+
+test('Get turn type', () => {
+  expect(savegame10017.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame101135.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame101221.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame10213.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame103279.turnType).toBe(Civ5Save.TURN_TYPES.HYBRID);
 });
 
 test('Save to file', async () => {
