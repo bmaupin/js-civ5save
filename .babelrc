@@ -4,5 +4,8 @@
       globals: ["DataView"]
     }]
   ],
-  "presets": ["env"]
+  "presets": [
+    "env",
+    "stage-2"
+  ]
 }

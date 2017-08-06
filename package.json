@@ -9,13 +9,15 @@
     "babel-jest": "^20.0.3",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-preset-env": "^1.6.0",
-    "babili-webpack-plugin": "^0.1.2",
+    "babel-preset-stage-2": "^6.24.1",
     "coveralls": "^2.13.1",
     "eslint": "^4.2.0",
     "eslint-loader": "^1.9.0",
     "eslint-plugin-json": "^1.2.0",
     "jest": "^20.0.4",
-    "webpack": "^3.3.0"
+    "webpack": "^3.3.0",
+    "webpack-preset-babel": "^0.2.0",
+    "webpack-preset-babel-stage-2": "^0.2.0"
   },
   "files": [
     "dist/"
