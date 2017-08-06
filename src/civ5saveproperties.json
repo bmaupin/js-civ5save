@@ -48,9 +48,9 @@
     },
     "type": "int",
     "values": [
-      "singleplayer",
-      "multiplayer",
-      "hotseat"
+      "Single player",
+      "Multiplayer",
+      "Hotseat"
     ]
   },
   "player1Civilization": {

@@ -1,6 +1,13 @@
 import Civ5SavePropertyDefinitions from './civ5saveproperties.json';
 
 export default class Civ5Save {
+  // TODO: Class fields are a javascript stage 3 proposal (https://github.com/tc39/proposals)
+  static TURN_TYPES = {
+    HYBRID: 'Hybrid',
+    SEQUENTIAL: 'Sequential',
+    SIMULTANEOUS: 'Simultaneous'
+  };
+
   constructor(saveData) {
     this._saveData = new Civ5SaveDataView(saveData.buffer);
     this._verifyFileSignature();
@@ -296,6 +303,17 @@ export default class Civ5Save {
     return this._properties.gameOptionsMap.get('GAMEOPTION_PITBOSS');
   }
 
+  get turnType() {
+    if (this._properties.gameOptionsMap.get('GAMEOPTION_DYNAMIC_TURNS') === true) {
+      return Civ5Save.TURN_TYPES.HYBRID;
+    } else if (this._properties.gameOptionsMap.get('GAMEOPTION_SIMULTANEOUS_TURNS') === true) {
+      return Civ5Save.TURN_TYPES.SIMULTANEOUS;
+    } else if (this._properties.gameOptionsMap.get('GAMEOPTION_DYNAMIC_TURNS') === false &&
+      this._properties.gameOptionsMap.get('GAMEOPTION_SIMULTANEOUS_TURNS') === false) {
+      return Civ5Save.TURN_TYPES.SEQUENTIAL;
+    }
+  }
+
   _returnPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
       return this._properties[propertyName].value;
@@ -340,7 +358,7 @@ class Civ5SaveProperty {
       return new Civ5SaveStringProperty(byteOffset, length, saveData);
 
     case 'stringToBoolMap':
-      return new Civ5SaveStringToBoolMap(byteOffset, length, saveData);
+      return new Civ5SaveStringToBoolMap(byteOffset, saveData);
 
     default: {
       throw new Error(`Property type ${type} not handled`);
@@ -403,9 +421,8 @@ class Civ5SaveStringProperty extends Civ5SaveProperty {
 }
 
 class Civ5SaveStringToBoolMap {
-  constructor(byteOffset, length, saveData) {
+  constructor(byteOffset, saveData) {
     this.byteOffset = byteOffset;
-    this._length = length;
     this.saveData = saveData;
     this._size = new Civ5SaveIntProperty(this.byteOffset, 4, this.saveData);
     this._items = new Map();
