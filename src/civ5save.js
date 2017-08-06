@@ -292,6 +292,10 @@ export default class Civ5Save {
     this._properties['diplomaticVictory'].value = newValue;
   }
 
+  get pitboss() {
+    return this._properties.gameOptionsMap.get('GAMEOPTION_PITBOSS');
+  }
+
   _returnPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
       return this._properties[propertyName].value;
@@ -301,14 +305,6 @@ export default class Civ5Save {
 
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 class Civ5SaveDataView extends DataView {
-  getBoolean(byteOffset) {
-    return Boolean(this.getUint8(byteOffset));
-  }
-
-  setBoolean(byteOffset, newValue) {
-    this.setUint8(byteOffset, Number(newValue));
-  }
-
   getString(byteOffset, byteLength) {
     let string = '';
     for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
@@ -332,19 +328,19 @@ class Civ5SaveProperty {
   static fromType(type, byteOffset, length, saveData) {
     switch (type) {
     case 'bool':
-      return new Civ5SaveBoolProperty(byteOffset, 1, saveData);
+      return new Civ5SaveBoolProperty(byteOffset, length, saveData);
 
     case 'bytes':
       return new Civ5SaveProperty(byteOffset, length, saveData);
 
-    case 'int8':
-      return new Civ5SaveInt8Property(byteOffset, 1, saveData);
-
-    case 'int32':
-      return new Civ5SaveInt32Property(byteOffset, 4, saveData);
+    case 'int':
+      return new Civ5SaveIntProperty(byteOffset, length, saveData);
 
     case 'string':
       return new Civ5SaveStringProperty(byteOffset, length, saveData);
+
+    case 'stringToBoolMap':
+      return new Civ5SaveStringToBoolMap(byteOffset, length, saveData);
 
     default: {
       throw new Error(`Property type ${type} not handled`);
@@ -355,31 +351,37 @@ class Civ5SaveProperty {
 
 class Civ5SaveBoolProperty extends Civ5SaveProperty {
   get value() {
-    return this.saveData.getBoolean(this.byteOffset);
+    if (this.length === 1) {
+      return Boolean(this.saveData.getUint8(this.byteOffset));
+    } else if (this.length === 4) {
+      return Boolean(this.saveData.getUint32(this.byteOffset, true));
+    }
   }
 
   set value(newValue) {
-    this.saveData.setBoolean(this.byteOffset, newValue);
+    if (this.length === 1) {
+      this.saveData.setUint8(this.byteOffset, Number(newValue));
+    } else if (this.length === 4) {
+      this.saveData.setUint32(this.byteOffset, Number(newValue), true);
+    }
   }
 }
 
-class Civ5SaveInt8Property extends Civ5SaveProperty {
+class Civ5SaveIntProperty extends Civ5SaveProperty {
   get value() {
-    return this.saveData.getUint8(this.byteOffset);
+    if (this.length === 1) {
+      return this.saveData.getUint8(this.byteOffset);
+    } else if (this.length === 4) {
+      return this.saveData.getUint32(this.byteOffset, true);
+    }
   }
 
   set value(newValue) {
-    this.saveData.setUint8(this.byteOffset, newValue);
-  }
-}
-
-class Civ5SaveInt32Property extends Civ5SaveProperty {
-  get value() {
-    return this.saveData.getUint32(this.byteOffset, true);
-  }
-
-  set value(newValue) {
-    this.saveData.setUint32(this.byteOffset, newValue, true);
+    if (this.length === 1) {
+      this.saveData.setUint8(this.byteOffset, newValue);
+    } else if (this.length === 4) {
+      this.saveData.setUint32(this.byteOffset, newValue, true);
+    }
   }
 }
 
@@ -397,6 +399,48 @@ class Civ5SaveStringProperty extends Civ5SaveProperty {
 
   getStringLength(byteOffset) {
     return this.saveData.getUint32(byteOffset, true);
+  }
+}
+
+class Civ5SaveStringToBoolMap {
+  constructor(byteOffset, length, saveData) {
+    this.byteOffset = byteOffset;
+    this._length = length;
+    this.saveData = saveData;
+    this._size = new Civ5SaveIntProperty(this.byteOffset, 4, this.saveData);
+    this._items = new Map();
+
+    if (this.size > 0) {
+      let currentByteOffset = this.byteOffset + 4;
+      for (let i = 0; i < this.size; i++) {
+        let itemKeyProperty = new Civ5SaveStringProperty(currentByteOffset, null, this.saveData);
+        currentByteOffset += itemKeyProperty.length;
+        let itemValueProperty = new Civ5SaveBoolProperty(currentByteOffset, 4, this.saveData);
+        currentByteOffset += itemValueProperty.length;
+
+        this._items.set(itemKeyProperty.value, itemValueProperty);
+      }
+    }
+  }
+
+  get size() {
+    return this._size.value;
+  }
+
+  get(itemKey) {
+    if (this._items.has(itemKey)) {
+      return this._items.get(itemKey).value;
+    } else {
+      return false;
+    }
+  }
+
+  set(itemKey, newItemValue) {
+    if (this._items.has(itemKey)) {
+      this._items.get(itemKey).value = newItemValue;
+    } else {
+      // TODO
+    }
   }
 }
 
