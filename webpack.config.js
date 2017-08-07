@@ -1,22 +1,20 @@
+const BabiliPlugin = require('babili-webpack-plugin');
 var path = require('path');
 
 var env = process.env.NODE_ENV;
 
 module.exports = {
   entry: './src/civ5save.js',
-  module: {
+  module: env === 'production' ? {
     rules: [
       {
         test: /\.js$/,
-        use: env === 'production' ? [
-          'babel-loader',
-          'eslint-loader'
-        ] : [
-          'babel-loader'
-        ]
+        use: {
+          loader: 'eslint-loader'
+        }
       }
     ]
-  },
+  } : {},
   output: {
     filename: env === 'production' ? 'civ5save.min.js' : 'civ5save.js',
     // library and libraryTarget are necessary so this can be imported as a module
@@ -24,4 +22,7 @@ module.exports = {
     libraryTarget: 'umd',
     path: path.resolve(__dirname, 'dist')
   },
+  plugins: env === 'production' ? [
+    new BabiliPlugin()
+  ] : [],
 };
