@@ -1,13 +1,6 @@
 import Civ5SavePropertyDefinitions from './civ5saveproperties.json';
 
 export default class Civ5Save {
-  // TODO: Class fields are a javascript stage 3 proposal (https://github.com/tc39/proposals)
-  static TURN_TYPES = {
-    HYBRID: 'Hybrid',
-    SEQUENTIAL: 'Sequential',
-    SIMULTANEOUS: 'Simultaneous'
-  };
-
   constructor(saveData) {
     this._saveData = new Civ5SaveDataView(saveData.buffer);
     this._verifyFileSignature();
@@ -338,6 +331,13 @@ export default class Civ5Save {
     }
   }
 }
+
+// TODO: Turn this into a class field once the proposal makes it into the spec (https://github.com/tc39/proposals)
+Civ5Save.TURN_TYPES = {
+  HYBRID: 'Hybrid',
+  SEQUENTIAL: 'Sequential',
+  SIMULTANEOUS: 'Simultaneous'
+};
 
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 class Civ5SaveDataView extends DataView {
