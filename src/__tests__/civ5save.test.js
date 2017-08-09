@@ -54,7 +54,7 @@ test('Create new Civ5Save instances from file', async () => {
 
   fileBlob = await getFileBlob(TEST_SAVEGAME_V103279);
   savegame103279 = await Civ5Save.fromFile(fileBlob);
-});
+}, 10000);
 
 test('Get game build', () => {
   expect(savegame10017.gameBuild).toBe('201080');
