@@ -310,9 +310,7 @@ export default class Civ5Save {
   }
 
   set pitboss(newValue) {
-    // TODO
     this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
-    // this._properties.gameOptionsMap.setValue(this._saveData, 'GAMEOPTION_PITBOSS', newValue);
   }
 
   get turnTimerEnabled() {
@@ -364,36 +362,31 @@ class Civ5SaveDataView extends DataView {
 }
 
 class Civ5SaveProperty {
-  constructor(byteOffset, length, saveData) {
+  constructor(byteOffset, length) {
     this.byteOffset = byteOffset;
-    this._length = length;
-    this.saveData = saveData;
-  }
-
-  get length() {
-    return this._length;
+    this.length = length;
   }
 
   static fromType(type, byteOffset, length, saveData) {
     switch (type) {
     case 'bool':
-      return new Civ5SaveBoolProperty(byteOffset, length, saveData);
+      return new Civ5SaveBoolProperty(byteOffset, length);
 
     case 'bytes':
-      return new Civ5SaveProperty(byteOffset, length, saveData);
+      return new Civ5SaveProperty(byteOffset, length);
 
     case 'int':
-      return new Civ5SaveIntProperty(byteOffset, length, saveData);
+      return new Civ5SaveIntProperty(byteOffset, length);
 
     case 'string':
       return new Civ5SaveStringProperty(byteOffset, length, saveData);
 
+    // TODO: Is this the right place for this? Civ5SaveStringToBoolMap isn't a Civ5SaveProperty
     case 'stringToBoolMap':
       return new Civ5SaveStringToBoolMap(byteOffset, saveData);
 
-    default: {
+    default:
       throw new Error(`Property type ${type} not handled`);
-    }
     }
   }
 }
@@ -435,70 +428,62 @@ class Civ5SaveIntProperty extends Civ5SaveProperty {
 }
 
 class Civ5SaveStringProperty extends Civ5SaveProperty {
-  // TODO calculate this in the constructor
-  get length() {
-    if (isNullOrUndefined(this._length)) {
-      this._length = this._getStringLength(this.byteOffset) + 4;
+  constructor(byteOffset, length, saveData) {
+    super(byteOffset, length);
+
+    if (isNullOrUndefined(this.length)) {
+      this.length = this._getStringLength(saveData, this.byteOffset) + 4;
     }
-    return this._length;
+  }
+
+  _getStringLength(saveData, byteOffset) {
+    return saveData.getUint32(byteOffset, true);
   }
 
   getValue(saveData) {
     return saveData.getString(this.byteOffset + 4, this.length - 4);
-  }
-
-  _getStringLength(byteOffset) {
-    return this.saveData.getUint32(byteOffset, true);
   }
 }
 
 class Civ5SaveStringToBoolMap {
   constructor(byteOffset, saveData) {
     this.byteOffset = byteOffset;
+    this.length = 4;
     this._items = new Map();
-    this._length = 4;
     this._size = new Civ5SaveIntProperty(this.byteOffset, 4, saveData);
 
-    // console.log(this.getSize(saveData));
-
-    if (this.getSize(saveData) > 0) {
+    if (this._getSize(saveData) > 0) {
       let currentByteOffset = this.byteOffset + 4;
-      for (let i = 0; i < this.getSize(saveData); i++) {
-        currentByteOffset = this._addExistingItem(saveData, currentByteOffset);
+      for (let i = 0; i < this._getSize(saveData); i++) {
+        currentByteOffset = this._addItemToMap(saveData, currentByteOffset);
       }
     }
   }
 
-  _addExistingItem(saveData, byteOffset) {
+  _addItemToMap(saveData, byteOffset) {
     let itemKeyProperty = new Civ5SaveStringProperty(byteOffset, null, saveData);
     byteOffset += itemKeyProperty.length;
     let itemValueProperty = new Civ5SaveBoolProperty(byteOffset, 4, saveData);
     byteOffset += itemValueProperty.length;
 
     this._items.set(itemKeyProperty.getValue(saveData), itemValueProperty);
-    this._length = byteOffset - this.byteOffset;
+    this.length = byteOffset - this.byteOffset;
 
     return byteOffset;
   }
 
-  getSize(saveData) {
+  _getSize(saveData) {
     return this._size.getValue(saveData);
   }
 
-  setSize(saveData, newValue) {
+  _setSize(saveData, newValue) {
     this._size.setValue(saveData, newValue);
   }
 
   getValue(saveData, itemKey) {
     if (this._items.has(itemKey)) {
-      if (itemKey === 'GAMEOPTION_PITBOSS') {
-        // console.log('GAMEOPTION_PITBOSS found');
-      }
       return this._items.get(itemKey).getValue(saveData);
     } else {
-      if (itemKey === 'GAMEOPTION_PITBOSS') {
-        // console.log('GAMEOPTION_PITBOSS not found');
-      }
       return false;
     }
   }
@@ -508,56 +493,70 @@ class Civ5SaveStringToBoolMap {
       this._items.get(itemKey).setValue(saveData, newItemValue);
 
     } else {
-      // TODO
-      // 1. Generate the data to add
-      /*
-  getString(byteOffset, byteLength) {
-    let string = '';
-    for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
-      string += String.fromCharCode(this.getUint8(byte));
+      return this._addItemToSaveData(saveData, itemKey, newItemValue);
     }
-    return string;
   }
-      */
-      // this._size.value ++;
-      this.setSize(saveData, this.getSize(saveData) + 1);
 
-      let stringLengthArray = int32ToUint8Array(itemKey.length);
-      let stringArray = stringToUint8Array(itemKey);
-      let itemValueArray = int32ToUint8Array(Number(newItemValue));
-      let arrayToInsert = concatTypedArrays(
-        concatTypedArrays(
-          stringLengthArray,
-          stringArray
-        ),
-        itemValueArray
-      );
-      // 2. Convert it to the right format
-      // 3. Insert it into a new arraybuffer?
-      // insertIntoArrayBuffer(this.saveData.buffer, new ArrayBuffer(arrayToInsert))
-      let newSaveDataTypedArray = insertIntoTypedArray(
-        new Uint8Array(saveData.buffer),
-        arrayToInsert,
-        this.byteOffset + this._length);
+  _addItemToSaveData(saveData, itemKey, newItemValue) {
+    this._setSize(saveData, this._getSize(saveData) + 1);
 
-      // let newArrayBuffer = new ArrayBuffer(newSaveDataTypedArray);
+    let itemKeyLengthArray = this._int32ToUint8Array(itemKey.length);
+    let itemKeyArray = this._stringToUint8Array(itemKey);
+    let itemValueArray = this._int32ToUint8Array(Number(newItemValue));
+    let arrayToInsert = this._concatTypedArrays(
+      this._concatTypedArrays(
+        itemKeyLengthArray,
+        itemKeyArray
+      ),
+      itemValueArray
+    );
 
-      // console.log(newArrayBuffer.byteLength);
+    let newSaveDataTypedArray = this._insertIntoTypedArray(
+      new Uint8Array(saveData.buffer),
+      arrayToInsert,
+      this.byteOffset + this.length);
+    let newSaveData = new Civ5SaveDataView(newSaveDataTypedArray.buffer);
 
+    this._addItemToMap(newSaveData, this.byteOffset + this.length);
 
-      // 4. Replace this.saveData with...?
-      let newSaveData = new Civ5SaveDataView(newSaveDataTypedArray.buffer);
-      // this.saveData = newSaveData;
+    return newSaveData;
+  }
 
-      // console.log(this.byteOffset + this._length);
-
-      this._addExistingItem(newSaveData, this.byteOffset + this._length);
-
-      // console.log(this.saveData.buffer.byteLength);
-      // console.log(newSaveData.buffer.byteLength);
-
-      return newSaveData;
+  // Inspired by https://stackoverflow.com/a/12965194/399105
+  _int32ToUint8Array(int32) {
+    let int32Array = new Uint8Array(4);
+    for (let i = 0; i < int32Array.length; i++) {
+      let byte = int32 & 0xff;
+      int32Array[i] = byte;
+      int32 = (int32 - byte) / 256;
     }
+    return int32Array;
+  }
+
+  _stringToUint8Array(string) {
+    let stringArray = new Uint8Array(string.length);
+    for (let i = 0; i < string.length; i++) {
+      stringArray[i] = string.charCodeAt(i);
+    }
+    return stringArray;
+  }
+
+  // https://stackoverflow.com/a/33703102/399105
+  _concatTypedArrays(a, b) {
+      var c = new (a.constructor)(a.length + b.length);
+      c.set(a, 0);
+      c.set(b, a.length);
+      return c;
+  }
+
+  _insertIntoTypedArray(array, arrayToInsert, insertAtByteOffset) {
+    return this._concatTypedArrays(
+      this._concatTypedArrays(
+        array.slice(0, insertAtByteOffset),
+        arrayToInsert
+      ),
+      array.slice(insertAtByteOffset, array.length)
+    );
   }
 }
 
@@ -571,48 +570,4 @@ function areArraysEqual(array1, array2) {
 // https://stackoverflow.com/a/416327/399105
 function isNullOrUndefined(variable) {
   return typeof variable === 'undefined' || variable === null;
-}
-
-// Inspired by https://stackoverflow.com/a/12965194/399105
-function int32ToUint8Array(int32) {
-  let int32Array = new Uint8Array(4);
-  for (let i = 0; i < int32Array.length; i++) {
-    let byte = int32 & 0xff;
-    int32Array[i] = byte;
-    int32 = (int32 - byte) / 256;
-  }
-  return int32Array;
-}
-
-function stringToUint8Array(string) {
-  let stringArray = new Uint8Array(string.length);
-  for (let i = 0; i < string.length; i++) {
-    stringArray[i] = string.charCodeAt(i);
-  }
-  return stringArray;
-}
-
-function concatTypedArrays(a, b) {
-    var c = new (a.constructor)(a.length + b.length);
-    c.set(a, 0);
-    c.set(b, a.length);
-    return c;
-}
-
-function insertIntoArrayBuffer(arrayBuffer, arrayBufferToInsert, insertAtByteOffset) {
-  return insertIntoTypedArray(
-    new Uint8Array(arrayBuffer),
-    new Uint8Array(arrayBufferToInsert),
-    insertAtByteOffset
-  ).buffer;
-}
-
-function insertIntoTypedArray(array, arrayToInsert, insertAtByteOffset) {
-  return concatTypedArrays(
-    concatTypedArrays(
-      array.slice(0, insertAtByteOffset),
-      arrayToInsert
-    ),
-    array.slice(insertAtByteOffset, array.length)
-  );
 }
