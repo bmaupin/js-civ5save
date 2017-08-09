@@ -199,135 +199,148 @@ export default class Civ5Save {
   }
 
   get gameVersion() {
-    return this._returnPropertyIfDefined('gameVersion');
+    return this._getPropertyIfDefined('gameVersion');
   }
 
   get currentTurn() {
-    return this._properties['currentTurn'].value;
+    return this._getPropertyIfDefined('currentTurn');
   }
 
   get gameMode() {
     if (Number(this.gameBuild) >= 230620) {
-      return Civ5SavePropertyDefinitions.gameMode.values[this._properties.gameMode.value];
+      return Civ5SavePropertyDefinitions.gameMode.values[this._properties.gameMode.getValue(this._saveData)];
     }
   }
 
   get player1Civilization() {
-    return this._returnPropertyIfDefined('player1Civilization');
+    return this._getPropertyIfDefined('player1Civilization');
   }
 
   get difficulty() {
-    return this._returnPropertyIfDefined('difficulty');
+    return this._getPropertyIfDefined('difficulty');
   }
 
   get startingEra() {
-    return this._returnPropertyIfDefined('startingEra');
+    return this._getPropertyIfDefined('startingEra');
   }
 
   get currentEra() {
-    return this._returnPropertyIfDefined('currentEra');
+    return this._getPropertyIfDefined('currentEra');
   }
 
   get gamePace() {
-    return this._returnPropertyIfDefined('gamePace');
+    return this._getPropertyIfDefined('gamePace');
   }
 
   get mapSize() {
-    return this._returnPropertyIfDefined('mapSize');
+    return this._getPropertyIfDefined('mapSize');
   }
 
   get mapFile() {
-    return this._returnPropertyIfDefined('mapFile');
+    return this._getPropertyIfDefined('mapFile');
   }
 
   get maxTurns() {
-    return this._returnPropertyIfDefined('maxTurns');
+    return this._getPropertyIfDefined('maxTurns');
   }
 
   set maxTurns(newValue) {
-    this._properties['maxTurns'].value = newValue;
+    this._properties.maxTurns.setValue(this._saveData, newValue);
   }
 
   get turnTimerLength() {
-    return this._returnPropertyIfDefined('turnTimerLength');
+    return this._getPropertyIfDefined('turnTimerLength');
   }
 
   set turnTimerLength(newValue) {
-    this._properties['turnTimerLength'].value = newValue;
+    this._properties.turnTimerLength.setValue(this._saveData, newValue);
   }
 
   get privateGame() {
-    return this._returnPropertyIfDefined('privateGame');
+    return this._getPropertyIfDefined('privateGame');
   }
 
   set privateGame(newValue) {
-    this._properties['privateGame'].value = newValue;
+    this._properties.privateGame.setValue(this._saveData, newValue);
   }
 
   get timeVictory() {
-    return this._returnPropertyIfDefined('timeVictory');
+    return this._getPropertyIfDefined('timeVictory');
   }
 
   set timeVictory(newValue) {
-    this._properties['timeVictory'].value = newValue;
+    this._properties.timeVictory.setValue(this._saveData, newValue);
   }
 
   get scienceVictory() {
-    return this._returnPropertyIfDefined('scienceVictory');
+    return this._getPropertyIfDefined('scienceVictory');
   }
 
   set scienceVictory(newValue) {
-    this._properties['scienceVictory'].value = newValue;
+    this._properties.scienceVictory.setValue(this._saveData, newValue);
   }
 
   get dominationVictory() {
-    return this._returnPropertyIfDefined('dominationVictory');
+    return this._getPropertyIfDefined('dominationVictory');
   }
 
   set dominationVictory(newValue) {
-    this._properties['dominationVictory'].value = newValue;
+    this._properties.dominationVictory.setValue(this._saveData, newValue);
   }
 
   get culturalVictory() {
-    return this._returnPropertyIfDefined('culturalVictory');
+    return this._getPropertyIfDefined('culturalVictory');
   }
 
   set culturalVictory(newValue) {
-    this._properties['culturalVictory'].value = newValue;
+    this._properties.culturalVictory.setValue(this._saveData, newValue);
   }
 
   get diplomaticVictory() {
-    return this._returnPropertyIfDefined('diplomaticVictory');
+    return this._getPropertyIfDefined('diplomaticVictory');
   }
 
   set diplomaticVictory(newValue) {
-    this._properties['diplomaticVictory'].value = newValue;
+    this._properties.diplomaticVictory.setValue(this._saveData, newValue);
   }
 
   // https://github.com/Bownairo/Civ5SaveEditor
   get pitboss() {
-    return this._properties.gameOptionsMap.get('GAMEOPTION_PITBOSS');
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');
+  }
+
+  set pitboss(newValue) {
+    // TODO
+    this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
+    // this._properties.gameOptionsMap.setValue(this._saveData, 'GAMEOPTION_PITBOSS', newValue);
   }
 
   get turnTimerEnabled() {
-    return this._properties.gameOptionsMap.get('GAMEOPTION_END_TURN_TIMER_ENABLED');
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_END_TURN_TIMER_ENABLED');
   }
 
   // http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
   get turnType() {
-    if (this._properties.gameOptionsMap.get('GAMEOPTION_DYNAMIC_TURNS') === true) {
+    if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === true) {
       return Civ5Save.TURN_TYPES.HYBRID;
-    } else if (this._properties.gameOptionsMap.get('GAMEOPTION_SIMULTANEOUS_TURNS') === true) {
+    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === true) {
       return Civ5Save.TURN_TYPES.SIMULTANEOUS;
-    } else if (this._properties.gameOptionsMap.get('GAMEOPTION_DYNAMIC_TURNS') === false &&
-      this._properties.gameOptionsMap.get('GAMEOPTION_SIMULTANEOUS_TURNS') === false) {
+    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === false &&
+      this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === false) {
       return Civ5Save.TURN_TYPES.SEQUENTIAL;
     }
   }
 
-  _returnPropertyIfDefined(propertyName) {
+  _getPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
-      return this._properties[propertyName].value;
+      return this._properties[propertyName].getValue(this._saveData);
+    }
+  }
+
+  _setNewGameOption(newGameOptionKey, newGameOptionValue) {
+    let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
+    if (!isNullOrUndefined(newSaveData)) {
+      this._saveData = newSaveData;
     }
   }
 }
@@ -386,54 +399,55 @@ class Civ5SaveProperty {
 }
 
 class Civ5SaveBoolProperty extends Civ5SaveProperty {
-  get value() {
+  getValue(saveData) {
     if (this.length === 1) {
-      return Boolean(this.saveData.getUint8(this.byteOffset));
+      return Boolean(saveData.getUint8(this.byteOffset));
     } else if (this.length === 4) {
-      return Boolean(this.saveData.getUint32(this.byteOffset, true));
+      return Boolean(saveData.getUint32(this.byteOffset, true));
     }
   }
 
-  set value(newValue) {
+  setValue(saveData, newValue) {
     if (this.length === 1) {
-      this.saveData.setUint8(this.byteOffset, Number(newValue));
+      saveData.setUint8(this.byteOffset, Number(newValue));
     } else if (this.length === 4) {
-      this.saveData.setUint32(this.byteOffset, Number(newValue), true);
+      saveData.setUint32(this.byteOffset, Number(newValue), true);
     }
   }
 }
 
 class Civ5SaveIntProperty extends Civ5SaveProperty {
-  get value() {
+  getValue(saveData) {
     if (this.length === 1) {
-      return this.saveData.getUint8(this.byteOffset);
+      return saveData.getUint8(this.byteOffset);
     } else if (this.length === 4) {
-      return this.saveData.getUint32(this.byteOffset, true);
+      return saveData.getUint32(this.byteOffset, true);
     }
   }
 
-  set value(newValue) {
+  setValue(saveData, newValue) {
     if (this.length === 1) {
-      this.saveData.setUint8(this.byteOffset, newValue);
+      saveData.setUint8(this.byteOffset, newValue);
     } else if (this.length === 4) {
-      this.saveData.setUint32(this.byteOffset, newValue, true);
+      saveData.setUint32(this.byteOffset, newValue, true);
     }
   }
 }
 
 class Civ5SaveStringProperty extends Civ5SaveProperty {
+  // TODO calculate this in the constructor
   get length() {
     if (isNullOrUndefined(this._length)) {
-      this._length = this.getStringLength(this.byteOffset) + 4;
+      this._length = this._getStringLength(this.byteOffset) + 4;
     }
     return this._length;
   }
 
-  get value() {
-    return this.saveData.getString(this.byteOffset + 4, this.length - 4);
+  getValue(saveData) {
+    return saveData.getString(this.byteOffset + 4, this.length - 4);
   }
 
-  getStringLength(byteOffset) {
+  _getStringLength(byteOffset) {
     return this.saveData.getUint32(byteOffset, true);
   }
 }
@@ -441,40 +455,108 @@ class Civ5SaveStringProperty extends Civ5SaveProperty {
 class Civ5SaveStringToBoolMap {
   constructor(byteOffset, saveData) {
     this.byteOffset = byteOffset;
-    this.saveData = saveData;
-    this._size = new Civ5SaveIntProperty(this.byteOffset, 4, this.saveData);
     this._items = new Map();
+    this._length = 4;
+    this._size = new Civ5SaveIntProperty(this.byteOffset, 4, saveData);
 
-    if (this.size > 0) {
+    // console.log(this.getSize(saveData));
+
+    if (this.getSize(saveData) > 0) {
       let currentByteOffset = this.byteOffset + 4;
-      for (let i = 0; i < this.size; i++) {
-        let itemKeyProperty = new Civ5SaveStringProperty(currentByteOffset, null, this.saveData);
-        currentByteOffset += itemKeyProperty.length;
-        let itemValueProperty = new Civ5SaveBoolProperty(currentByteOffset, 4, this.saveData);
-        currentByteOffset += itemValueProperty.length;
-
-        this._items.set(itemKeyProperty.value, itemValueProperty);
+      for (let i = 0; i < this.getSize(saveData); i++) {
+        currentByteOffset = this._addExistingItem(saveData, currentByteOffset);
       }
     }
   }
 
-  get size() {
-    return this._size.value;
+  _addExistingItem(saveData, byteOffset) {
+    let itemKeyProperty = new Civ5SaveStringProperty(byteOffset, null, saveData);
+    byteOffset += itemKeyProperty.length;
+    let itemValueProperty = new Civ5SaveBoolProperty(byteOffset, 4, saveData);
+    byteOffset += itemValueProperty.length;
+
+    this._items.set(itemKeyProperty.getValue(saveData), itemValueProperty);
+    this._length = byteOffset - this.byteOffset;
+
+    return byteOffset;
   }
 
-  get(itemKey) {
+  getSize(saveData) {
+    return this._size.getValue(saveData);
+  }
+
+  setSize(saveData, newValue) {
+    this._size.setValue(saveData, newValue);
+  }
+
+  getValue(saveData, itemKey) {
     if (this._items.has(itemKey)) {
-      return this._items.get(itemKey).value;
+      if (itemKey === 'GAMEOPTION_PITBOSS') {
+        // console.log('GAMEOPTION_PITBOSS found');
+      }
+      return this._items.get(itemKey).getValue(saveData);
     } else {
+      if (itemKey === 'GAMEOPTION_PITBOSS') {
+        // console.log('GAMEOPTION_PITBOSS not found');
+      }
       return false;
     }
   }
 
-  set(itemKey, newItemValue) {
+  setValue(saveData, itemKey, newItemValue) {
     if (this._items.has(itemKey)) {
-      this._items.get(itemKey).value = newItemValue;
+      this._items.get(itemKey).setValue(saveData, newItemValue);
+
     } else {
       // TODO
+      // 1. Generate the data to add
+      /*
+  getString(byteOffset, byteLength) {
+    let string = '';
+    for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
+      string += String.fromCharCode(this.getUint8(byte));
+    }
+    return string;
+  }
+      */
+      // this._size.value ++;
+      this.setSize(saveData, this.getSize(saveData) + 1);
+
+      let stringLengthArray = int32ToUint8Array(itemKey.length);
+      let stringArray = stringToUint8Array(itemKey);
+      let itemValueArray = int32ToUint8Array(Number(newItemValue));
+      let arrayToInsert = concatTypedArrays(
+        concatTypedArrays(
+          stringLengthArray,
+          stringArray
+        ),
+        itemValueArray
+      );
+      // 2. Convert it to the right format
+      // 3. Insert it into a new arraybuffer?
+      // insertIntoArrayBuffer(this.saveData.buffer, new ArrayBuffer(arrayToInsert))
+      let newSaveDataTypedArray = insertIntoTypedArray(
+        new Uint8Array(saveData.buffer),
+        arrayToInsert,
+        this.byteOffset + this._length);
+
+      // let newArrayBuffer = new ArrayBuffer(newSaveDataTypedArray);
+
+      // console.log(newArrayBuffer.byteLength);
+
+
+      // 4. Replace this.saveData with...?
+      let newSaveData = new Civ5SaveDataView(newSaveDataTypedArray.buffer);
+      // this.saveData = newSaveData;
+
+      // console.log(this.byteOffset + this._length);
+
+      this._addExistingItem(newSaveData, this.byteOffset + this._length);
+
+      // console.log(this.saveData.buffer.byteLength);
+      // console.log(newSaveData.buffer.byteLength);
+
+      return newSaveData;
     }
   }
 }
@@ -489,4 +571,48 @@ function areArraysEqual(array1, array2) {
 // https://stackoverflow.com/a/416327/399105
 function isNullOrUndefined(variable) {
   return typeof variable === 'undefined' || variable === null;
+}
+
+// Inspired by https://stackoverflow.com/a/12965194/399105
+function int32ToUint8Array(int32) {
+  let int32Array = new Uint8Array(4);
+  for (let i = 0; i < int32Array.length; i++) {
+    let byte = int32 & 0xff;
+    int32Array[i] = byte;
+    int32 = (int32 - byte) / 256;
+  }
+  return int32Array;
+}
+
+function stringToUint8Array(string) {
+  let stringArray = new Uint8Array(string.length);
+  for (let i = 0; i < string.length; i++) {
+    stringArray[i] = string.charCodeAt(i);
+  }
+  return stringArray;
+}
+
+function concatTypedArrays(a, b) {
+    var c = new (a.constructor)(a.length + b.length);
+    c.set(a, 0);
+    c.set(b, a.length);
+    return c;
+}
+
+function insertIntoArrayBuffer(arrayBuffer, arrayBufferToInsert, insertAtByteOffset) {
+  return insertIntoTypedArray(
+    new Uint8Array(arrayBuffer),
+    new Uint8Array(arrayBufferToInsert),
+    insertAtByteOffset
+  ).buffer;
+}
+
+function insertIntoTypedArray(array, arrayToInsert, insertAtByteOffset) {
+  return concatTypedArrays(
+    concatTypedArrays(
+      array.slice(0, insertAtByteOffset),
+      arrayToInsert
+    ),
+    array.slice(insertAtByteOffset, array.length)
+  );
 }
