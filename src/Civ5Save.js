@@ -1,6 +1,6 @@
-import Civ5SaveDataView from './Civ5SaveDataView'
+import Civ5SaveDataView from './Civ5SaveDataView';
 import Civ5SavePropertyDefinitions from './Civ5SavePropertyDefinitions.json';
-import Civ5SavePropertyFactory from './Civ5SavePropertyFactory'
+import Civ5SavePropertyFactory from './Civ5SavePropertyFactory';
 
 export default class Civ5Save {
   constructor(saveData) {

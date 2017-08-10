@@ -1,8 +1,8 @@
-import Civ5SaveBoolProperty from './Civ5SaveBoolProperty'
-import Civ5SaveIntProperty from './Civ5SaveIntProperty'
-import Civ5SaveProperty from './Civ5SaveProperty'
-import Civ5SaveStringProperty from './Civ5SaveStringProperty'
-import Civ5SaveStringToBoolMap from './Civ5SaveStringToBoolMap'
+import Civ5SaveBoolProperty from './Civ5SaveBoolProperty';
+import Civ5SaveIntProperty from './Civ5SaveIntProperty';
+import Civ5SaveProperty from './Civ5SaveProperty';
+import Civ5SaveStringProperty from './Civ5SaveStringProperty';
+import Civ5SaveStringToBoolMap from './Civ5SaveStringToBoolMap';
 
 export default class Civ5SavePropertyFactory {
   static fromType(type, byteOffset, length, saveData) {
