@@ -1,4 +1,4 @@
-import Civ5SaveProperty from './Civ5SaveProperty'
+import Civ5SaveProperty from './Civ5SaveProperty';
 
 export default class Civ5SaveIntProperty extends Civ5SaveProperty {
   getValue(saveData) {

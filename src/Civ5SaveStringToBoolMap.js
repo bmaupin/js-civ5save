@@ -1,7 +1,7 @@
-import Civ5SaveBoolProperty from './Civ5SaveBoolProperty'
-import Civ5SaveDataView from './Civ5SaveDataView'
-import Civ5SaveIntProperty from './Civ5SaveIntProperty'
-import Civ5SaveStringProperty from './Civ5SaveStringProperty'
+import Civ5SaveBoolProperty from './Civ5SaveBoolProperty';
+import Civ5SaveDataView from './Civ5SaveDataView';
+import Civ5SaveIntProperty from './Civ5SaveIntProperty';
+import Civ5SaveStringProperty from './Civ5SaveStringProperty';
 
 export default class Civ5SaveStringToBoolMap {
   constructor(byteOffset, saveData) {
@@ -101,10 +101,10 @@ export default class Civ5SaveStringToBoolMap {
 
   // https://stackoverflow.com/a/33703102/399105
   _concatTypedArrays(a, b) {
-      var c = new (a.constructor)(a.length + b.length);
-      c.set(a, 0);
-      c.set(b, a.length);
-      return c;
+    var c = new (a.constructor)(a.length + b.length);
+    c.set(a, 0);
+    c.set(b, a.length);
+    return c;
   }
 
   _insertIntoTypedArray(array, arrayToInsert, insertAtByteOffset) {
