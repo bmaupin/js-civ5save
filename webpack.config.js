@@ -4,7 +4,7 @@ var path = require('path');
 var env = process.env.NODE_ENV;
 
 module.exports = {
-  entry: './src/civ5save.js',
+  entry: './src/Civ5Save.js',
   module: env === 'production' ? {
     rules: [
       {
