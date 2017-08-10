@@ -4,6 +4,7 @@ export default class Civ5Save {
   constructor(saveData) {
     this._saveData = new Civ5SaveDataView(saveData.buffer);
     this._verifyFileSignature();
+    this._gameBuild = this._getGameBuild();
     this._properties = this._getProperties();
   }
 
@@ -62,7 +63,7 @@ export default class Civ5Save {
 
       let propertySection = this._getPropertySection(propertyDefinition);
       // If propertySection is null, it means the property isn't available for the particular game build
-      if (isNullOrUndefined(propertySection)) {
+      if (this._isNullOrUndefined(propertySection)) {
         continue;
       }
 
@@ -100,6 +101,10 @@ export default class Civ5Save {
     return properties;
   }
 
+  _isNullOrUndefined(variable) {
+    return typeof variable === 'undefined' || variable === null;
+  }
+
   _getSectionOffsets() {
     const SECTION_DELIMITER = [0x40, 0, 0, 0];
 
@@ -117,7 +122,7 @@ export default class Civ5Save {
     sectionOffsets.push(section);
 
     for (let byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {
-      if (areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
+      if (this._areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
         // Player colour section before build 310700 contains hex values, which can include the section delimiter
         if (Number(this.gameBuild) < 310700) {
           let playerColourSection = 23;
@@ -146,6 +151,13 @@ export default class Civ5Save {
     return sectionOffsets;
   }
 
+  // https://stackoverflow.com/a/22395463/399105
+  _areArraysEqual(array1, array2) {
+    return (array1.length == array2.length) && array1.every(function(element, index) {
+      return element === array2[index];
+    });
+  }
+
   _getPropertySection(propertyDefinition) {
     let propertySection = null;
     for (let build in propertyDefinition.sectionByBuild) {
@@ -158,10 +170,6 @@ export default class Civ5Save {
   }
 
   get gameBuild() {
-    if (isNullOrUndefined(this._gameBuild)) {
-      this._gameBuild = this._getGameBuild();
-    }
-
     return this._gameBuild;
   }
 
@@ -180,7 +188,7 @@ export default class Civ5Save {
     let gameBuildMarkerByteOffset = 0;
     let saveDataBytes = new Int8Array(this._saveData.buffer);
     for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
-      if (areArraysEqual(
+      if (this._areArraysEqual(
         saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
         GAME_BUILD_MARKER_ARRAY)) {
         gameBuildMarkerByteOffset = byteOffset;
@@ -337,7 +345,7 @@ export default class Civ5Save {
 
   _setNewGameOption(newGameOptionKey, newGameOptionValue) {
     let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
-    if (!isNullOrUndefined(newSaveData)) {
+    if (!this._isNullOrUndefined(newSaveData)) {
       this._saveData = newSaveData;
     }
   }
@@ -389,6 +397,10 @@ class Civ5SaveProperty {
       throw new Error(`Property type ${type} not handled`);
     }
   }
+
+  _isNullOrUndefined(variable) {
+    return typeof variable === 'undefined' || variable === null;
+  }
 }
 
 class Civ5SaveBoolProperty extends Civ5SaveProperty {
@@ -431,7 +443,7 @@ class Civ5SaveStringProperty extends Civ5SaveProperty {
   constructor(byteOffset, length, saveData) {
     super(byteOffset, length);
 
-    if (isNullOrUndefined(this.length)) {
+    if (this._isNullOrUndefined(this.length)) {
       this.length = this._getStringLength(saveData, this.byteOffset) + 4;
     }
   }
@@ -558,16 +570,4 @@ class Civ5SaveStringToBoolMap {
       array.slice(insertAtByteOffset, array.length)
     );
   }
-}
-
-// https://stackoverflow.com/a/22395463/399105
-function areArraysEqual(array1, array2) {
-  return (array1.length == array2.length) && array1.every(function(element, index) {
-    return element === array2[index];
-  });
-}
-
-// https://stackoverflow.com/a/416327/399105
-function isNullOrUndefined(variable) {
-  return typeof variable === 'undefined' || variable === null;
 }
