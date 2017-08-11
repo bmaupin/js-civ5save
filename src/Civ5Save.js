@@ -250,6 +250,12 @@ export default class Civ5Save {
     return this._getPropertyIfDefined('mapFile');
   }
 
+  get enabledDLC() {
+    if (this._properties.hasOwnProperty('enabledDLC')) {
+      return this._properties.enabledDLC.getArray();
+    }
+  }
+
   get maxTurns() {
     return this._getPropertyIfDefined('maxTurns');
   }
