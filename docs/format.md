@@ -35,7 +35,7 @@
 
 Notes:
 ---
-- Sections are separated by 0x40000000
+- Sections are separated by `4000 0000`
 - Within each section, string values are prefixed by their length as a little-endian 32-bit integer. For example:  
   `1400 0000 4349 5649 4c49 5a41 5449 4f4e 5f4d 4f52 4f43 434f`
   - `1400 0000` = 0x14 (little endian) = 20 bytes

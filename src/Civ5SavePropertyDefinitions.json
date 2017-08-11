@@ -110,6 +110,14 @@
     },
     "type": "string"
   },
+  "enabledDLC": {
+    "byteOffsetInSection": null,
+    "length": null,
+    "sectionByBuild": {
+      "98650": 1
+    },
+    "type": "dlcStringArray"
+  },
   "section19Skip1": {
     "byteOffsetInSection": 264,
     "length": null,

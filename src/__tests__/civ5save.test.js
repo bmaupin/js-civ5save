@@ -1,4 +1,4 @@
-import Civ5Save from '../civ5save';
+import Civ5Save from '../Civ5Save';
 
 const path = require('path');
 
@@ -142,6 +142,49 @@ test('Get map file', () => {
   expect(savegame101221.mapFile).toBe('Assets\\DLC\\DLC_02\\Scenarios\\NewWorldScenario\\NewWorld_Scenario_MapScript.lua');
   expect(savegame10213.mapFile).toBe('Assets\\Maps\\Pangaea.lua');
   expect(savegame103279.mapFile).toBe('Assets\\Maps\\Earth_Duel.Civ5Map');
+});
+
+test('Get enabled DLC', () => {
+  expect(savegame10017.enabledDLC).toEqual([]);
+  expect(savegame101135.enabledDLC).toEqual([
+    'Babylon',
+    'Upgrade 1',
+    'Mongolia'
+  ]);
+  expect(savegame101221.enabledDLC).toEqual([
+    'Spain and Inca',
+    'Polynesia',
+    'Babylon',
+    'Upgrade 1',
+    'Mongolia'
+  ]);
+  expect(savegame10213.enabledDLC).toEqual([
+    'Mongolia',
+    'Spain and Inca',
+    'Polynesia',
+    'Denmark',
+    'Korea',
+    'Ancient Wonders',
+    'Babylon',
+    'Expansion - Gods and Kings',
+    'Upgrade 1'
+  ]);
+  expect(savegame103279.enabledDLC).toEqual([
+    'Mongolia',
+    'Spain and Inca',
+    'Polynesia',
+    'Denmark',
+    'Korea',
+    'Ancient Wonders',
+    'Civilization 5 Complete',
+    'Babylon',
+    'DLC_SP_Maps',
+    'DLC_SP_Maps_2',
+    'DLC_SP_Maps_3',
+    'Expansion - Gods and Kings',
+    'Expansion - Brave New World',
+    'Upgrade 1'
+  ]);
 });
 
 test('Get max turns', () => {
