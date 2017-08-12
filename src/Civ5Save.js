@@ -333,6 +333,10 @@ export default class Civ5Save {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_END_TURN_TIMER_ENABLED');
   }
 
+  set turnTimerEnabled(newValue) {
+    this._setNewGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);
+  }
+
   // http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
   get turnType() {
     if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === true) {
@@ -342,6 +346,19 @@ export default class Civ5Save {
     } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === false &&
       this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === false) {
       return Civ5Save.TURN_TYPES.SEQUENTIAL;
+    }
+  }
+
+  set turnType(newValue) {
+    if (newValue === Civ5Save.TURN_TYPES.HYBRID) {
+      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', true);
+      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
+    } else if (newValue === Civ5Save.TURN_TYPES.SIMULTANEOUS) {
+      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
+      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', true);
+    } else if (newValue === Civ5Save.TURN_TYPES.SEQUENTIAL) {
+      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
+      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
     }
   }
 
