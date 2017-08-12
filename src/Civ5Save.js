@@ -69,6 +69,23 @@ export default class Civ5Save {
         continue;
       }
 
+      if (propertyName === 'section30Skip1') {
+        if (properties.enabledDLC.getArray().includes('Expansion - Gods and Kings') ||
+          properties.enabledDLC.getArray().includes('Expansion - Brave New World')) {
+          propertyDefinition.length = 76;
+        } else {
+          propertyDefinition.length = 72;
+        }
+      } else if (propertyName === 'section30Skip3') {
+        if (properties.enabledDLC.getArray().includes('Expansion - Brave New World')) {
+          propertyDefinition.length = 80;
+        } else if (properties.enabledDLC.getArray().includes('Expansion - Gods and Kings')) {
+          propertyDefinition.length = 76;
+        } else {
+          propertyDefinition.length = 72;
+        }
+      }
+
       let propertyByteOffset = null;
       if (propertySection === previousPropertySection) {
         let previousProperty = properties[previousPropertyName];

@@ -339,20 +339,12 @@
     "type": "bool"
   },
   "section30Skip1": {
+    "_comment": "This section is 76 bytes long if either expansion pack is installed. Otherwise it's 72 bytes long.",
     "byteOffsetInSection": 4,
-    "length": 72,
+    "length": null,
     "sectionByBuild": {
       "98650": 28,
       "262623": 29,
-      "395070": 30
-    },
-    "type": "bytes"
-  },
-  "section30Skip2": {
-    "byteOffsetInSection": 76,
-    "length": 4,
-    "sectionByBuild": {
-      "322813": 29,
       "395070": 30
     },
     "type": "bytes"
@@ -377,7 +369,7 @@
     },
     "type": "string"
   },
-  "section30Skip3": {
+  "section30Skip2": {
     "byteOffsetInSection": null,
     "length": 8,
     "sectionByBuild": {
@@ -408,6 +400,7 @@
     "type": "string"
   },
   "section30MapSize3": {
+    "_comment": "This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed. Otherwise it's 72 bytes long.",
     "byteOffsetInSection": null,
     "length": null,
     "sectionByBuild": {
@@ -417,30 +410,12 @@
     },
     "type": "string"
   },
-  "section30Skip4": {
+  "section30Skip3": {
     "byteOffsetInSection": null,
     "length": 72,
     "sectionByBuild": {
       "98650": 28,
       "262623": 29,
-      "395070": 30
-    },
-    "type": "bytes"
-  },
-  "section30Skip5": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "322813": 29,
-      "395070": 30
-    },
-    "type": "bytes"
-  },
-  "section30Skip6": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "388272": 29,
       "395070": 30
     },
     "type": "bytes"
