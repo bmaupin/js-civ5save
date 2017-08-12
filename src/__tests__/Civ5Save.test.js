@@ -12,11 +12,14 @@ const NEW_CULTURAL_VICTORY = false;
 const NEW_DIPLOMATIC_VICTORY = true;
 const NEW_DOMINATION_VICTORY = true;
 const NEW_MAX_TURNS = 123;
+const NEW_PITBOSS = false;
 const NEW_PRIVATE_GAME = false;
 const NEW_SAVEGAME_FILENAME = 'New.Civ5Save';
 const NEW_SCIENCE_VICTORY = false;
 const NEW_TIME_VICTORY = true;
+const NEW_TURN_TIMER_ENABLED = false;
 const NEW_TURN_TIMER_VALUE = 321;
+const NEW_TURN_TYPE = Civ5Save.TURN_TYPES.SIMULTANEOUS;
 
 let savegame10017;
 let savegame101135;
@@ -187,6 +190,69 @@ test('Get enabled DLC', () => {
   ]);
 });
 
+test('Get pitboss', () => {
+  expect(savegame10017.pitboss).toBe(false);
+  expect(savegame101135.pitboss).toBe(false);
+  expect(savegame101221.pitboss).toBe(false);
+  expect(savegame10213.pitboss).toBe(false);
+  expect(savegame103279.pitboss).toBe(true);
+});
+
+test('Set pitboss', async () => {
+  savegame10017.pitboss = NEW_PITBOSS;
+  savegame101135.pitboss = NEW_PITBOSS;
+  savegame101221.pitboss = NEW_PITBOSS;
+  savegame10213.pitboss = NEW_PITBOSS;
+  savegame103279.pitboss = NEW_PITBOSS;
+  expect(savegame10017.pitboss).toBe(NEW_PITBOSS);
+  expect(savegame101135.pitboss).toBe(NEW_PITBOSS);
+  expect(savegame101221.pitboss).toBe(NEW_PITBOSS);
+  expect(savegame10213.pitboss).toBe(NEW_PITBOSS);
+  expect(savegame103279.pitboss).toBe(NEW_PITBOSS);
+});
+
+test('Get turn timer enabled', () => {
+  expect(savegame10017.turnTimerEnabled).toBe(false);
+  expect(savegame101135.turnTimerEnabled).toBe(false);
+  expect(savegame101221.turnTimerEnabled).toBe(false);
+  expect(savegame10213.turnTimerEnabled).toBe(false);
+  expect(savegame103279.turnTimerEnabled).toBe(true);
+});
+
+test('Set turn timer enabled', async () => {
+  savegame10017.turnTimerEnabled = NEW_TURN_TIMER_ENABLED;
+  savegame101135.turnTimerEnabled = NEW_TURN_TIMER_ENABLED;
+  savegame101221.turnTimerEnabled = NEW_TURN_TIMER_ENABLED;
+  savegame10213.turnTimerEnabled = NEW_TURN_TIMER_ENABLED;
+  savegame103279.turnTimerEnabled = NEW_TURN_TIMER_ENABLED;
+  expect(savegame10017.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
+  expect(savegame101135.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
+  expect(savegame101221.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
+  expect(savegame10213.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
+  expect(savegame103279.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
+});
+
+test('Get turn type', () => {
+  expect(savegame10017.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame101135.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame101221.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame10213.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame103279.turnType).toBe(Civ5Save.TURN_TYPES.HYBRID);
+});
+
+test('Set turn timer enabled', async () => {
+  savegame10017.turnType = Civ5Save.TURN_TYPES.HYBRID;
+  savegame101135.turnType = Civ5Save.TURN_TYPES.SIMULTANEOUS;
+  savegame101221.turnType = Civ5Save.TURN_TYPES.SEQUENTIAL;
+  savegame10213.turnType = NEW_TURN_TYPE;
+  savegame103279.turnType = NEW_TURN_TYPE;
+  expect(savegame10017.turnType).toBe(Civ5Save.TURN_TYPES.HYBRID);
+  expect(savegame101135.turnType).toBe(Civ5Save.TURN_TYPES.SIMULTANEOUS);
+  expect(savegame101221.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
+  expect(savegame10213.turnType).toBe(NEW_TURN_TYPE);
+  expect(savegame103279.turnType).toBe(NEW_TURN_TYPE);
+});
+
 test('Get max turns', () => {
   expect(savegame10017.maxTurns).toBe(500);
   expect(savegame101135.maxTurns).toBe(1500);
@@ -355,34 +421,13 @@ test('Set diplomatic victory', () => {
   expect(savegame103279.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
 });
 
-test('Get pitboss', () => {
-  expect(savegame10017.pitboss).toBe(false);
-  expect(savegame101135.pitboss).toBe(false);
-  expect(savegame101221.pitboss).toBe(false);
-  expect(savegame10213.pitboss).toBe(false);
-  expect(savegame103279.pitboss).toBe(true);
-});
-
-test('Get turn timer enabled', () => {
-  expect(savegame10017.turnTimerEnabled).toBe(false);
-  expect(savegame101135.turnTimerEnabled).toBe(false);
-  expect(savegame101221.turnTimerEnabled).toBe(false);
-  expect(savegame10213.turnTimerEnabled).toBe(false);
-  expect(savegame103279.turnTimerEnabled).toBe(true);
-});
-
-test('Get turn type', () => {
-  expect(savegame10017.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame101135.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame101221.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame10213.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame103279.turnType).toBe(Civ5Save.TURN_TYPES.HYBRID);
-});
-
 test('Save to file', async () => {
   let newSavegameFile = savegame103279.toFile(NEW_SAVEGAME_FILENAME);
   let newSavegame = await Civ5Save.fromFile(newSavegameFile);
 
+  expect(newSavegame.pitboss).toBe(NEW_PITBOSS);
+  expect(newSavegame.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
+  expect(newSavegame.turnType).toBe(NEW_TURN_TYPE);
   expect(newSavegame.maxTurns).toBe(NEW_MAX_TURNS);
   expect(newSavegame.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
   expect(newSavegame.privateGame).toBe(NEW_PRIVATE_GAME);
