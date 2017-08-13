@@ -214,6 +214,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 class Civ5Save {
   constructor(saveData) {
+    // TODO: Convert fields and methods starting with underscores to private once it makes it into the spec
+    // (https://github.com/tc39/proposals)
     this._saveData = new __WEBPACK_IMPORTED_MODULE_0__Civ5SaveDataView__["a" /* default */](saveData.buffer);
     this._verifyFileSignature();
     this._gameBuild = this._getGameBuild();
@@ -450,31 +452,34 @@ class Civ5Save {
   }
 
   get player1Civilization() {
-    return this._getPropertyIfDefined('player1Civilization');
+    return this._getBeautifiedPropertyIfDefined('player1Civilization');
   }
 
   get difficulty() {
-    return this._getPropertyIfDefined('difficulty');
+    return this._getBeautifiedPropertyIfDefined('difficulty');
   }
 
   get startingEra() {
-    return this._getPropertyIfDefined('startingEra');
+    return this._getBeautifiedPropertyIfDefined('startingEra');
   }
 
   get currentEra() {
-    return this._getPropertyIfDefined('currentEra');
+    return this._getBeautifiedPropertyIfDefined('currentEra');
   }
 
   get gamePace() {
-    return this._getPropertyIfDefined('gamePace');
+    return this._getBeautifiedPropertyIfDefined('gamePace');
   }
 
   get mapSize() {
-    return this._getPropertyIfDefined('mapSize');
+    return this._getBeautifiedPropertyIfDefined('mapSize');
   }
 
   get mapFile() {
-    return this._getPropertyIfDefined('mapFile');
+    let mapFileValue = this._getPropertyIfDefined('mapFile');
+    if (!this._isNullOrUndefined(mapFileValue)) {
+      return this._beautifyMapFileValue(mapFileValue);
+    }
   }
 
   get enabledDLC() {
@@ -547,6 +552,142 @@ class Civ5Save {
     this._properties.diplomaticVictory.setValue(this._saveData, newValue);
   }
 
+  get alwaysPeace() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_PEACE');
+  }
+
+  set alwaysPeace(newValue) {
+    this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
+  }
+
+  get alwaysWar() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_WAR');
+  }
+
+  set alwaysWar(newValue) {
+    this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
+  }
+
+  get completeKills() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_COMPLETE_KILLS');
+  }
+
+  set completeKills(newValue) {
+    this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
+  }
+
+  get lockMods() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_LOCK_MODS');
+  }
+
+  set lockMods(newValue) {
+    this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);
+  }
+
+  get newRandomSeed() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NEW_RANDOM_SEED');
+  }
+
+  set newRandomSeed(newValue) {
+    this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
+  }
+
+  get noAncientRuins() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_GOODY_HUTS');
+  }
+
+  set noAncientRuins(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_GOODY_HUTS', newValue);
+  }
+
+  get noBarbarians() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_BARBARIANS');
+  }
+
+  set noBarbarians(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
+  }
+
+  get noChangingWarPeace() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CHANGING_WAR_PEACE');
+  }
+
+  set noChangingWarPeace(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
+  }
+
+  get noCityRazing() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CITY_RAZING');
+  }
+
+  set noCityRazing(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
+  }
+
+  get noCultureOverviewUI() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CULTURE_OVERVIEW_UI');
+  }
+
+  set noCultureOverviewUI(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
+  }
+
+  get noEspionage() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_ESPIONAGE');
+  }
+
+  set noEspionage(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
+  }
+
+  get noHappiness() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_HAPPINESS');
+  }
+
+  set noHappiness(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
+  }
+
+  get noPolicies() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_POLICIES');
+  }
+
+  set noPolicies(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);
+  }
+
+  get noReligion() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_RELIGION');
+  }
+
+  set noReligion(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);
+  }
+
+  get noScience() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_SCIENCE');
+  }
+
+  set noScience(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);
+  }
+
+  get noWorldCongress() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_LEAGUES');
+  }
+
+  set noWorldCongress(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);
+  }
+
+  get oneCityChallenge() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ONE_CITY_CHALLENGE');
+  }
+
+  set oneCityChallenge(newValue) {
+    this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
+  }
+
   // https://github.com/Bownairo/Civ5SaveEditor
   get pitboss() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');
@@ -554,6 +695,38 @@ class Civ5Save {
 
   set pitboss(newValue) {
     this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
+  }
+
+  get policySaving() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_POLICY_SAVING');
+  }
+
+  set policySaving(newValue) {
+    this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);
+  }
+
+  get promotionSaving() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PROMOTION_SAVING');
+  }
+
+  set promotionSaving(newValue) {
+    this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
+  }
+
+  get ragingBarbarians() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RAGING_BARBARIANS');
+  }
+
+  set ragingBarbarians(newValue) {
+    this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
+  }
+
+  get randomPersonalities() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RANDOM_PERSONALITIES');
+  }
+
+  set randomPersonalities(newValue) {
+    this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
   }
 
   get turnTimerEnabled() {
@@ -595,6 +768,27 @@ class Civ5Save {
     }
   }
 
+  _getBeautifiedPropertyIfDefined(propertyName) {
+    if (this._properties.hasOwnProperty(propertyName)) {
+      return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+    }
+  }
+
+  _beautifyPropertyValue(propertyValue) {
+    propertyValue = propertyValue.split('_')[1];
+    propertyValue = propertyValue.toLowerCase();
+    propertyValue = propertyValue.charAt(0).toUpperCase() + propertyValue.slice(1);
+    return propertyValue;
+  }
+
+  _beautifyMapFileValue(mapFileValue) {
+    mapFileValue = mapFileValue.split('/').slice(-1)[0];
+    mapFileValue = mapFileValue.split('\\').slice(-1)[0];
+    mapFileValue = mapFileValue.substring(0, mapFileValue.lastIndexOf('.'));
+    mapFileValue = mapFileValue.replace(/_/g, ' ');
+    return mapFileValue;
+  }
+
   _setNewGameOption(newGameOptionKey, newGameOptionValue) {
     let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
     if (!this._isNullOrUndefined(newSaveData)) {
@@ -605,7 +799,13 @@ class Civ5Save {
 /* harmony export (immutable) */ __webpack_exports__["default"] = Civ5Save;
 
 
-// TODO: Turn this into a class field once the proposal makes it into the spec (https://github.com/tc39/proposals)
+// TODO: Turn these into class fields once the proposal makes it into the spec (https://github.com/tc39/proposals)
+Civ5Save.GAME_MODES = {
+  SINGLE: 'Single player',
+  MULTI: 'Multiplayer',
+  HOTSEAT: 'Hotseat'
+};
+
 Civ5Save.TURN_TYPES = {
   HYBRID: 'Hybrid',
   SEQUENTIAL: 'Sequential',
