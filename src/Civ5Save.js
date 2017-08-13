@@ -337,6 +337,142 @@ export default class Civ5Save {
     this._properties.diplomaticVictory.setValue(this._saveData, newValue);
   }
 
+  get alwaysPeace() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_PEACE');
+  }
+
+  set alwaysPeace(newValue) {
+    this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
+  }
+
+  get alwaysWar() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_WAR');
+  }
+
+  set alwaysWar(newValue) {
+    this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
+  }
+
+  get completeKills() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_COMPLETE_KILLS');
+  }
+
+  set completeKills(newValue) {
+    this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
+  }
+
+  get lockMods() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_LOCK_MODS');
+  }
+
+  set lockMods(newValue) {
+    this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);
+  }
+
+  get newRandomSeed() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NEW_RANDOM_SEED');
+  }
+
+  set newRandomSeed(newValue) {
+    this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
+  }
+
+  get noAncientRuins() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_GOODY_HUTS');
+  }
+
+  set noAncientRuins(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_GOODY_HUTS', newValue);
+  }
+
+  get noBarbarians() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_BARBARIANS');
+  }
+
+  set noBarbarians(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
+  }
+
+  get noChangingWarPeace() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CHANGING_WAR_PEACE');
+  }
+
+  set noChangingWarPeace(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
+  }
+
+  get noCityRazing() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CITY_RAZING');
+  }
+
+  set noCityRazing(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
+  }
+
+  get noCultureOverviewUI() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CULTURE_OVERVIEW_UI');
+  }
+
+  set noCultureOverviewUI(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
+  }
+
+  get noEspionage() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_ESPIONAGE');
+  }
+
+  set noEspionage(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
+  }
+
+  get noHappiness() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_HAPPINESS');
+  }
+
+  set noHappiness(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
+  }
+
+  get noPolicies() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_POLICIES');
+  }
+
+  set noPolicies(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);
+  }
+
+  get noReligion() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_RELIGION');
+  }
+
+  set noReligion(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);
+  }
+
+  get noScience() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_SCIENCE');
+  }
+
+  set noScience(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);
+  }
+
+  get noWorldCongress() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_LEAGUES');
+  }
+
+  set noWorldCongress(newValue) {
+    this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);
+  }
+
+  get oneCityChallenge() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ONE_CITY_CHALLENGE');
+  }
+
+  set oneCityChallenge(newValue) {
+    this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
+  }
+
   // https://github.com/Bownairo/Civ5SaveEditor
   get pitboss() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');
@@ -344,6 +480,38 @@ export default class Civ5Save {
 
   set pitboss(newValue) {
     this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
+  }
+
+  get policySaving() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_POLICY_SAVING');
+  }
+
+  set policySaving(newValue) {
+    this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);
+  }
+
+  get promotionSaving() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PROMOTION_SAVING');
+  }
+
+  set promotionSaving(newValue) {
+    this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
+  }
+
+  get ragingBarbarians() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RAGING_BARBARIANS');
+  }
+
+  set ragingBarbarians(newValue) {
+    this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
+  }
+
+  get randomPersonalities() {
+    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RANDOM_PERSONALITIES');
+  }
+
+  set randomPersonalities(newValue) {
+    this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
   }
 
   get turnTimerEnabled() {
