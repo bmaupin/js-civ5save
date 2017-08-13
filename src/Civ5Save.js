@@ -4,6 +4,8 @@ import Civ5SavePropertyFactory from './Civ5SavePropertyFactory';
 
 export default class Civ5Save {
   constructor(saveData) {
+    // TODO: Convert fields and methods starting with underscores to private once it makes it into the spec
+    // (https://github.com/tc39/proposals)
     this._saveData = new Civ5SaveDataView(saveData.buffer);
     this._verifyFileSignature();
     this._gameBuild = this._getGameBuild();
@@ -240,31 +242,34 @@ export default class Civ5Save {
   }
 
   get player1Civilization() {
-    return this._getPropertyIfDefined('player1Civilization');
+    return this._getBeautifiedPropertyIfDefined('player1Civilization');
   }
 
   get difficulty() {
-    return this._getPropertyIfDefined('difficulty');
+    return this._getBeautifiedPropertyIfDefined('difficulty');
   }
 
   get startingEra() {
-    return this._getPropertyIfDefined('startingEra');
+    return this._getBeautifiedPropertyIfDefined('startingEra');
   }
 
   get currentEra() {
-    return this._getPropertyIfDefined('currentEra');
+    return this._getBeautifiedPropertyIfDefined('currentEra');
   }
 
   get gamePace() {
-    return this._getPropertyIfDefined('gamePace');
+    return this._getBeautifiedPropertyIfDefined('gamePace');
   }
 
   get mapSize() {
-    return this._getPropertyIfDefined('mapSize');
+    return this._getBeautifiedPropertyIfDefined('mapSize');
   }
 
   get mapFile() {
-    return this._getPropertyIfDefined('mapFile');
+    let mapFileValue = this._getPropertyIfDefined('mapFile');
+    if (!this._isNullOrUndefined(mapFileValue)) {
+      return this._beautifyMapFileValue(mapFileValue);
+    }
   }
 
   get enabledDLC() {
@@ -553,6 +558,27 @@ export default class Civ5Save {
     }
   }
 
+  _getBeautifiedPropertyIfDefined(propertyName) {
+    if (this._properties.hasOwnProperty(propertyName)) {
+      return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+    }
+  }
+
+  _beautifyPropertyValue(propertyValue) {
+    propertyValue = propertyValue.split('_')[1];
+    propertyValue = propertyValue.toLowerCase();
+    propertyValue = propertyValue.charAt(0).toUpperCase() + propertyValue.slice(1);
+    return propertyValue;
+  }
+
+  _beautifyMapFileValue(mapFileValue) {
+    mapFileValue = mapFileValue.split('/').slice(-1)[0];
+    mapFileValue = mapFileValue.split('\\').slice(-1)[0];
+    mapFileValue = mapFileValue.substring(0, mapFileValue.lastIndexOf('.'));
+    mapFileValue = mapFileValue.replace(/_/g, ' ');
+    return mapFileValue;
+  }
+
   _setNewGameOption(newGameOptionKey, newGameOptionValue) {
     let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
     if (!this._isNullOrUndefined(newSaveData)) {
@@ -561,7 +587,13 @@ export default class Civ5Save {
   }
 }
 
-// TODO: Turn this into a class field once the proposal makes it into the spec (https://github.com/tc39/proposals)
+// TODO: Turn these into class fields once the proposal makes it into the spec (https://github.com/tc39/proposals)
+Civ5Save.GAME_MODES = {
+  SINGLE: 'Single player',
+  MULTI: 'Multiplayer',
+  HOTSEAT: 'Hotseat'
+};
+
 Civ5Save.TURN_TYPES = {
   HYBRID: 'Hybrid',
   SEQUENTIAL: 'Sequential',

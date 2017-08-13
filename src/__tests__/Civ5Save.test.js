@@ -108,64 +108,64 @@ test('Get game mode', () => {
   expect(savegame10017.gameMode).not.toBeDefined();
   expect(savegame101135.gameMode).not.toBeDefined();
   expect(savegame101221.gameMode).not.toBeDefined();
-  expect(savegame10213.gameMode).toBe('Single player');
-  expect(savegame103279.gameMode).toBe('Multiplayer');
+  expect(savegame10213.gameMode).toBe(Civ5Save.GAME_MODES.SINGLE);
+  expect(savegame103279.gameMode).toBe(Civ5Save.GAME_MODES.MULTI);
 });
 
 test('Get player 1 civilization', () => {
-  expect(savegame10017.player1Civilization).toBe('CIVILIZATION_PERSIA');
-  expect(savegame101135.player1Civilization).toBe('CIVILIZATION_ARABIA');
-  expect(savegame101221.player1Civilization).toBe('CIVILIZATION_FRANCE');
-  expect(savegame10213.player1Civilization).toBe('CIVILIZATION_SPAIN');
-  expect(savegame103279.player1Civilization).toBe('CIVILIZATION_DENMARK');
+  expect(savegame10017.player1Civilization).toBe('Persia');
+  expect(savegame101135.player1Civilization).toBe('Arabia');
+  expect(savegame101221.player1Civilization).toBe('France');
+  expect(savegame10213.player1Civilization).toBe('Spain');
+  expect(savegame103279.player1Civilization).toBe('Denmark');
 });
 
 test('Get difficulty', () => {
-  expect(savegame10017.difficulty).toBe('HANDICAP_CHIEFTAIN');
-  expect(savegame101135.difficulty).toBe('HANDICAP_WARLORD');
-  expect(savegame101221.difficulty).toBe('HANDICAP_PRINCE');
-  expect(savegame10213.difficulty).toBe('HANDICAP_IMMORTAL');
-  expect(savegame103279.difficulty).toBe('HANDICAP_SETTLER');
+  expect(savegame10017.difficulty).toBe('Chieftain');
+  expect(savegame101135.difficulty).toBe('Warlord');
+  expect(savegame101221.difficulty).toBe('Prince');
+  expect(savegame10213.difficulty).toBe('Immortal');
+  expect(savegame103279.difficulty).toBe('Settler');
 });
 
 test('Get starting era', () => {
-  expect(savegame10017.startingEra).toBe('ERA_ANCIENT');
-  expect(savegame101135.startingEra).toBe('ERA_ANCIENT');
-  expect(savegame101221.startingEra).toBe('ERA_MEDIEVAL');
-  expect(savegame10213.startingEra).toBe('ERA_ANCIENT');
-  expect(savegame103279.startingEra).toBe('ERA_FUTURE');
+  expect(savegame10017.startingEra).toBe('Ancient');
+  expect(savegame101135.startingEra).toBe('Ancient');
+  expect(savegame101221.startingEra).toBe('Medieval');
+  expect(savegame10213.startingEra).toBe('Ancient');
+  expect(savegame103279.startingEra).toBe('Future');
 });
 
 test('Get current era', () => {
-  expect(savegame10017.currentEra).toBe('ERA_ANCIENT');
-  expect(savegame101135.currentEra).toBe('ERA_ANCIENT');
-  expect(savegame101221.currentEra).toBe('ERA_RENAISSANCE');
-  expect(savegame10213.currentEra).toBe('ERA_ANCIENT');
-  expect(savegame103279.currentEra).toBe('ERA_FUTURE');
+  expect(savegame10017.currentEra).toBe('Ancient');
+  expect(savegame101135.currentEra).toBe('Ancient');
+  expect(savegame101221.currentEra).toBe('Renaissance');
+  expect(savegame10213.currentEra).toBe('Ancient');
+  expect(savegame103279.currentEra).toBe('Future');
 });
 
 test('Get game pace', () => {
-  expect(savegame10017.gamePace).toBe('GAMESPEED_STANDARD');
-  expect(savegame101135.gamePace).toBe('GAMESPEED_MARATHON');
-  expect(savegame101221.gamePace).toBe('GAMESPEED_QUICK');
-  expect(savegame10213.gamePace).toBe('GAMESPEED_STANDARD');
-  expect(savegame103279.gamePace).toBe('GAMESPEED_QUICK');
+  expect(savegame10017.gamePace).toBe('Standard');
+  expect(savegame101135.gamePace).toBe('Marathon');
+  expect(savegame101221.gamePace).toBe('Quick');
+  expect(savegame10213.gamePace).toBe('Standard');
+  expect(savegame103279.gamePace).toBe('Quick');
 });
 
 test('Get map size', () => {
-  expect(savegame10017.mapSize).toBe('WORLDSIZE_SMALL');
-  expect(savegame101135.mapSize).toBe('WORLDSIZE_HUGE');
-  expect(savegame101221.mapSize).toBe('WORLDSIZE_STANDARD');
-  expect(savegame10213.mapSize).toBe('WORLDSIZE_STANDARD');
-  expect(savegame103279.mapSize).toBe('WORLDSIZE_DUEL');
+  expect(savegame10017.mapSize).toBe('Small');
+  expect(savegame101135.mapSize).toBe('Huge');
+  expect(savegame101221.mapSize).toBe('Standard');
+  expect(savegame10213.mapSize).toBe('Standard');
+  expect(savegame103279.mapSize).toBe('Duel');
 });
 
 test('Get map file', () => {
-  expect(savegame10017.mapFile).toBe('Assets\\Maps\\Continents.lua');
-  expect(savegame101135.mapFile).toBe('Assets/Maps/Pangaea.lua');
-  expect(savegame101221.mapFile).toBe('Assets\\DLC\\DLC_02\\Scenarios\\NewWorldScenario\\NewWorld_Scenario_MapScript.lua');
-  expect(savegame10213.mapFile).toBe('Assets\\Maps\\Pangaea.lua');
-  expect(savegame103279.mapFile).toBe('Assets\\Maps\\Earth_Duel.Civ5Map');
+  expect(savegame10017.mapFile).toBe('Continents');
+  expect(savegame101135.mapFile).toBe('Pangaea');
+  expect(savegame101221.mapFile).toBe('NewWorld Scenario MapScript');
+  expect(savegame10213.mapFile).toBe('Pangaea');
+  expect(savegame103279.mapFile).toBe('Earth Duel');
 });
 
 test('Get enabled DLC', () => {
