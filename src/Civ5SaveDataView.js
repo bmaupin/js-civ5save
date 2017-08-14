@@ -1,10 +1,13 @@
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 export default class Civ5SaveDataView extends DataView {
   getString(byteOffset, byteLength) {
-    let string = '';
-    for (let byte = byteOffset; byte < byteOffset + byteLength; byte++) {
-      string += String.fromCharCode(this.getUint8(byte));
+    if (typeof TextDecoder === 'function') {
+      return new TextDecoder().decode(this.buffer.slice(byteOffset, byteOffset + byteLength));
+    } else {
+      // https://stackoverflow.com/a/17192845/399105
+      let encodedString = String.fromCharCode.apply(null, new Uint8Array(this.buffer.slice(byteOffset,
+        byteOffset + byteLength)));
+      return decodeURIComponent(escape(encodedString));
     }
-    return string;
   }
 }
