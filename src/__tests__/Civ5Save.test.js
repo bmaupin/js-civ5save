@@ -17,7 +17,6 @@ const NEW_DOMINATION_VICTORY = true;
 const NEW_LOCK_MODS = true;
 const NEW_MAX_TURNS = 123;
 const NEW_NEW_RANDOM_SEED = true;
-const NEW_NO_ANCIENT_RUINS = false;
 const NEW_NO_BARBARIANS = false;
 const NEW_NO_CHANGING_WAR_OR_PEACE = true;
 const NEW_NO_CITY_RAZING = false;
@@ -314,27 +313,6 @@ test('Set new random seed', async () => {
   expect(savegame101221.newRandomSeed).toBe(NEW_NEW_RANDOM_SEED);
   expect(savegame10213.newRandomSeed).toBe(NEW_NEW_RANDOM_SEED);
   expect(savegame103279.newRandomSeed).toBe(NEW_NEW_RANDOM_SEED);
-});
-
-test('Get no ancient ruins', () => {
-  expect(savegame10017.noAncientRuins).toBe(false);
-  expect(savegame101135.noAncientRuins).toBe(false);
-  expect(savegame101221.noAncientRuins).toBe(false);
-  expect(savegame10213.noAncientRuins).toBe(false);
-  expect(savegame103279.noAncientRuins).toBe(true);
-});
-
-test('Set no ancient ruins', async () => {
-  savegame10017.noAncientRuins = NEW_NO_ANCIENT_RUINS;
-  savegame101135.noAncientRuins = NEW_NO_ANCIENT_RUINS;
-  savegame101221.noAncientRuins = NEW_NO_ANCIENT_RUINS;
-  savegame10213.noAncientRuins = NEW_NO_ANCIENT_RUINS;
-  savegame103279.noAncientRuins = NEW_NO_ANCIENT_RUINS;
-  expect(savegame10017.noAncientRuins).toBe(NEW_NO_ANCIENT_RUINS);
-  expect(savegame101135.noAncientRuins).toBe(NEW_NO_ANCIENT_RUINS);
-  expect(savegame101221.noAncientRuins).toBe(NEW_NO_ANCIENT_RUINS);
-  expect(savegame10213.noAncientRuins).toBe(NEW_NO_ANCIENT_RUINS);
-  expect(savegame103279.noAncientRuins).toBe(NEW_NO_ANCIENT_RUINS);
 });
 
 test('Get no barbarians', () => {
@@ -896,7 +874,6 @@ test('Save to file', async () => {
   expect(newSavegame.lockMods).toBe(NEW_LOCK_MODS);
   expect(newSavegame.maxTurns).toBe(NEW_MAX_TURNS);
   expect(newSavegame.newRandomSeed).toBe(NEW_NEW_RANDOM_SEED);
-  expect(newSavegame.noAncientRuins).toBe(NEW_NO_ANCIENT_RUINS);
   expect(newSavegame.noBarbarians).toBe(NEW_NO_BARBARIANS);
   expect(newSavegame.noChangingWarPeace).toBe(NEW_NO_CHANGING_WAR_OR_PEACE);
   expect(newSavegame.noCityRazing).toBe(NEW_NO_CITY_RAZING);
