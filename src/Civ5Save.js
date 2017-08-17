@@ -382,14 +382,6 @@ export default class Civ5Save {
     this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
   }
 
-  get noAncientRuins() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_GOODY_HUTS');
-  }
-
-  set noAncientRuins(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_GOODY_HUTS', newValue);
-  }
-
   get noBarbarians() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_BARBARIANS');
   }
