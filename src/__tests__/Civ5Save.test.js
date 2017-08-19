@@ -39,7 +39,7 @@ const NEW_SCIENCE_VICTORY = false;
 const NEW_TIME_VICTORY = true;
 const NEW_TURN_TIMER_ENABLED = false;
 const NEW_TURN_TIMER_VALUE = 321;
-const NEW_TURN_TYPE = Civ5Save.TURN_TYPES.SIMULTANEOUS;
+const NEW_TURN_MODE = Civ5Save.TURN_MODES.SIMULTANEOUS;
 
 let savegame10017;
 let savegame101135;
@@ -672,25 +672,25 @@ test('Set turn timer enabled', async () => {
   expect(savegame103279.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
 });
 
-test('Get turn type', () => {
-  expect(savegame10017.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame101135.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame101221.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame10213.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame103279.turnType).toBe(Civ5Save.TURN_TYPES.HYBRID);
+test('Get turn mode', () => {
+  expect(savegame10017.turnMode).toBe(Civ5Save.TURN_MODES.SEQUENTIAL);
+  expect(savegame101135.turnMode).toBe(Civ5Save.TURN_MODES.SEQUENTIAL);
+  expect(savegame101221.turnMode).toBe(Civ5Save.TURN_MODES.SEQUENTIAL);
+  expect(savegame10213.turnMode).toBe(Civ5Save.TURN_MODES.SEQUENTIAL);
+  expect(savegame103279.turnMode).toBe(Civ5Save.TURN_MODES.HYBRID);
 });
 
-test('Set turn timer enabled', async () => {
-  savegame10017.turnType = Civ5Save.TURN_TYPES.HYBRID;
-  savegame101135.turnType = Civ5Save.TURN_TYPES.SIMULTANEOUS;
-  savegame101221.turnType = Civ5Save.TURN_TYPES.SEQUENTIAL;
-  savegame10213.turnType = NEW_TURN_TYPE;
-  savegame103279.turnType = NEW_TURN_TYPE;
-  expect(savegame10017.turnType).toBe(Civ5Save.TURN_TYPES.HYBRID);
-  expect(savegame101135.turnType).toBe(Civ5Save.TURN_TYPES.SIMULTANEOUS);
-  expect(savegame101221.turnType).toBe(Civ5Save.TURN_TYPES.SEQUENTIAL);
-  expect(savegame10213.turnType).toBe(NEW_TURN_TYPE);
-  expect(savegame103279.turnType).toBe(NEW_TURN_TYPE);
+test('Set turn mode', async () => {
+  savegame10017.turnMode = Civ5Save.TURN_MODES.HYBRID;
+  savegame101135.turnMode = Civ5Save.TURN_MODES.SIMULTANEOUS;
+  savegame101221.turnMode = Civ5Save.TURN_MODES.SEQUENTIAL;
+  savegame10213.turnMode = NEW_TURN_MODE;
+  savegame103279.turnMode = NEW_TURN_MODE;
+  expect(savegame10017.turnMode).toBe(Civ5Save.TURN_MODES.HYBRID);
+  expect(savegame101135.turnMode).toBe(Civ5Save.TURN_MODES.SIMULTANEOUS);
+  expect(savegame101221.turnMode).toBe(Civ5Save.TURN_MODES.SEQUENTIAL);
+  expect(savegame10213.turnMode).toBe(NEW_TURN_MODE);
+  expect(savegame103279.turnMode).toBe(NEW_TURN_MODE);
 });
 
 test('Get max turns', () => {
@@ -895,5 +895,5 @@ test('Save to file', async () => {
   expect(newSavegame.timeVictory).toBe(NEW_TIME_VICTORY);
   expect(newSavegame.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
   expect(newSavegame.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
-  expect(newSavegame.turnType).toBe(NEW_TURN_TYPE);
+  expect(newSavegame.turnMode).toBe(NEW_TURN_MODE);
 });
