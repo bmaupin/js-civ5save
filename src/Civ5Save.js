@@ -91,12 +91,7 @@ export default class Civ5Save {
       let propertyByteOffset = null;
       if (propertySection === previousPropertySection) {
         let previousProperty = properties[previousPropertyName];
-        // previousProperty.length is a common spot of failure if something went wrong
-        try {
-          propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
-        } catch (e) {
-          break;
-        }
+        propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
 
       // Workaround for a couple values that are preceded by string arrays (see comment above)
       } else if (propertyName === 'privateGame') {
@@ -109,11 +104,15 @@ export default class Civ5Save {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
       }
 
-      properties[propertyName] = Civ5SavePropertyFactory.fromType(
-        propertyDefinition.type,
-        propertyByteOffset,
-        propertyDefinition.length,
-        this._saveData);
+      try {
+        properties[propertyName] = Civ5SavePropertyFactory.fromType(
+          propertyDefinition.type,
+          propertyByteOffset,
+          propertyDefinition.length,
+          this._saveData);
+      } catch (e) {
+        throw new Error(`Failure parsing save at property ${propertyName}`);
+      }
 
       previousPropertyName = propertyName;
       previousPropertySection = propertySection;
