@@ -7,6 +7,7 @@ const TEST_SAVEGAME_V101135 = path.join(__dirname, 'resources', '1.0.1.135.Civ5S
 const TEST_SAVEGAME_V101221 = path.join(__dirname, 'resources', '1.0.1.221.Civ5Save');
 const TEST_SAVEGAME_V10213 = path.join(__dirname, 'resources', '1.0.2.13.Civ5Save');
 const TEST_SAVEGAME_V103279 = path.join(__dirname, 'resources', '1.0.3.279.Civ5Save');
+const TEST_SAVEGAME_BROKEN = path.join(__dirname, 'resources', 'broken.Civ5Save');
 
 const NEW_ALWAYS_PEACE = true;
 const NEW_ALWAYS_WAR = true;
@@ -896,4 +897,9 @@ test('Save to file', async () => {
   expect(newSavegame.turnTimerEnabled).toBe(NEW_TURN_TIMER_ENABLED);
   expect(newSavegame.turnTimerLength).toBe(NEW_TURN_TIMER_VALUE);
   expect(newSavegame.turnMode).toBe(NEW_TURN_MODE);
+});
+
+test('Open broken save game', async () => {
+  let fileBlob = await getFileBlob(TEST_SAVEGAME_BROKEN);
+  await expect(Civ5Save.fromFile(fileBlob)).rejects.toBeDefined();
 });
