@@ -2,7 +2,7 @@ import Civ5SaveDataView from './Civ5SaveDataView';
 import Civ5SavePropertyDefinitions from './Civ5SavePropertyDefinitions.json';
 import Civ5SavePropertyFactory from './Civ5SavePropertyFactory';
 
-export default class Civ5Save {
+class Civ5Save {
   constructor(saveData) {
     // TODO: Convert fields and methods starting with underscores to private once it makes it into the spec
     // (https://github.com/tc39/proposals)
@@ -590,3 +590,5 @@ Civ5Save.TURN_MODES = {
   SEQUENTIAL: 'Sequential',
   SIMULTANEOUS: 'Simultaneous'
 };
+
+export default Civ5Save;

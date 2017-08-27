@@ -421,6 +421,7 @@
     "type": "bytes"
   },
   "gameOptionsMap": {
+    "_comment": "This is where a large chunk of game options are stored (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)",
     "byteOffsetInSection": null,
     "length": null,
     "sectionByBuild": {
