@@ -19,7 +19,7 @@ module.exports = {
               plugins: [
                 ['babel-plugin-transform-builtin-extend', { globals: ["DataView"] }],
                 // Fix ReferenceError: regeneratorRuntime is not defined (https://stackoverflow.com/a/36821986/399105)
-                ['transform-runtime', { 'polyfill': false }]
+                ['transform-runtime']
               ]
             }
           },
@@ -31,7 +31,7 @@ module.exports = {
               presets: ['env'],
               plugins: [
                 ['babel-plugin-transform-builtin-extend', { globals: ["DataView"] }],
-                ['transform-runtime', { 'polyfill': false }]
+                ['transform-runtime']
               ]
             }
           }
