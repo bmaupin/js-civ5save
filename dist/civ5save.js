@@ -1722,9 +1722,9 @@ var Civ5Save = function () {
 
 
   (0, _createClass3.default)(Civ5Save, [{
-    key: 'toFile',
-    value: function toFile(fileName) {
-      return new File([this._saveData], fileName, {
+    key: 'toBlob',
+    value: function toBlob() {
+      return new Blob([this._saveData], {
         type: 'application/octet-stream'
       });
     }

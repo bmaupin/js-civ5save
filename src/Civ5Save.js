@@ -37,8 +37,8 @@ class Civ5Save {
     });
   }
 
-  toFile(fileName) {
-    return new File([this._saveData], fileName, {
+  toBlob() {
+    return new Blob([this._saveData], {
       type: 'application/octet-stream'
     });
   }

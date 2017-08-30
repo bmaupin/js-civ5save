@@ -35,7 +35,6 @@ const NEW_PRIVATE_GAME = false;
 const NEW_PROMOTION_SAVING = false;
 const NEW_RAGING_BARBARIANS = false;
 const NEW_RANDOM_PERSONALITIES = false;
-const NEW_SAVEGAME_FILENAME = 'New.Civ5Save';
 const NEW_SCIENCE_VICTORY = false;
 const NEW_TIME_VICTORY = true;
 const NEW_TURN_TIMER_ENABLED = false;
@@ -862,8 +861,8 @@ test('Set diplomatic victory', () => {
   expect(savegame103279.diplomaticVictory).toBe(NEW_DIPLOMATIC_VICTORY);
 });
 
-test('Save to file', async () => {
-  let newSavegameFile = savegame103279.toFile(NEW_SAVEGAME_FILENAME);
+test('Save to blob', async () => {
+  let newSavegameFile = savegame103279.toBlob();
   let newSavegame = await Civ5Save.fromFile(newSavegameFile);
 
   expect(newSavegame.alwaysPeace).toBe(NEW_ALWAYS_PEACE);
