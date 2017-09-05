@@ -118,6 +118,31 @@
     },
     "type": "dlcStringArray"
   },
+  "playerStatuses": {
+    "_comment": "Players after the first player marked as none seem to be superfluous. Length is number of items, not bytes.",
+    "byteOffsetInSection": 4,
+    "length": 64,
+    "sectionByBuild": {
+      "98650": 4
+    },
+    "type": "intArray",
+    "values": [
+      "",
+      "AI",
+      "Dead",
+      "Human",
+      "None"
+    ]
+  },
+  "playerCivilizations": {
+    "_comment": "Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there at all. Length is number of items, not bytes.",
+    "byteOffsetInSection": 4,
+    "length": 64,
+    "sectionByBuild": {
+      "310700": 8
+    },
+    "type": "stringArray"
+  },
   "section19Skip1": {
     "byteOffsetInSection": 264,
     "length": null,
@@ -202,7 +227,7 @@
     "type": "int"
   },
   "playerColours": {
-    "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list bytes. Seems like it can have 63 or 64 items.",
+    "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list of bytes. Seems like it can have 63 or 64 items.",
     "byteOffsetInSection": 4,
     "length": null,
     "sectionByBuild": {

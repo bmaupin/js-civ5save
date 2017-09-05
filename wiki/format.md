@@ -47,7 +47,7 @@ Notes:
   - Build ?????? - 389545 (version 1.0.3.80)
     - Contains 32 sections
 - Somewhere around build 230620 the savegame format had some major changes, including the addition of the game version and build near the beginning of the file
-- Starting with build 310700 the player colours are written as strings instead of hex values
+- Starting with build 310700 the player colours are written as strings instead of hex values. Player civilizations and leaders are also added to the file as strings.
 
 Relationship between time victory and max turns
 ---
