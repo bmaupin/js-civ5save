@@ -210,6 +210,163 @@ test('Get enabled DLC', () => {
   ]);
 });
 
+test('Get players', () => {
+  expect(savegame10017.players).toEqual([
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.HUMAN
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+  ]);
+  expect(savegame101135.players).toEqual([
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.HUMAN
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.DEAD
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.DEAD
+    },
+  ]);
+  expect(savegame101221.players).toEqual([
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.HUMAN
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.DEAD
+    },
+    {
+      civilization: undefined,
+      status: Civ5Save.PLAYER_STATUSES.DEAD
+    },
+  ]);
+  expect(savegame10213.players).toEqual([
+    {
+      civilization: 'Spain',
+      status: Civ5Save.PLAYER_STATUSES.HUMAN
+    },
+    {
+      civilization: 'Ottoman',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: 'Greece',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: 'Egypt',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: 'Byzantium',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: 'Austria',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: 'Songhai',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+    {
+      civilization: 'Ethiopia',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+  ]);
+  expect(savegame103279.players).toEqual([
+    {
+      civilization: 'Denmark',
+      status: Civ5Save.PLAYER_STATUSES.HUMAN
+    },
+    {
+      civilization: 'Austria',
+      status: Civ5Save.PLAYER_STATUSES.AI
+    },
+  ]);
+});
+
 test('Get always peace', () => {
   expect(savegame10017.alwaysPeace).toBe(false);
   expect(savegame101135.alwaysPeace).toBe(false);

@@ -277,6 +277,28 @@ class Civ5Save {
     }
   }
 
+  get players() {
+    if (this._isNullOrUndefined(this._players)) {
+      this._players = new Array();
+      let playerStatuses = this._properties.playerStatuses.getArray();
+      for (let i = 0; i < playerStatuses.length; i++) {
+        let player = new Object();
+        player.status = Civ5SavePropertyDefinitions.playerStatuses.values[playerStatuses[i]];
+
+        if (this._properties.hasOwnProperty('playerCivilizations')) {
+          player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);
+        }
+        if (player.status == Civ5Save.PLAYER_STATUSES.NONE) {
+          break;
+        }
+
+        this._players.push(player);
+      }
+    }
+
+    return this._players;
+  }
+
   get maxTurns() {
     return this._getPropertyIfDefined('maxTurns');
   }
@@ -583,6 +605,13 @@ Civ5Save.GAME_MODES = {
   SINGLE: 'Single player',
   MULTI: 'Multiplayer',
   HOTSEAT: 'Hotseat'
+};
+
+Civ5Save.PLAYER_STATUSES = {
+  AI: 'AI',
+  DEAD: 'Dead',
+  HUMAN: 'Human',
+  NONE: 'None'
 };
 
 Civ5Save.TURN_MODES = {
