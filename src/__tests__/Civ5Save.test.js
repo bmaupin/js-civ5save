@@ -111,14 +111,6 @@ test('Get game mode', () => {
   expect(savegame103279.gameMode).toBe(Civ5Save.GAME_MODES.MULTI);
 });
 
-test('Get player 1 civilization', () => {
-  expect(savegame10017.player1Civilization).toBe('Persia');
-  expect(savegame101135.player1Civilization).toBe('Arabia');
-  expect(savegame101221.player1Civilization).toBe('France');
-  expect(savegame10213.player1Civilization).toBe('Spain');
-  expect(savegame103279.player1Civilization).toBe('Denmark');
-});
-
 test('Get difficulty', () => {
   expect(savegame10017.difficulty).toBe('Chieftain');
   expect(savegame101135.difficulty).toBe('Warlord');
@@ -213,7 +205,7 @@ test('Get enabled DLC', () => {
 test('Get players', () => {
   expect(savegame10017.players).toEqual([
     {
-      civilization: undefined,
+      civilization: 'Persia',
       status: Civ5Save.PLAYER_STATUSES.HUMAN
     },
     {
@@ -239,7 +231,7 @@ test('Get players', () => {
   ]);
   expect(savegame101135.players).toEqual([
     {
-      civilization: undefined,
+      civilization: 'Arabia',
       status: Civ5Save.PLAYER_STATUSES.HUMAN
     },
     {
@@ -289,7 +281,7 @@ test('Get players', () => {
   ]);
   expect(savegame101221.players).toEqual([
     {
-      civilization: undefined,
+      civilization: 'France',
       status: Civ5Save.PLAYER_STATUSES.HUMAN
     },
     {

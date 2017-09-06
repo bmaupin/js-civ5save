@@ -240,10 +240,6 @@ class Civ5Save {
     }
   }
 
-  get player1Civilization() {
-    return this._getBeautifiedPropertyIfDefined('player1Civilization');
-  }
-
   get difficulty() {
     return this._getBeautifiedPropertyIfDefined('difficulty');
   }
@@ -287,7 +283,11 @@ class Civ5Save {
 
         if (this._properties.hasOwnProperty('playerCivilizations')) {
           player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);
+        } else if (i === 0 && this._properties.hasOwnProperty('player1Civilization')) {
+          player.civilization = this._beautifyPropertyValue(
+            this._properties.player1Civilization.getValue(this._saveData));
         }
+
         if (player.status == Civ5Save.PLAYER_STATUSES.NONE) {
           break;
         }
