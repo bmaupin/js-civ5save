@@ -169,7 +169,7 @@ class Civ5Save {
 
   // https://stackoverflow.com/a/22395463/399105
   _areArraysEqual(array1, array2) {
-    return (array1.length == array2.length) && array1.every(function(element, index) {
+    return (array1.length === array2.length) && array1.every(function(element, index) {
       return element === array2[index];
     });
   }
@@ -281,15 +281,19 @@ class Civ5Save {
         let player = new Object();
         player.status = Civ5SavePropertyDefinitions.playerStatuses.values[playerStatuses[i]];
 
+        if (player.status === Civ5Save.PLAYER_STATUSES.NONE) {
+          break;
+        }
+
         if (this._properties.hasOwnProperty('playerCivilizations')) {
+          if (this._properties.playerCivilizations.getArray()[i] === '') {
+            break;
+          }
           player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);
+
         } else if (i === 0 && this._properties.hasOwnProperty('player1Civilization')) {
           player.civilization = this._beautifyPropertyValue(
             this._properties.player1Civilization.getValue(this._saveData));
-        }
-
-        if (player.status == Civ5Save.PLAYER_STATUSES.NONE) {
-          break;
         }
 
         this._players.push(player);
