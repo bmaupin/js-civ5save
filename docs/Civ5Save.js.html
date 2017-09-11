@@ -1,4 +1,32 @@
-import Civ5SaveDataView from './Civ5SaveDataView';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Civ5Save.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Civ5Save.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Civ5SaveDataView from './Civ5SaveDataView';
 import Civ5SavePropertyDefinitions from './Civ5SavePropertyDefinitions.json';
 import Civ5SavePropertyFactory from './Civ5SavePropertyFactory';
 
@@ -150,16 +178,16 @@ class Civ5Save {
     };
     sectionOffsets.push(section);
 
-    for (let byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {
+    for (let byteOffset = 0; byteOffset &lt; saveDataBytes.length; byteOffset++) {
       if (this._areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
         // Player colour section before build 310700 contains hex values, which can include the section delimiter
-        if (Number(this.gameBuild) < 310700) {
+        if (Number(this.gameBuild) &lt; 310700) {
           let playerColourSection = 23;
           if (Number(this.gameBuild) >= 262623) {
             playerColourSection = 24;
           }
           if (sectionOffsets.length === playerColourSection) {
-            if (byteOffset - sectionOffsets[sectionOffsets.length - 1].start < 270) {
+            if (byteOffset - sectionOffsets[sectionOffsets.length - 1].start &lt; 270) {
               continue;
             }
           }
@@ -182,7 +210,7 @@ class Civ5Save {
 
   // https://stackoverflow.com/a/22395463/399105
   _areArraysEqual(array1, array2) {
-    return (array1.length === array2.length) && array1.every(function(element, index) {
+    return (array1.length === array2.length) &amp;&amp; array1.every(function(element, index) {
       return element === array2[index];
     });
   }
@@ -216,7 +244,7 @@ class Civ5Save {
     const GAME_BUILD_MARKER = 'FINAL_RELEASE';
     const GAME_BUILD_MARKER_ARRAY = (function() {
       let gameBuildMarkerArray = [];
-      for (let i = 0; i < GAME_BUILD_MARKER.length; i++) {
+      for (let i = 0; i &lt; GAME_BUILD_MARKER.length; i++) {
         gameBuildMarkerArray.push(GAME_BUILD_MARKER.charCodeAt(i));
       }
       return gameBuildMarkerArray;
@@ -224,7 +252,7 @@ class Civ5Save {
 
     let gameBuildMarkerByteOffset = 0;
     let saveDataBytes = new Int8Array(this._saveData.buffer);
-    for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {
+    for (let byteOffset = 0; byteOffset &lt;= saveDataBytes.length; byteOffset++) {
       if (this._areArraysEqual(
         saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),
         GAME_BUILD_MARKER_ARRAY)) {
@@ -340,7 +368,7 @@ class Civ5Save {
     if (this._isNullOrUndefined(this._players)) {
       this._players = new Array();
       let playerStatuses = this._properties.playerStatuses.getArray();
-      for (let i = 0; i < playerStatuses.length; i++) {
+      for (let i = 0; i &lt; playerStatuses.length; i++) {
         let player = new Object();
         player.status = Civ5SavePropertyDefinitions.playerStatuses.values[playerStatuses[i]];
 
@@ -354,7 +382,7 @@ class Civ5Save {
           }
           player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);
 
-        } else if (i === 0 && this._properties.hasOwnProperty('player1Civilization')) {
+        } else if (i === 0 &amp;&amp; this._properties.hasOwnProperty('player1Civilization')) {
           player.civilization = this._beautifyPropertyValue(
             this._properties.player1Civilization.getValue(this._saveData));
         }
@@ -739,7 +767,7 @@ class Civ5Save {
       return Civ5Save.TURN_MODES.HYBRID;
     } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === true) {
       return Civ5Save.TURN_MODES.SIMULTANEOUS;
-    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === false &&
+    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === false &amp;&amp;
       this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === false) {
       return Civ5Save.TURN_MODES.SEQUENTIAL;
     }
@@ -814,3 +842,26 @@ Civ5Save.TURN_MODES = {
 };
 
 export default Civ5Save;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Civ5Save.html">Civ5Save</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a> on Mon Sep 11 2017 13:55:05 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

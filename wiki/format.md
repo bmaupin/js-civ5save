@@ -14,9 +14,10 @@
 |  | String | `GAMESPEED_STANDARD`<br>`GAMESPEED_QUICK` | Game pace |
 |  | String | `WORLDSIZE_DUEL`<br>`WORLDSIZE_SMALL` | Map size |
 |  | String | `Assets\Maps\Continents.lua`<br>`Assets\Maps\Earth_Duel.Civ5Map` | Map |
-| 3 |  |  | Player names |
+| 3 |  |  | Player names (for human players) |
 | 4 |  |  | Player statuses |
-| 8 |  |  | Civilizations |
+| 7 |  |  | Player difficulties? |
+| 8 |  |  | Player civilizations |
 | 9 |  |  | Leaders |
 | 14 |  |  | Climate |
 | 19* |  |  |  |

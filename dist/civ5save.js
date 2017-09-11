@@ -1711,6 +1711,10 @@ var _Civ5SavePropertyFactory2 = _interopRequireDefault(_Civ5SavePropertyFactory)
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/**
+ * A Civilization V save file object.
+ * @param {DataView} saveData - The save file contents.
+ */
 var Civ5Save = function () {
   function Civ5Save(saveData) {
     (0, _classCallCheck3.default)(this, Civ5Save);
@@ -1723,12 +1727,23 @@ var Civ5Save = function () {
     this._properties = this._getProperties();
   }
 
+  /**
+   * Create a Civ5Save object from a file.
+   * @param {File} saveFile - A Civilization V save file.
+   * @return {Civ5Save} A Civ5Save object.
+   */
   // Use a static factory to instantiate the object since it relies on data that needs to be fetched asynchronously
   // https://stackoverflow.com/a/24686979/399105
 
 
   (0, _createClass3.default)(Civ5Save, [{
     key: 'toBlob',
+
+
+    /**
+     * Write Civ5Save object to a blob.
+     * @return {Blob} The save file with any changes.
+     */
     value: function toBlob() {
       return new Blob([this._saveData], {
         type: 'application/octet-stream'
@@ -1878,6 +1893,12 @@ var Civ5Save = function () {
     value: function _isNullOrUndefined(variable) {
       return typeof variable === 'undefined' || variable === null;
     }
+
+    /**
+     * Game build number.
+     * @type {string}
+     */
+
   }, {
     key: '_getGameBuild',
 
@@ -1912,6 +1933,12 @@ var Civ5Save = function () {
 
       return gameBuild;
     }
+
+    /**
+     * Game version.
+     * @type {string}
+     */
+
   }, {
     key: '_getPropertyIfDefined',
     value: function _getPropertyIfDefined(propertyName) {
@@ -1961,11 +1988,23 @@ var Civ5Save = function () {
     get: function get() {
       return this._getPropertyIfDefined('gameVersion');
     }
+
+    /**
+     * Current turn.
+     * @type {number}
+     */
+
   }, {
     key: 'currentTurn',
     get: function get() {
       return this._getPropertyIfDefined('currentTurn');
     }
+
+    /**
+     * Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.
+     * @type {string}
+     */
+
   }, {
     key: 'gameMode',
     get: function get() {
@@ -1973,31 +2012,67 @@ var Civ5Save = function () {
         return _Civ5SavePropertyDefinitions2.default.gameMode.values[this._properties.gameMode.getValue(this._saveData)];
       }
     }
+
+    /**
+     * Game difficulty.
+     * @type {string}
+     */
+
   }, {
     key: 'difficulty',
     get: function get() {
       return this._getBeautifiedPropertyIfDefined('difficulty');
     }
+
+    /**
+     * Starting era.
+     * @type {string}
+     */
+
   }, {
     key: 'startingEra',
     get: function get() {
       return this._getBeautifiedPropertyIfDefined('startingEra');
     }
+
+    /**
+     * Current era.
+     * @type {string}
+     */
+
   }, {
     key: 'currentEra',
     get: function get() {
       return this._getBeautifiedPropertyIfDefined('currentEra');
     }
+
+    /**
+     * Game pace.
+     * @type {string}
+     */
+
   }, {
     key: 'gamePace',
     get: function get() {
       return this._getBeautifiedPropertyIfDefined('gamePace');
     }
+
+    /**
+     * Map size.
+     * @type {string}
+     */
+
   }, {
     key: 'mapSize',
     get: function get() {
       return this._getBeautifiedPropertyIfDefined('mapSize');
     }
+
+    /**
+     * Map file.
+     * @type {string}
+     */
+
   }, {
     key: 'mapFile',
     get: function get() {
@@ -2006,6 +2081,12 @@ var Civ5Save = function () {
         return this._beautifyMapFileValue(mapFileValue);
       }
     }
+
+    /**
+     * List of enabled DLC.
+     * @type {Array}
+     */
+
   }, {
     key: 'enabledDLC',
     get: function get() {
@@ -2013,6 +2094,14 @@ var Civ5Save = function () {
         return this._properties.enabledDLC.getArray();
       }
     }
+
+    /**
+     * List of players with their civilization and status as properties. Civilization may be `undefined`. Status is one
+     *     of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,
+     *     `Civ5Save.PLAYER_STATUSES.NONE`.
+     * @type {Array}
+     */
+
   }, {
     key: 'players',
     get: function get() {
@@ -2042,6 +2131,12 @@ var Civ5Save = function () {
 
       return this._players;
     }
+
+    /**
+     * Max turns.
+     * @type {number}
+     */
+
   }, {
     key: 'maxTurns',
     get: function get() {
@@ -2050,6 +2145,13 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.maxTurns.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.
+     *     Otherwise, it is in minutes.
+     * @type {number}
+     */
+
   }, {
     key: 'turnTimerLength',
     get: function get() {
@@ -2058,6 +2160,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.turnTimerLength.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Private setting for multiplayer games.
+     * @type {boolean}
+     */
+
   }, {
     key: 'privateGame',
     get: function get() {
@@ -2066,6 +2174,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.privateGame.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Time victory enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'timeVictory',
     get: function get() {
@@ -2074,6 +2188,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.timeVictory.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Science victory enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'scienceVictory',
     get: function get() {
@@ -2082,6 +2202,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.scienceVictory.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Domination victory enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'dominationVictory',
     get: function get() {
@@ -2090,6 +2216,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.dominationVictory.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Cultural victory enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'culturalVictory',
     get: function get() {
@@ -2098,6 +2230,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.culturalVictory.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Diplomatic victory enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'diplomaticVictory',
     get: function get() {
@@ -2106,6 +2244,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._properties.diplomaticVictory.setValue(this._saveData, newValue);
     }
+
+    /**
+     * Always peace enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'alwaysPeace',
     get: function get() {
@@ -2114,6 +2258,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
     }
+
+    /**
+     * Always war enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'alwaysWar',
     get: function get() {
@@ -2122,6 +2272,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
     }
+
+    /**
+     * Complete kills enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'completeKills',
     get: function get() {
@@ -2130,6 +2286,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
     }
+
+    /**
+     * Lock mods enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'lockMods',
     get: function get() {
@@ -2138,6 +2300,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);
     }
+
+    /**
+     * New random seed enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'newRandomSeed',
     get: function get() {
@@ -2146,6 +2314,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
     }
+
+    /**
+     * No barbarians enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noBarbarians',
     get: function get() {
@@ -2154,6 +2328,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
     }
+
+    /**
+     * No changing war or peace enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noChangingWarPeace',
     get: function get() {
@@ -2162,6 +2342,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
     }
+
+    /**
+     * No city razing enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noCityRazing',
     get: function get() {
@@ -2170,6 +2356,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
     }
+
+    /**
+     * No cultural overview UI enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noCultureOverviewUI',
     get: function get() {
@@ -2178,6 +2370,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
     }
+
+    /**
+     * No espionage enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noEspionage',
     get: function get() {
@@ -2186,6 +2384,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
     }
+
+    /**
+     * No happiness enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noHappiness',
     get: function get() {
@@ -2194,6 +2398,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
     }
+
+    /**
+     * No policies enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noPolicies',
     get: function get() {
@@ -2202,6 +2412,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);
     }
+
+    /**
+     * No religion enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noReligion',
     get: function get() {
@@ -2210,6 +2426,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);
     }
+
+    /**
+     * No science enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noScience',
     get: function get() {
@@ -2218,6 +2440,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);
     }
+
+    /**
+     * No world congress enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'noWorldCongress',
     get: function get() {
@@ -2226,6 +2454,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);
     }
+
+    /**
+     * One city challenge enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'oneCityChallenge',
     get: function get() {
@@ -2235,6 +2469,10 @@ var Civ5Save = function () {
       this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
     }
 
+    /**
+     * Pitboss enabled.
+     * @type {boolean}
+     */
     // https://github.com/Bownairo/Civ5SaveEditor
 
   }, {
@@ -2245,6 +2483,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
     }
+
+    /**
+     * Policy saving enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'policySaving',
     get: function get() {
@@ -2253,6 +2497,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);
     }
+
+    /**
+     * Promotion saving enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'promotionSaving',
     get: function get() {
@@ -2261,6 +2511,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
     }
+
+    /**
+     * Raging barbarians enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'ragingBarbarians',
     get: function get() {
@@ -2269,6 +2525,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
     }
+
+    /**
+     * Random personalities enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'randomPersonalities',
     get: function get() {
@@ -2277,6 +2539,12 @@ var Civ5Save = function () {
     set: function set(newValue) {
       this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
     }
+
+    /**
+     * Turn timer enabled.
+     * @type {boolean}
+     */
+
   }, {
     key: 'turnTimerEnabled',
     get: function get() {
@@ -2286,6 +2554,11 @@ var Civ5Save = function () {
       this._setNewGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);
     }
 
+    /**
+     * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or
+     *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.
+     * @type {string}
+     */
     // http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
 
   }, {
@@ -2321,7 +2594,7 @@ var Civ5Save = function () {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.next = 2;
-                return Civ5Save.loadData(saveFile);
+                return Civ5Save._loadData(saveFile);
 
               case 2:
                 saveData = _context.sent;
@@ -2342,8 +2615,8 @@ var Civ5Save = function () {
       return fromFile;
     }()
   }, {
-    key: 'loadData',
-    value: function loadData(saveFile) {
+    key: '_loadData',
+    value: function _loadData(saveFile) {
       return new _promise2.default(function (resolve, reject) {
         var reader = new FileReader();
 
