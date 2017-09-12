@@ -3,11 +3,29 @@ import Civ5SaveDataView from './Civ5SaveDataView';
 import Civ5SaveIntProperty from './Civ5SaveIntProperty';
 import Civ5SaveStringProperty from './Civ5SaveStringProperty';
 
+/**
+ * @ignore
+ */
 export default class Civ5SaveStringToBoolMap {
+  /**
+   * @ignore
+   */
   constructor(byteOffset, saveData) {
+    /**
+     * @ignore
+     */
     this.byteOffset = byteOffset;
+    /**
+     * @ignore
+     */
     this.length = 4;
+    /**
+     * @private
+     */
     this._items = new Map();
+    /**
+     * @private
+     */
     this._size = new Civ5SaveIntProperty(this.byteOffset, 4, saveData);
 
     if (this._getSize(saveData) > 0) {
@@ -18,6 +36,9 @@ export default class Civ5SaveStringToBoolMap {
     }
   }
 
+  /**
+   * @private
+   */
   _addItemToMap(saveData, byteOffset) {
     let itemKeyProperty = new Civ5SaveStringProperty(byteOffset, null, saveData);
     byteOffset += itemKeyProperty.length;
@@ -30,14 +51,23 @@ export default class Civ5SaveStringToBoolMap {
     return byteOffset;
   }
 
+  /**
+   * @private
+   */
   _getSize(saveData) {
     return this._size.getValue(saveData);
   }
 
+  /**
+   * @private
+   */
   _setSize(saveData, newValue) {
     this._size.setValue(saveData, newValue);
   }
 
+  /**
+   * @ignore
+   */
   getValue(saveData, itemKey) {
     if (this._items.has(itemKey)) {
       return this._items.get(itemKey).getValue(saveData);
@@ -46,6 +76,9 @@ export default class Civ5SaveStringToBoolMap {
     }
   }
 
+  /**
+   * @ignore
+   */
   setValue(saveData, itemKey, newItemValue) {
     if (this._items.has(itemKey)) {
       this._items.get(itemKey).setValue(saveData, newItemValue);
@@ -55,6 +88,9 @@ export default class Civ5SaveStringToBoolMap {
     }
   }
 
+  /**
+   * @private
+   */
   _addItemToSaveData(saveData, itemKey, newItemValue) {
     this._setSize(saveData, this._getSize(saveData) + 1);
 
@@ -80,6 +116,9 @@ export default class Civ5SaveStringToBoolMap {
     return newSaveData;
   }
 
+  /**
+   * @private
+   */
   // Inspired by https://stackoverflow.com/a/12965194/399105
   _int32ToUint8Array(int32) {
     let int32Array = new Uint8Array(4);
@@ -91,6 +130,9 @@ export default class Civ5SaveStringToBoolMap {
     return int32Array;
   }
 
+  /**
+   * @private
+   */
   _stringToUint8Array(string) {
     let stringArray = new Uint8Array(string.length);
     for (let i = 0; i < string.length; i++) {
@@ -99,6 +141,9 @@ export default class Civ5SaveStringToBoolMap {
     return stringArray;
   }
 
+  /**
+   * @private
+   */
   // https://stackoverflow.com/a/33703102/399105
   _concatTypedArrays(a, b) {
     var c = new (a.constructor)(a.length + b.length);
@@ -107,6 +152,9 @@ export default class Civ5SaveStringToBoolMap {
     return c;
   }
 
+  /**
+   * @private
+   */
   _insertIntoTypedArray(array, arrayToInsert, insertAtByteOffset) {
     return this._concatTypedArrays(
       this._concatTypedArrays(
