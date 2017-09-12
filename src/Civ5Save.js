@@ -8,11 +8,23 @@ import Civ5SavePropertyFactory from './Civ5SavePropertyFactory';
  */
 class Civ5Save {
   constructor(saveData) {
+    /**
+     * @private
+     */
     // TODO: Convert fields and methods starting with underscores to private once it makes it into the spec
     // (https://github.com/tc39/proposals)
     this._saveData = new Civ5SaveDataView(saveData.buffer);
+    /**
+     * @private
+     */
     this._verifyFileSignature();
+    /**
+     * @private
+     */
     this._gameBuild = this._getGameBuild();
+    /**
+     * @private
+     */
     this._properties = this._getProperties();
   }
 
@@ -28,6 +40,9 @@ class Civ5Save {
     return new Civ5Save(saveData);
   }
 
+  /**
+   * @private
+   */
   static _loadData(saveFile) {
     return new Promise(function (resolve, reject) {
       let reader = new FileReader();
@@ -56,12 +71,18 @@ class Civ5Save {
     });
   }
 
+  /**
+   * @private
+   */
   _verifyFileSignature() {
     if (this._saveData.getString(0, 4) !== 'CIV5') {
       throw new Error('File signature does not match. Is this a Civ 5 savegame?');
     }
   }
 
+  /**
+   * @private
+   */
   _getProperties() {
     let previousPropertyName = '';
     let previousPropertySection = 0;
@@ -134,6 +155,9 @@ class Civ5Save {
     return properties;
   }
 
+  /**
+   * @private
+   */
   _getSectionOffsets() {
     const SECTION_DELIMITER = [0x40, 0, 0, 0];
 
@@ -180,13 +204,19 @@ class Civ5Save {
     return sectionOffsets;
   }
 
-  // https://stackoverflow.com/a/22395463/399105
+  /**
+   * @private
+   * @see https://stackoverflow.com/a/22395463/399105
+   */
   _areArraysEqual(array1, array2) {
     return (array1.length === array2.length) && array1.every(function(element, index) {
       return element === array2[index];
     });
   }
 
+  /**
+   * @private
+   */
   _getPropertySection(propertyDefinition) {
     let propertySection = null;
     for (let build in propertyDefinition.sectionByBuild) {
@@ -198,6 +228,9 @@ class Civ5Save {
     return propertySection;
   }
 
+  /**
+   * @private
+   */
   _isNullOrUndefined(variable) {
     return typeof variable === 'undefined' || variable === null;
   }
@@ -210,6 +243,9 @@ class Civ5Save {
     return this._gameBuild;
   }
 
+  /**
+   * @private
+   */
   // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the
   // game build for all savegame versions
   _getGameBuild() {
@@ -658,8 +694,8 @@ class Civ5Save {
   /**
    * Pitboss enabled.
    * @type {boolean}
+   * @see https://github.com/Bownairo/Civ5SaveEditor
    */
-  // https://github.com/Bownairo/Civ5SaveEditor
   get pitboss() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');
   }
@@ -732,8 +768,8 @@ class Civ5Save {
    * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or
    *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.
    * @type {string}
+   * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
    */
-  // http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
   get turnMode() {
     if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === true) {
       return Civ5Save.TURN_MODES.HYBRID;
@@ -758,18 +794,27 @@ class Civ5Save {
     }
   }
 
+  /**
+   * @private
+   */
   _getPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
       return this._properties[propertyName].getValue(this._saveData);
     }
   }
 
+  /**
+   * @private
+   */
   _getBeautifiedPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
       return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
     }
   }
 
+  /**
+   * @private
+   */
   _beautifyPropertyValue(propertyValue) {
     propertyValue = propertyValue.split('_')[1];
     propertyValue = propertyValue.toLowerCase();
@@ -777,6 +822,9 @@ class Civ5Save {
     return propertyValue;
   }
 
+  /**
+   * @private
+   */
   _beautifyMapFileValue(mapFileValue) {
     mapFileValue = mapFileValue.split('/').slice(-1)[0];
     mapFileValue = mapFileValue.split('\\').slice(-1)[0];
@@ -785,6 +833,9 @@ class Civ5Save {
     return mapFileValue;
   }
 
+  /**
+   * @private
+   */
   _setNewGameOption(newGameOptionKey, newGameOptionValue) {
     let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
     if (!this._isNullOrUndefined(newSaveData)) {

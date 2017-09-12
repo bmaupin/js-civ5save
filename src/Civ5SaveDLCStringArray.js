@@ -1,11 +1,29 @@
 import Civ5SaveIntProperty from './Civ5SaveIntProperty';
 import Civ5SaveStringProperty from './Civ5SaveStringProperty';
 
+/**
+ * @ignore
+ */
 export default class Civ5SaveDLCStringArray {
+  /**
+   * @ignore
+   */
   constructor(byteOffset, saveData) {
+    /**
+     * @ignore
+     */
     this.byteOffset = byteOffset;
+    /**
+     * @ignore
+     */
     this.length = 4;
+    /**
+     * @private
+     */
     this._array = new Array();
+    /**
+     * @private
+     */
     this._size = new Civ5SaveIntProperty(this.byteOffset, 4, saveData);
 
     if (this._getSize(saveData) > 0) {
@@ -25,10 +43,16 @@ export default class Civ5SaveDLCStringArray {
     Object.freeze(this._array);
   }
 
+  /**
+   * @private
+   */
   _getSize(saveData) {
     return this._size.getValue(saveData);
   }
 
+  /**
+   * @ignore
+   */
   getArray() {
     return this._array;
   }

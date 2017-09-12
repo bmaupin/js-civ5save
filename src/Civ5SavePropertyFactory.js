@@ -7,7 +7,13 @@ import Civ5SaveStringArray from './Civ5SaveStringArray';
 import Civ5SaveStringProperty from './Civ5SaveStringProperty';
 import Civ5SaveStringToBoolMap from './Civ5SaveStringToBoolMap';
 
+/**
+ * @ignore
+ */
 export default class Civ5SavePropertyFactory {
+  /**
+   * @ignore
+   */
   static fromType(type, byteOffset, length, saveData) {
     switch (type) {
     case 'bool':

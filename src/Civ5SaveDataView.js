@@ -1,5 +1,11 @@
+/**
+ * @ignore
+ */
 // Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend
 export default class Civ5SaveDataView extends DataView {
+  /**
+   * @ignore
+   */
   getString(byteOffset, byteLength) {
     if (typeof TextDecoder === 'function') {
       return new TextDecoder().decode(this.buffer.slice(byteOffset, byteOffset + byteLength));
