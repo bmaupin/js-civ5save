@@ -4,9 +4,14 @@ import Civ5SavePropertyFactory from './Civ5SavePropertyFactory';
 
 /**
  * A Civilization V save file object.
- * @param {DataView} saveData - The save file contents.
  */
 class Civ5Save {
+  /**
+   * Create a Civ5Save object.
+   *
+   * As an alternative, a static factory method is available for more convenient instantiation from a file: [fromFile](#static-method-fromFile)
+   * @param {DataView} saveData - The save file contents.
+   */
   constructor(saveData) {
     /**
      * @private
@@ -30,11 +35,13 @@ class Civ5Save {
 
   /**
    * Create a Civ5Save object from a file.
+   *
+   * Reading data from a file needs to be done asynchronously; since the
+   * [constructor](#instance-constructor-constructor) cannot be async, this static factory is provided as an alternative
+   * way to instantiate a Civ5Save object from a file (https://stackoverflow.com/a/24686979/399105).
    * @param {File} saveFile - A Civilization V save file.
    * @return {Civ5Save} A Civ5Save object.
    */
-  // Use a static factory to instantiate the object since it relies on data that needs to be fetched asynchronously
-  // https://stackoverflow.com/a/24686979/399105
   static async fromFile(saveFile) {
     let saveData = await Civ5Save._loadData(saveFile);
     return new Civ5Save(saveData);
@@ -374,6 +381,9 @@ class Civ5Save {
    */
   get players() {
     if (this._isNullOrUndefined(this._players)) {
+      /**
+       * @private
+       */
       this._players = new Array();
       let playerStatuses = this._properties.playerStatuses.getArray();
       for (let i = 0; i < playerStatuses.length; i++) {
@@ -410,6 +420,10 @@ class Civ5Save {
     return this._getPropertyIfDefined('maxTurns');
   }
 
+  /**
+   * Max turns.
+   * @type {number}
+   */
   set maxTurns(newValue) {
     this._properties.maxTurns.setValue(this._saveData, newValue);
   }
@@ -423,6 +437,11 @@ class Civ5Save {
     return this._getPropertyIfDefined('turnTimerLength');
   }
 
+  /**
+   * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.
+   *     Otherwise, it is in minutes.
+   * @type {number}
+   */
   set turnTimerLength(newValue) {
     this._properties.turnTimerLength.setValue(this._saveData, newValue);
   }
@@ -435,264 +454,352 @@ class Civ5Save {
     return this._getPropertyIfDefined('privateGame');
   }
 
+  /**
+   * Private setting for multiplayer games.
+   * @type {boolean}
+   */
   set privateGame(newValue) {
     this._properties.privateGame.setValue(this._saveData, newValue);
   }
 
   /**
-   * Time victory enabled.
+   * Time victory.
    * @type {boolean}
    */
   get timeVictory() {
     return this._getPropertyIfDefined('timeVictory');
   }
 
+  /**
+   * Time victory.
+   * @type {boolean}
+   */
   set timeVictory(newValue) {
     this._properties.timeVictory.setValue(this._saveData, newValue);
   }
 
   /**
-   * Science victory enabled.
+   * Science victory.
    * @type {boolean}
    */
   get scienceVictory() {
     return this._getPropertyIfDefined('scienceVictory');
   }
 
+  /**
+   * Science victory.
+   * @type {boolean}
+   */
   set scienceVictory(newValue) {
     this._properties.scienceVictory.setValue(this._saveData, newValue);
   }
 
   /**
-   * Domination victory enabled.
+   * Domination victory.
    * @type {boolean}
    */
   get dominationVictory() {
     return this._getPropertyIfDefined('dominationVictory');
   }
 
+  /**
+   * Domination victory.
+   * @type {boolean}
+   */
   set dominationVictory(newValue) {
     this._properties.dominationVictory.setValue(this._saveData, newValue);
   }
 
   /**
-   * Cultural victory enabled.
+   * Cultural victory.
    * @type {boolean}
    */
   get culturalVictory() {
     return this._getPropertyIfDefined('culturalVictory');
   }
 
+  /**
+   * Cultural victory.
+   * @type {boolean}
+   */
   set culturalVictory(newValue) {
     this._properties.culturalVictory.setValue(this._saveData, newValue);
   }
 
   /**
-   * Diplomatic victory enabled.
+   * Diplomatic victory.
    * @type {boolean}
    */
   get diplomaticVictory() {
     return this._getPropertyIfDefined('diplomaticVictory');
   }
 
+  /**
+   * Diplomatic victory.
+   * @type {boolean}
+   */
   set diplomaticVictory(newValue) {
     this._properties.diplomaticVictory.setValue(this._saveData, newValue);
   }
 
   /**
-   * Always peace enabled.
+   * Always peace.
    * @type {boolean}
    */
   get alwaysPeace() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_PEACE');
   }
 
+  /**
+   * Always peace.
+   * @type {boolean}
+   */
   set alwaysPeace(newValue) {
     this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
   }
 
   /**
-   * Always war enabled.
+   * Always war.
    * @type {boolean}
    */
   get alwaysWar() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_WAR');
   }
 
+  /**
+   * Always war.
+   * @type {boolean}
+   */
   set alwaysWar(newValue) {
     this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
   }
 
   /**
-   * Complete kills enabled.
+   * Complete kills.
    * @type {boolean}
    */
   get completeKills() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_COMPLETE_KILLS');
   }
 
+  /**
+   * Complete kills.
+   * @type {boolean}
+   */
   set completeKills(newValue) {
     this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
   }
 
   /**
-   * Lock mods enabled.
+   * Lock mods.
    * @type {boolean}
    */
   get lockMods() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_LOCK_MODS');
   }
 
+  /**
+   * Lock mods.
+   * @type {boolean}
+   */
   set lockMods(newValue) {
     this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);
   }
 
   /**
-   * New random seed enabled.
+   * New random seed.
    * @type {boolean}
    */
   get newRandomSeed() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NEW_RANDOM_SEED');
   }
 
+  /**
+   * New random seed.
+   * @type {boolean}
+   */
   set newRandomSeed(newValue) {
     this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
   }
 
   /**
-   * No barbarians enabled.
+   * No barbarians.
    * @type {boolean}
    */
   get noBarbarians() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_BARBARIANS');
   }
 
+  /**
+   * No barbarians.
+   * @type {boolean}
+   */
   set noBarbarians(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
   }
 
   /**
-   * No changing war or peace enabled.
+   * No changing war or peace.
    * @type {boolean}
    */
   get noChangingWarPeace() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CHANGING_WAR_PEACE');
   }
 
+  /**
+   * No changing war or peace.
+   * @type {boolean}
+   */
   set noChangingWarPeace(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
   }
 
   /**
-   * No city razing enabled.
+   * No city razing.
    * @type {boolean}
    */
   get noCityRazing() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CITY_RAZING');
   }
 
+  /**
+   * No city razing.
+   * @type {boolean}
+   */
   set noCityRazing(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
   }
 
   /**
-   * No cultural overview UI enabled.
+   * No cultural overview UI.
    * @type {boolean}
    */
   get noCultureOverviewUI() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CULTURE_OVERVIEW_UI');
   }
 
+  /**
+   * No cultural overview UI.
+   * @type {boolean}
+   */
   set noCultureOverviewUI(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
   }
 
   /**
-   * No espionage enabled.
+   * No espionage.
    * @type {boolean}
    */
   get noEspionage() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_ESPIONAGE');
   }
 
+  /**
+   * No espionage.
+   * @type {boolean}
+   */
   set noEspionage(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
   }
 
   /**
-   * No happiness enabled.
+   * No happiness.
    * @type {boolean}
    */
   get noHappiness() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_HAPPINESS');
   }
 
+  /**
+   * No happiness.
+   * @type {boolean}
+   */
   set noHappiness(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
   }
 
   /**
-   * No policies enabled.
+   * No policies.
    * @type {boolean}
    */
   get noPolicies() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_POLICIES');
   }
 
+  /**
+   * No policies.
+   * @type {boolean}
+   */
   set noPolicies(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);
   }
 
   /**
-   * No religion enabled.
+   * No religion.
    * @type {boolean}
    */
   get noReligion() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_RELIGION');
   }
 
+  /**
+   * No religion.
+   * @type {boolean}
+   */
   set noReligion(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);
   }
 
   /**
-   * No science enabled.
+   * No science.
    * @type {boolean}
    */
   get noScience() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_SCIENCE');
   }
 
+  /**
+   * No science.
+   * @type {boolean}
+   */
   set noScience(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);
   }
 
   /**
-   * No world congress enabled.
+   * No world congress.
    * @type {boolean}
    */
   get noWorldCongress() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_LEAGUES');
   }
 
+  /**
+   * No world congress.
+   * @type {boolean}
+   */
   set noWorldCongress(newValue) {
     this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);
   }
 
   /**
-   * One city challenge enabled.
+   * One-city challenge.
    * @type {boolean}
    */
   get oneCityChallenge() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ONE_CITY_CHALLENGE');
   }
 
+  /**
+   * One-city challenge.
+   * @type {boolean}
+   */
   set oneCityChallenge(newValue) {
     this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
   }
 
   /**
-   * Pitboss enabled.
+   * Pitboss.
    * @type {boolean}
    * @see https://github.com/Bownairo/Civ5SaveEditor
    */
@@ -700,54 +807,75 @@ class Civ5Save {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');
   }
 
+  /**
+   * Pitboss.
+   * @type {boolean}
+   * @see https://github.com/Bownairo/Civ5SaveEditor
+   */
   set pitboss(newValue) {
     this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
   }
 
   /**
-   * Policy saving enabled.
+   * Policy saving.
    * @type {boolean}
    */
   get policySaving() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_POLICY_SAVING');
   }
 
+  /**
+   * Policy saving.
+   * @type {boolean}
+   */
   set policySaving(newValue) {
     this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);
   }
 
   /**
-   * Promotion saving enabled.
+   * Promotion saving.
    * @type {boolean}
    */
   get promotionSaving() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PROMOTION_SAVING');
   }
 
+  /**
+   * Promotion saving.
+   * @type {boolean}
+   */
   set promotionSaving(newValue) {
     this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
   }
 
   /**
-   * Raging barbarians enabled.
+   * Raging barbarians.
    * @type {boolean}
    */
   get ragingBarbarians() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RAGING_BARBARIANS');
   }
 
+  /**
+   * Raging barbarians.
+   * @type {boolean}
+   */
   set ragingBarbarians(newValue) {
     this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
   }
 
   /**
-   * Random personalities enabled.
+   * Random personalities.
    * @type {boolean}
    */
   get randomPersonalities() {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RANDOM_PERSONALITIES');
   }
 
+  /**
+   * Random personalities.
+   * @type {boolean}
+   */
   set randomPersonalities(newValue) {
     this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
   }
@@ -760,6 +888,10 @@ class Civ5Save {
     return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_END_TURN_TIMER_ENABLED');
   }
 
+  /**
+   * Turn timer enabled.
+   * @type {boolean}
+   */
   set turnTimerEnabled(newValue) {
     this._setNewGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);
   }
@@ -781,6 +913,12 @@ class Civ5Save {
     }
   }
 
+  /**
+   * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or
+   *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.
+   * @type {string}
+   * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
+   */
   set turnMode(newValue) {
     if (newValue === Civ5Save.TURN_MODES.HYBRID) {
       this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', true);
