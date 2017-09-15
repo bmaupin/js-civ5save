@@ -299,7 +299,11 @@ class Civ5Save {
 
   /**
    * Game version.
-   * @type {string}
+   *
+   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used
+   * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply
+   * the spot is there but empty).
+   * @type {string|undefined}
    */
   get gameVersion() {
     return this._getPropertyIfDefined('gameVersion');
@@ -315,7 +319,11 @@ class Civ5Save {
 
   /**
    * Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.
-   * @type {string}
+   *
+   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used
+   * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply
+   * the spot is there but empty).
+   * @type {string|undefined}
    */
   get gameMode() {
     if (Number(this.gameBuild) >= 230620) {
@@ -385,10 +393,13 @@ class Civ5Save {
   }
 
   /**
-   * List of players with their civilization and status as properties. Civilization may be `undefined`. Status is one
-   *     of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,
+   * List of players as objects with their civilization and status as properties.
+   *
+   * Civilization will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700.
+   *
+   * Status is one of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,
    *     `Civ5Save.PLAYER_STATUSES.NONE`.
-   * @type {Array}
+   * @type {Array.<{civilization: string|undefined, status: number}>}
    */
   get players() {
     if (this._isNullOrUndefined(this._players)) {

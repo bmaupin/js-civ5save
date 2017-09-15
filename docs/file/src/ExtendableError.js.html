@@ -47,9 +47,9 @@ export default class ExtendableError extends Error {
    */
   constructor(message) {
     super(message);
-  /**
-   * @ignore
-   */
+    /**
+     * @ignore
+     */
     this.name = this.constructor.name;
     if (typeof Error.captureStackTrace === &apos;function&apos;) {
       Error.captureStackTrace(this, this.constructor);
