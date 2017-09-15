@@ -6,6 +6,18 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "civ5save/src/civ5save.js~invalidsignatureerror",
+    "class/src/Civ5Save.js~InvalidSignatureError.html",
+    "<span>InvalidSignatureError</span> <span class=\"search-result-import-path\">civ5save/src/Civ5Save.js</span>",
+    "class"
+  ],
+  [
+    "civ5save/src/civ5save.js~parseerror",
+    "class/src/Civ5Save.js~ParseError.html",
+    "<span>ParseError</span> <span class=\"search-result-import-path\">civ5save/src/Civ5Save.js</span>",
+    "class"
+  ],
+  [
     "src/.external-ecmascript.js~array",
     "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
     "src/.external-ecmascript.js~Array",
@@ -295,13 +307,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#alwayspeace",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-alwaysPeace",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-alwaysPeace",
     "src/Civ5Save.js~Civ5Save#alwaysPeace",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#alwayspeace",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-alwaysPeace",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-alwaysPeace",
     "src/Civ5Save.js~Civ5Save#alwaysPeace",
     "member"
   ],
@@ -319,13 +331,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#completekills",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-completeKills",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-completeKills",
     "src/Civ5Save.js~Civ5Save#completeKills",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#completekills",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-completeKills",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-completeKills",
     "src/Civ5Save.js~Civ5Save#completeKills",
     "member"
   ],
@@ -379,13 +391,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#dominationvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-dominationVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-dominationVictory",
     "src/Civ5Save.js~Civ5Save#dominationVictory",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#dominationvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-dominationVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-dominationVictory",
     "src/Civ5Save.js~Civ5Save#dominationVictory",
     "member"
   ],
@@ -457,13 +469,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#newrandomseed",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-newRandomSeed",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-newRandomSeed",
     "src/Civ5Save.js~Civ5Save#newRandomSeed",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#newrandomseed",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-newRandomSeed",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-newRandomSeed",
     "src/Civ5Save.js~Civ5Save#newRandomSeed",
     "member"
   ],
@@ -493,25 +505,25 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#nocityrazing",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noCityRazing",
-    "src/Civ5Save.js~Civ5Save#noCityRazing",
-    "member"
-  ],
-  [
-    "src/civ5save.js~civ5save#nocityrazing",
     "class/src/Civ5Save.js~Civ5Save.html#instance-set-noCityRazing",
     "src/Civ5Save.js~Civ5Save#noCityRazing",
     "member"
   ],
   [
-    "src/civ5save.js~civ5save#nocultureoverviewui",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noCultureOverviewUI",
-    "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
+    "src/civ5save.js~civ5save#nocityrazing",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noCityRazing",
+    "src/Civ5Save.js~Civ5Save#noCityRazing",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#nocultureoverviewui",
     "class/src/Civ5Save.js~Civ5Save.html#instance-get-noCultureOverviewUI",
+    "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
+    "member"
+  ],
+  [
+    "src/civ5save.js~civ5save#nocultureoverviewui",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noCultureOverviewUI",
     "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
     "member"
   ],
@@ -577,13 +589,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#noworldcongress",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noWorldCongress",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noWorldCongress",
     "src/Civ5Save.js~Civ5Save#noWorldCongress",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#noworldcongress",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noWorldCongress",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noWorldCongress",
     "src/Civ5Save.js~Civ5Save#noWorldCongress",
     "member"
   ],
@@ -631,13 +643,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#privategame",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-privateGame",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-privateGame",
     "src/Civ5Save.js~Civ5Save#privateGame",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#privategame",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-privateGame",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-privateGame",
     "src/Civ5Save.js~Civ5Save#privateGame",
     "member"
   ],
@@ -813,6 +825,12 @@ window.esdocSearchIndex = [
     "src/civ5savestringtoboolmap.js",
     "file/src/Civ5SaveStringToBoolMap.js.html",
     "src/Civ5SaveStringToBoolMap.js",
+    "file"
+  ],
+  [
+    "src/extendableerror.js",
+    "file/src/ExtendableError.js.html",
+    "src/ExtendableError.js",
     "file"
   ]
 ]
