@@ -8,9 +8,9 @@ export default class ExtendableError extends Error {
    */
   constructor(message) {
     super(message);
-  /**
-   * @ignore
-   */
+    /**
+     * @ignore
+     */
     this.name = this.constructor.name;
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
