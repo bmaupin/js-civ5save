@@ -30,6 +30,8 @@
   <ul>
     
   <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Civ5Save.js~Civ5Save.html">Civ5Save</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Civ5Save.js~InvalidSignatureError.html">InvalidSignatureError</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Civ5Save.js~ParseError.html">ParseError</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -38,6 +40,7 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Civ5SaveDataView from &apos;./Civ5SaveDataView&apos;;
 import Civ5SavePropertyDefinitions from &apos;./Civ5SavePropertyDefinitions.json&apos;;
 import Civ5SavePropertyFactory from &apos;./Civ5SavePropertyFactory&apos;;
+import ExtendableError from &apos;./ExtendableError&apos;;
 
 /**
  * A Civilization V save file object.
@@ -48,6 +51,8 @@ class Civ5Save {
    *
    * As an alternative, a static factory method is available for more convenient instantiation from a file: [fromFile](#static-method-fromFile)
    * @param {DataView} saveData - The save file contents.
+   * @throws {InvalidSignatureError} Invalid file signature.
+   * @throws {ParseError} Error while parsing the save file.
    */
   constructor(saveData) {
     /**
@@ -78,6 +83,12 @@ class Civ5Save {
    * way to instantiate a Civ5Save object from a file (https://stackoverflow.com/a/24686979/399105).
    * @param {File} saveFile - A Civilization V save file.
    * @return {Civ5Save} A Civ5Save object.
+   * @throws {InvalidSignatureError} Invalid file signature.
+   * @throws {ParseError} Error while parsing the save file.
+   * @example
+   * try {
+   *   let save = await Civ5Save.fromFile(saveFile);
+   *   ...
    */
   static async fromFile(saveFile) {
     let saveData = await Civ5Save._loadData(saveFile);
@@ -108,6 +119,8 @@ class Civ5Save {
   /**
    * Write Civ5Save object to a blob.
    * @return {Blob} The save file with any changes.
+   * @example
+   * let downloadURL = window.URL.createObjectURL(save.toBlob());
    */
   toBlob() {
     return new Blob([this._saveData], {
@@ -120,7 +133,7 @@ class Civ5Save {
    */
   _verifyFileSignature() {
     if (this._saveData.getString(0, 4) !== &apos;CIV5&apos;) {
-      throw new Error(&apos;File signature does not match. Is this a Civ 5 savegame?&apos;);
+      throw new InvalidSignatureError(&apos;File signature does not match. Is this a Civ 5 savegame?&apos;);
     }
   }
 
@@ -189,7 +202,7 @@ class Civ5Save {
           propertyDefinition.length,
           this._saveData);
       } catch (e) {
-        throw new Error(`Failure parsing save at property ${propertyName}`);
+        throw new ParseError(`Failure parsing save at property ${propertyName}`);
       }
 
       previousPropertyName = propertyName;
@@ -1040,6 +1053,16 @@ Civ5Save.TURN_MODES = {
 };
 
 export default Civ5Save;
+
+/**
+ * Error signifying the file signature is invalid for a Civ5Save file.
+ */
+export class InvalidSignatureError extends ExtendableError {}
+
+/**
+ * Error signifying there was a problem parsing the save file.
+ */
+export class ParseError extends ExtendableError {}
 </code></pre>
 
 </div>
