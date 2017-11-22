@@ -7,6 +7,8 @@
 |  | 32-bit integer | 4<br>5<br>8 | Save game version:<br>4 = 1.0.0<br>5 = 1.0.1<br>8 = 1.0.2 - 1.0.3 |
 |  | String | `1.0.2.13 (341540)`<br>`1.0.3.18 (379995)`<br>`1.0.3.80 (389545)`<br>`1.0.3.142 (395070)`<br>`1.0.3.144 (395131)`<br>`1.0.3.279(130961)` | Civ 5 version |
 |  | String | `379995`<br>`395131`<br>`403694` | Civ 5 build |
+|  | 32-bit integer | | Current turn |
+|  | 8-bit integer | | Game mode:<br>0 = Single player<br>1 = Multiplayer<br>2 = Hotseat |
 |  | String | `CIVILIZATION_IROQUOIS`<br>`CIVILIZATION_MOROCCO` | Player 1 civilization |
 |  | String | `HANDICAP_CHIEFTAIN`<br>`HANDICAP_SETTLER` | Difficulty |
 |  | String | `ERA_ANCIENT` | Starting era |
@@ -20,6 +22,8 @@
 | 8 |  |  | Player civilizations |
 | 9 |  |  | Leaders |
 | 14 |  |  | Climate |
+| 17 |  |  | Player difficulties? |
+| 18 |  |  | Player difficulties? |
 | 19* |  |  |  |
 |  | 32-bit integer | 0<br>330<br>500 | Max turns |
 | 20* |  |  | City states |
@@ -77,6 +81,7 @@ Builds and versions
 | 379995 | 1.0.3.18 |
 | 388272 | 1.0.3.70 |
 | 395070 | 1.0.3.142 |
+| 403694 | 1.0.3.279 |
 
 References:
 ---
