@@ -15,9 +15,35 @@
 
 For an example of actual usage, see https://github.com/bmaupin/civ5save-editor
 
+### Installation
+
+    yarn add civ5save
+
+Or:
+
+    npm install civ5save
+
+### Development
+
+1. Install Yarn (https://yarnpkg.com/docs/install)
+
+2. Clone the repository and install dependencies
+
+       git clone https://github.com/bmaupin/js-civ5save.git
+       cd js-civ5save
+       yarn install
+
+### Testing
+
+    yarn test
+
+### Building (includes documentation)
+
+    yarn build
+
 ### Credits
 
-#### Sites consulted for reference
+#### References
 - File format
   - https://github.com/rivarolle/civ5-saveparser
   - https://github.com/omni-resources/civ5-save-parser
