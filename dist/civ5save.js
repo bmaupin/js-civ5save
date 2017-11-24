@@ -5726,8 +5726,9 @@ module.exports = {
 		},
 		"type": "stringArray"
 	},
-	"section19Skip1": {
-		"byteOffsetInSection": 264,
+	"section19SkipSavePath": {
+		"_comment": "This is rare but seems to contain the full path to the save file, e.g. C:\\Users\\Username\\Documents\\My Games\\Sid Meier's Civilization 5\\Saves\\multi\\auto\\AutoSave_0310 AD-2030.Civ5Save",
+		"byteOffsetInSection": 260,
 		"length": null,
 		"sectionByBuild": {
 			"98650": 17,
@@ -5736,7 +5737,18 @@ module.exports = {
 		},
 		"type": "string"
 	},
-	"section19Skip2": {
+	"section19SkipUsername": {
+		"_comment": "This appears to contain the current OS username",
+		"byteOffsetInSection": null,
+		"length": null,
+		"sectionByBuild": {
+			"98650": 17,
+			"262623": 18,
+			"395070": 19
+		},
+		"type": "string"
+	},
+	"section19Skip1": {
 		"byteOffsetInSection": null,
 		"length": 7,
 		"sectionByBuild": {
@@ -5756,7 +5768,7 @@ module.exports = {
 		},
 		"type": "string"
 	},
-	"section19Skip3": {
+	"section19Skip2": {
 		"byteOffsetInSection": null,
 		"length": 4,
 		"sectionByBuild": {
