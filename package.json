@@ -58,7 +58,7 @@
     "url": "https://github.com/bmaupin/js-civ5save.git"
   },
   "scripts": {
-    "build": "webpack && NODE_ENV=production webpack",
+    "build": "webpack && NODE_ENV=production webpack && esdoc",
     "lint": "eslint src/*",
     "test": "jest --coverage"
   },
