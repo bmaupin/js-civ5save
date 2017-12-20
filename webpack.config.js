@@ -10,7 +10,7 @@ module.exports = {
         // Fix TypeError: (0 , _typeof3.default) is not a function (https://github.com/webpack/webpack/issues/1694)
         exclude: /node_modules/,
         test: /\.js$/,
-        use: env === 'production' ? [
+        use: [
           {
             loader: 'babel-loader',
             options: {
@@ -23,17 +23,6 @@ module.exports = {
             }
           },
           { loader: 'eslint-loader' }
-        ] : [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: ['env'],
-              plugins: [
-                ['babel-plugin-transform-builtin-extend', { globals: ["DataView"] }],
-                ['transform-runtime']
-              ]
-            }
-          }
         ]
       }
     ]
