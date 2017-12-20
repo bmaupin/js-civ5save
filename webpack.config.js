@@ -1,7 +1,6 @@
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-var path = require('path');
-
-var env = process.env.NODE_ENV;
+const env = process.env.NODE_ENV;
+const MinifyPlugin = require('babel-minify-webpack-plugin');
+const path = require('path');
 
 module.exports = {
   entry: './src/Civ5Save.js',
@@ -47,6 +46,6 @@ module.exports = {
     path: path.resolve(__dirname, 'dist')
   },
   plugins: env === 'production' ? [
-    new UglifyJSPlugin()
+    new MinifyPlugin()
   ] : [],
 };
