@@ -22,11 +22,13 @@ test('Test creating Civ5Save instances from local save files', async () => {
   const resourceDir = path.join(__dirname, 'resources');
   let filenames = [];
 
-  fs.readdirSync(resourceDir).forEach(filename => {
-    if (filename.endsWith('.Civ5Save')) {
-      filenames.push(filename);
-    }
-  });
+  if (fs.existsSync(resourceDir)) {
+    fs.readdirSync(resourceDir).forEach(filename => {
+      if (filename.endsWith('.Civ5Save')) {
+        filenames.push(filename);
+      }
+    });
+  }
 
   for (let i = 0, len = filenames.length; i < len; i++) {
     let filename = filenames[i];
