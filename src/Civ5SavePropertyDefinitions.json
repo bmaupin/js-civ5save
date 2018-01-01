@@ -239,9 +239,9 @@
     "type": "int"
   },
   "playerColours": {
-    "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list of bytes. Seems like it can have 63 or 64 items.",
+    "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list of bytes. Length is number of items, not bytes.",
     "byteOffsetInSection": 4,
-    "length": null,
+    "length": 64,
     "sectionByBuild": {
       "98650": 23,
       "262623": 24,

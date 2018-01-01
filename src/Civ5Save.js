@@ -108,9 +108,12 @@ class Civ5Save {
     let sectionOffsets = this._getSectionOffsets();
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
-      // Player colours doesn't seem to have a predictable length (can have 63 or 64 items)
-      if (propertyName === 'playerColours') {
-        continue;
+      // Before build 310700, playerColours is a list of bytes. There isn't much value in implementing that. And
+      // privateGame comes after playerColours.
+      if (Number(this.gameBuild) < 310700) {
+        if (propertyName === 'playerColours' || propertyName === 'privateGame') {
+          continue;
+        }
       }
 
       // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
@@ -143,10 +146,6 @@ class Civ5Save {
       if (propertySection === previousPropertySection) {
         let previousProperty = properties[previousPropertyName];
         propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
-
-      // Workaround for player colours issue (see comment above)
-      } else if (propertyName === 'privateGame') {
-        propertyByteOffset = sectionOffsets[propertySection].start - 10;
 
       } else {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
