@@ -1,5 +1,5 @@
 import Civ5SaveDataView from './Civ5SaveDataView';
-import Civ5SavePropertyDefinitions from './Civ5SavePropertyDefinitions.json';
+import Civ5SavePropertyDefinitions from './Civ5SavePropertyDefinitions.js';
 import Civ5SavePropertyFactory from './Civ5SavePropertyFactory';
 import ExtendableError from './ExtendableError';
 
