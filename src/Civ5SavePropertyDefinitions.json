@@ -207,9 +207,9 @@
     "type": "int"
   },
   "playerNames2": {
-    "_comment": "This seems to be the second place in the file with player names. There's enough space for 64 names",
+    "_comment": "This seems to be the second place in the file with player names. Length is number of items, not bytes.",
     "byteOffsetInSection": 4,
-    "length": null,
+    "length": 64,
     "sectionByBuild": {
       "98650": 21,
       "262623": 22,

@@ -108,9 +108,8 @@ class Civ5Save {
     let sectionOffsets = this._getSectionOffsets();
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
-      // Skip string array properties since there isn't much value in implementing them until they're needed, plus the
-      // string array containing player colours doesn't seem to have a predictable length (can have 63 or 64 items)
-      if (['playerColours', 'playerNames2', 'section23Skip1'].includes(propertyName)) {
+      // Player colours doesn't seem to have a predictable length (can have 63 or 64 items)
+      if (propertyName === 'playerColours') {
         continue;
       }
 
@@ -145,12 +144,9 @@ class Civ5Save {
         let previousProperty = properties[previousPropertyName];
         propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
 
-      // Workaround for a couple values that are preceded by string arrays (see comment above)
+      // Workaround for player colours issue (see comment above)
       } else if (propertyName === 'privateGame') {
         propertyByteOffset = sectionOffsets[propertySection].start - 10;
-
-      } else if (propertyName === 'turnTimerLength') {
-        propertyByteOffset = sectionOffsets[propertySection].start - 4;
 
       } else {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
