@@ -36,7 +36,8 @@ test('Test creating Civ5Save instances from local save files', async () => {
       let fileBlob = await getFileBlob(path.join(resourceDir, filename));
       await Civ5Save.fromFile(fileBlob);
     } catch (e) {
-      console.log(`ERROR parsing ${filename}: ${e}`);
+      e.message += ` (${filename})`;
+      throw e;
     }
   };
 }, 20000);
