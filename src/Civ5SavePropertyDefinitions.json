@@ -16,6 +16,7 @@
     "type": "int"
   },
   "gameVersion": {
+    "_comment": "This property is updated if the game is saved with a newer version of Civ 5",
     "byteOffsetInSection": 8,
     "length": null,
     "sectionByBuild": {
@@ -24,6 +25,7 @@
     "type": "string"
   },
   "gameBuild": {
+    "_comment": "This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally used when the save file was created is stored later, after gameOptionsMap.",
     "byteOffsetInSection": null,
     "length": null,
     "sectionByBuild": {
@@ -437,7 +439,6 @@
     "type": "string"
   },
   "section30MapSize3": {
-    "_comment": "This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed. Otherwise it's 72 bytes long.",
     "byteOffsetInSection": null,
     "length": null,
     "sectionByBuild": {
@@ -448,8 +449,9 @@
     "type": "string"
   },
   "section30Skip3": {
+    "_comment": "This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed. Otherwise it's 72 bytes long.",
     "byteOffsetInSection": null,
-    "length": 72,
+    "length": null,
     "sectionByBuild": {
       "98650": 28,
       "262623": 29,
