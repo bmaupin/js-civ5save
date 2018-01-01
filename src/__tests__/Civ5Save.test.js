@@ -885,22 +885,16 @@ test('Set turn timer length', () => {
 });
 
 test('Get private game', () => {
-  expect(savegame10017.privateGame).toBe(false);
-  expect(savegame101135.privateGame).toBe(false);
-  expect(savegame101221.privateGame).toBe(false);
+  expect(savegame10017.privateGame).not.toBeDefined();
+  expect(savegame101135.privateGame).not.toBeDefined();
+  expect(savegame101221.privateGame).not.toBeDefined();
   expect(savegame10213.privateGame).toBe(false);
   expect(savegame103279.privateGame).toBe(true);
 });
 
 test('Set private game', () => {
-  savegame10017.privateGame = NEW_PRIVATE_GAME;
-  savegame101135.privateGame = NEW_PRIVATE_GAME;
-  savegame101221.privateGame = NEW_PRIVATE_GAME;
   savegame10213.privateGame = NEW_PRIVATE_GAME;
   savegame103279.privateGame = NEW_PRIVATE_GAME;
-  expect(savegame10017.privateGame).toBe(NEW_PRIVATE_GAME);
-  expect(savegame101135.privateGame).toBe(NEW_PRIVATE_GAME);
-  expect(savegame101221.privateGame).toBe(NEW_PRIVATE_GAME);
   expect(savegame10213.privateGame).toBe(NEW_PRIVATE_GAME);
   expect(savegame103279.privateGame).toBe(NEW_PRIVATE_GAME);
 });
