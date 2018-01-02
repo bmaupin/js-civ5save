@@ -1,473 +1,477 @@
-{
-  "fileSignature": {
-    "byteOffsetInSection": 0,
-    "length": 4,
-    "sectionByBuild": {
-      "98650": 1
+export default {
+  'fileSignature': {
+    'byteOffsetInSection': 0,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "saveGameVersion": {
-    "byteOffsetInSection": 4,
-    "length": 4,
-    "sectionByBuild": {
-      "98650": 1
+  'saveGameVersion': {
+    'byteOffsetInSection': 4,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "int"
+    'type': 'int'
   },
-  "gameVersion": {
-    "_comment": "This property is updated if the game is saved with a newer version of Civ 5",
-    "byteOffsetInSection": 8,
-    "length": null,
-    "sectionByBuild": {
-      "230620": 1
+  // This property is updated if the game is saved with a newer version of Civ 5
+  'gameVersion': {
+    'byteOffsetInSection': 8,
+    'length': null,
+    'sectionByBuild': {
+      '230620': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "gameBuild": {
-    "_comment": "This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally used when the save file was created is stored later, after gameOptionsMap.",
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "230620": 1
+  // This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally used when the save file was created is stored later, after gameOptionsMap.
+  'gameBuild': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '230620': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "currentTurn": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "98650": 1
+  'currentTurn': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "int"
+    'type': 'int'
   },
-  "gameMode": {
-    "_comment": "This property exists in all versions but only seems to gain significance around build 230620",
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "98650": 1
+  // This property exists in all versions but only seems to gain significance around build 230620
+  'gameMode': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "int",
-    "values": [
-      "Single player",
-      "Multiplayer",
-      "Hotseat"
+    'type': 'int',
+    'values': [
+      'Single player',
+      'Multiplayer',
+      'Hotseat'
     ]
   },
-  "player1Civilization": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  'player1Civilization': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "difficulty": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  'difficulty': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "startingEra": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  'startingEra': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "currentEra": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  'currentEra': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "gamePace": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  'gamePace': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "mapSize": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  'mapSize': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "mapFile": {
-    "_comment": "The map file appears multiple times; I have no idea why (see section19Map)",
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  // The map file appears multiple times; I have no idea why (see section19Map)
+  'mapFile': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "string"
+    'type': 'string'
   },
-  "enabledDLC": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 1
+  'enabledDLC': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
     },
-    "type": "dlcStringArray"
+    'type': 'dlcStringArray'
   },
-  "playerStatuses": {
-    "_comment": "Players after the first player marked as none seem to be superfluous. Length is number of items, not bytes.",
-    "byteOffsetInSection": 4,
-    "length": 64,
-    "sectionByBuild": {
-      "98650": 4
+  // Players after the first player marked as none seem to be superfluous
+  'playerStatuses': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    'sectionByBuild': {
+      '98650': 4
     },
-    "type": "intArray",
-    "values": [
-      "",
-      "AI",
-      "Dead",
-      "Human",
-      "None"
+    'type': 'intArray',
+    'values': [
+      '',
+      'AI',
+      'Dead',
+      'Human',
+      'None'
     ]
   },
-  "playerCivilizations": {
-    "_comment": "Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there at all. Length is number of items, not bytes.",
-    "byteOffsetInSection": 4,
-    "length": 64,
-    "sectionByBuild": {
-      "310700": 8
+  // Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there at all
+  'playerCivilizations': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    'sectionByBuild': {
+      '310700': 8
     },
-    "type": "stringArray"
+    'type': 'stringArray'
   },
-  "section19SkipSavePath": {
-    "_comment": "This is rare but seems to contain the full path to the save file, e.g. C:\\Users\\Username\\Documents\\My Games\\Sid Meier's Civilization 5\\Saves\\multi\\auto\\AutoSave_0310 AD-2030.Civ5Save",
-    "byteOffsetInSection": 260,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 17,
-      "262623": 18,
-      "395070": 19
+  // This is rare but seems to contain the full path to the save file, e.g. C:\Users\Username\Documents\My Games\Sid Meier's Civilization 5\Saves\multi\auto\AutoSave_0310 AD-2030.Civ5Save
+  'section19SkipSavePath': {
+    'byteOffsetInSection': 260,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section19SkipUsername": {
-    "_comment": "This appears to contain the current OS username",
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 17,
-      "262623": 18,
-      "395070": 19
+  // This appears to contain the current OS username
+  'section19SkipUsername': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section19Skip1": {
-    "byteOffsetInSection": null,
-    "length": 7,
-    "sectionByBuild": {
-      "98650": 17,
-      "262623": 18,
-      "395070": 19
+  'section19Skip1': {
+    'byteOffsetInSection': null,
+    'length': 7,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "section19Map": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 17,
-      "262623": 18,
-      "395070": 19
+  'section19Map': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section19Skip2": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "98650": 17,
-      "262623": 18,
-      "395070": 19
+  'section19Skip2': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "maxTurns": {
-    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "98650": 17,
-      "262623": 18,
-      "395070": 19
+  // https://gaming.stackexchange.com/a/273907/154341
+  'maxTurns': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
     },
-    "type": "int"
+    'type': 'int'
   },
-  "playerNames2": {
-    "_comment": "This seems to be the second place in the file with player names. Length is number of items, not bytes.",
-    "byteOffsetInSection": 4,
-    "length": 64,
-    "sectionByBuild": {
-      "98650": 21,
-      "262623": 22,
-      "395070": 23
+  // This seems to be the second place in the file with player names
+  'playerNames2': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    'sectionByBuild': {
+      '98650': 21,
+      '262623': 22,
+      '395070': 23
     },
-    "type": "stringArray"
+    'type': 'stringArray'
   },
-  "section23Skip1": {
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "98650": 21,
-      "262623": 22,
-      "395070": 23
+  'section23Skip1': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 21,
+      '262623': 22,
+      '395070': 23
     },
-    "type": "int"
+    'type': 'int'
   },
-  "turnTimerLength": {
-    "_comment": "https://steamcommunity.com/app/8930/discussions/0/864973761026018000/#c619568192863618582",
-    "byteOffsetInSection": null,
-    "length": 4,
-    "sectionByBuild": {
-      "98650": 21,
-      "262623": 22,
-      "395070": 23
+  // https://steamcommunity.com/app/8930/discussions/0/864973761026018000/#c619568192863618582
+  'turnTimerLength': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 21,
+      '262623': 22,
+      '395070': 23
     },
-    "type": "int"
+    'type': 'int'
   },
-  "playerColours": {
-    "_comment": "Starting with build 310700 this is a list of strings. Before that it's a list of bytes. Length is number of items, not bytes.",
-    "byteOffsetInSection": 4,
-    "length": 64,
-    "sectionByBuild": {
-      "98650": 23,
-      "262623": 24,
-      "395070": 25
+  // Starting with build 310700 this is a list of strings. Before that it's a list of bytes.
+  'playerColours': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    'sectionByBuild': {
+      '98650': 23,
+      '262623': 24,
+      '395070': 25
     },
-    "type": "stringArray"
+    'type': 'stringArray'
   },
-  "privateGame": {
-    "_comment": "https://github.com/Canardlaquay/Civ5SavePrivate",
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "98650": 23,
-      "262623": 24,
-      "395070": 25
+  // https://github.com/Canardlaquay/Civ5SavePrivate
+  'privateGame': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 23,
+      '262623': 24,
+      '395070': 25
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "section29Timer1": {
-    "byteOffsetInSection": 269,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  'section29Timer1': {
+    'byteOffsetInSection': 269,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29Skip1": {
-    "byteOffsetInSection": null,
-    "length": 12,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  'section29Skip1': {
+    'byteOffsetInSection': null,
+    'length': 12,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "section29TurnTimer": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  'section29TurnTimer': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29TxtKeyTurnTimer": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  'section29TxtKeyTurnTimer': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29Timer2": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  'section29Timer2': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section29Skip2": {
-    "byteOffsetInSection": null,
-    "length": 25,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  'section29Skip2': {
+    'byteOffsetInSection': null,
+    'length': 25,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "timeVictory": {
-    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  // https://gaming.stackexchange.com/a/273907/154341
+  'timeVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "scienceVictory": {
-    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  // https://gaming.stackexchange.com/a/273907/154341
+  'scienceVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "dominationVictory": {
-    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  // https://gaming.stackexchange.com/a/273907/154341
+  'dominationVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "culturalVictory": {
-    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  // https://gaming.stackexchange.com/a/273907/154341
+  'culturalVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "diplomaticVictory": {
-    "_comment": "https://gaming.stackexchange.com/a/273907/154341",
-    "byteOffsetInSection": null,
-    "length": 1,
-    "sectionByBuild": {
-      "98650": 27,
-      "262623": 28,
-      "395070": 29
+  // https://gaming.stackexchange.com/a/273907/154341
+  'diplomaticVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
     },
-    "type": "bool"
+    'type': 'bool'
   },
-  "section30Skip1": {
-    "_comment": "This section is 76 bytes long if either expansion pack is installed. Otherwise it's 72 bytes long.",
-    "byteOffsetInSection": 4,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  // This section is 76 bytes long if either expansion pack is installed. Otherwise it's 72 bytes long.
+  'section30Skip1': {
+    'byteOffsetInSection': 4,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "section30MapSize1": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  'section30MapSize1': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section30TxtKeyMapHelp": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  'section30TxtKeyMapHelp': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section30Skip2": {
-    "byteOffsetInSection": null,
-    "length": 8,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  'section30Skip2': {
+    'byteOffsetInSection': null,
+    'length': 8,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "section30MapSize2": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  'section30MapSize2': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section30TxtKeyMapSize": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  'section30TxtKeyMapSize': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section30MapSize3": {
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  'section30MapSize3': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "string"
+    'type': 'string'
   },
-  "section30Skip3": {
-    "_comment": "This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed. Otherwise it's 72 bytes long.",
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  // This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed. Otherwise it's 72 bytes long.
+  'section30Skip3': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "bytes"
+    'type': 'bytes'
   },
-  "gameOptionsMap": {
-    "_comment": "This is where a large chunk of game options are stored (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)",
-    "byteOffsetInSection": null,
-    "length": null,
-    "sectionByBuild": {
-      "98650": 28,
-      "262623": 29,
-      "395070": 30
+  // This is where a large chunk of game options are stored (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)
+  'gameOptionsMap': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
     },
-    "type": "stringToBoolMap"
+    'type': 'stringToBoolMap'
   }
-}
+};
