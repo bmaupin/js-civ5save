@@ -5,7 +5,11 @@ export default {
     'sectionByBuild': {
       '98650': 1
     },
-    'type': 'string'
+    'type': 'string',
+    // Game build is a later property and not yet defined, so the section will need to be determined without it
+    getSection(saveGameVersion) {
+      return 1;
+    },
   },
   'saveGameVersion': {
     'byteOffsetInSection': 4,
@@ -13,7 +17,11 @@ export default {
     'sectionByBuild': {
       '98650': 1
     },
-    'type': 'int'
+    'type': 'int',
+    // Game build is a later property and not yet defined, so the section will need to be determined without it
+    getSection(saveGameVersion) {
+      return 1;
+    },
   },
   // This property is updated if the game is saved with a newer version of Civ 5
   'gameVersion': {
@@ -22,7 +30,15 @@ export default {
     'sectionByBuild': {
       '230620': 1
     },
-    'type': 'string'
+    'type': 'string',
+    // Game build is a later property and not yet defined, so the section will need to be determined without it
+    getSection(saveGameVersion) {
+      if (saveGameVersion >= 7) {
+        return 1;
+      } else {
+        return null;
+      }
+    },
   },
   // This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally used when the save file was created is stored later, after gameOptionsMap.
   'gameBuild': {
@@ -31,7 +47,15 @@ export default {
     'sectionByBuild': {
       '230620': 1
     },
-    'type': 'string'
+    'type': 'string',
+    // Game build is not yet defined, so the section will need to be determined without it
+    getSection(saveGameVersion) {
+      if (saveGameVersion >= 7) {
+        return 1;
+      } else {
+        return null;
+      }
+    },
   },
   'currentTurn': {
     'byteOffsetInSection': null,
