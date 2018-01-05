@@ -9,7 +9,7 @@ export default {
     // Game build is a later property and not yet defined, so the section will need to be determined without it
     getSection(saveGameVersion) {
       return 1;
-    },
+    }
   },
   'saveGameVersion': {
     'byteOffsetInSection': 4,
@@ -21,7 +21,7 @@ export default {
     // Game build is a later property and not yet defined, so the section will need to be determined without it
     getSection(saveGameVersion) {
       return 1;
-    },
+    }
   },
   // This property is updated if the game is saved with a newer version of Civ 5
   'gameVersion': {
@@ -38,7 +38,7 @@ export default {
       } else {
         return null;
       }
-    },
+    }
   },
   // This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally used when the save file was created is stored later, after gameOptionsMap.
   'gameBuild': {
@@ -55,7 +55,7 @@ export default {
       } else {
         return null;
       }
-    },
+    }
   },
   'currentTurn': {
     'byteOffsetInSection': null,
@@ -414,7 +414,14 @@ export default {
       '262623': 29,
       '395070': 30
     },
-    'type': 'bytes'
+    'type': 'bytes',
+    getLength(enabledDLC) {
+      if (enabledDLC.includes('Expansion - Gods and Kings') || enabledDLC.includes('Expansion - Brave New World')) {
+        return 76;
+      } else {
+        return 72;
+      }
+    }
   },
   'section30MapSize1': {
     'byteOffsetInSection': null,
@@ -485,7 +492,16 @@ export default {
       '262623': 29,
       '395070': 30
     },
-    'type': 'bytes'
+    'type': 'bytes',
+    getLength(enabledDLC) {
+      if (enabledDLC.includes('Expansion - Brave New World')) {
+        return 80;
+      } else if (enabledDLC.includes('Expansion - Gods and Kings')) {
+        return 76;
+      } else {
+        return 72;
+      }
+    }
   },
   // This is where a large chunk of game options are stored (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)
   'gameOptionsMap': {
