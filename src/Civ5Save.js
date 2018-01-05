@@ -98,7 +98,6 @@ class Civ5Save {
    * @private
    */
   _getProperties() {
-    this._gameBuild = null;
     let previousPropertyName = null;
     let previousPropertySection = 0;
     let properties = new Map();
@@ -106,11 +105,20 @@ class Civ5Save {
     let sectionOffsets = null;
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
+      // Check for currentTurn since gameBuild may not be available as a property
+      if (propertyName === 'currentTurn') {
+        this._setGameBuild(properties.gameBuild);
+        sectionOffsets = this._getSectionOffsets(this.gameBuild);
+      }
+      if (previousPropertyName === 'saveGameVersion') {
+        saveGameVersion = properties.saveGameVersion.getValue(this._saveData);
+      }
+
       // Before build 310700, playerColours is a list of bytes. There isn't much value in implementing that. And
       // privateGame comes after playerColours.
       // TODO: move this logic into property definitions file
       if (propertyName === 'playerColours' || propertyName === 'privateGame') {
-        if (Number(this._gameBuild) < 310700) {
+        if (Number(this.gameBuild) < 310700) {
           continue;
         }
       }
@@ -118,14 +126,9 @@ class Civ5Save {
       // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
       let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);
 
-      let propertySection = this._getPropertySection(propertyDefinition, saveGameVersion, this._gameBuild);
+      let propertySection = this._getPropertySection(propertyDefinition, saveGameVersion, this.gameBuild);
       // If propertySection is null, it means the property isn't available for the particular game build
       if (this._isNullOrUndefined(propertySection)) {
-        if (propertyName === 'gameBuild') {
-          this._gameBuild = this._getGameBuild();
-          sectionOffsets = this._getSectionOffsets(this._gameBuild);
-        }
-
         continue;
       }
 
@@ -164,14 +167,6 @@ class Civ5Save {
           this._saveData);
       } catch (e) {
         throw new ParseError(`Failure parsing save at property ${propertyName}`);
-      }
-
-      if (propertyName === 'gameBuild') {
-        this._gameBuild = properties.gameBuild.getValue(this._saveData);
-        sectionOffsets = this._getSectionOffsets(this._gameBuild);
-      }
-      if (propertyName === 'saveGameVersion') {
-        saveGameVersion = properties.saveGameVersion.getValue(this._saveData);
       }
 
       previousPropertyName = propertyName;
@@ -308,6 +303,17 @@ class Civ5Save {
     }
 
     return gameBuild;
+  }
+
+  /**
+   * @private
+   */
+  _setGameBuild(gameBuildProperty) {
+    if (typeof gameBuildProperty !== 'undefined') {
+      this._gameBuild = gameBuildProperty.getValue(this._saveData);
+    } else {
+      this._gameBuild = this._getGameBuild();
+    }
   }
 
   /**
