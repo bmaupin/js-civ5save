@@ -39,5 +39,5 @@ test('Test creating Civ5Save instances from local save files', async () => {
       e.message += ` (${filename})`;
       throw e;
     }
-  };
+  }
 }, 20000);
