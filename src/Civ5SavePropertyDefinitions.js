@@ -40,7 +40,8 @@ export default {
       }
     }
   },
-  // This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally used when the save file was created is stored later, after gameOptionsMap.
+  // This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally
+  // used when the save file was created is stored later, after gameOptionsMap.
   'gameBuild': {
     'byteOffsetInSection': null,
     'length': null,
@@ -161,7 +162,8 @@ export default {
       'None'
     ]
   },
-  // Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there at all
+  // Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there
+  // at all
   'playerCivilizations': {
     'byteOffsetInSection': 4,
     // Length is number of items, not bytes
@@ -171,7 +173,8 @@ export default {
     },
     'type': 'stringArray'
   },
-  // This is rare but seems to contain the full path to the save file, e.g. C:\Users\Username\Documents\My Games\Sid Meier's Civilization 5\Saves\multi\auto\AutoSave_0310 AD-2030.Civ5Save
+  // This is rare but seems to contain the full path to the save file, e.g.
+  // C:\Users\Username\Documents\My Games\Sid Meier's Civilization 5\Saves\multi\auto\AutoSave_0310 AD-2030.Civ5Save
   'section19SkipSavePath': {
     'byteOffsetInSection': 260,
     'length': null,
@@ -267,14 +270,18 @@ export default {
     },
     'type': 'int'
   },
-  // Starting with build 310700 this is a list of strings. Before that it's a list of bytes.
   'playerColours': {
     'byteOffsetInSection': 4,
     // Length is number of items, not bytes
     'length': 64,
+    // This is technically incorrect; before build 310700 this property exists, but it's a list of bytes instead of a
+    // list of strings, and there isn't much value in adding the extra complexity for old save games. For reference, the
+    // correct values are:
+    //  '98650': 23,
+    //  '262623': 24,
+    //  '395070': 25
     'sectionByBuild': {
-      '98650': 23,
-      '262623': 24,
+      '310700': 24,
       '395070': 25
     },
     'type': 'stringArray'
@@ -283,9 +290,11 @@ export default {
   'privateGame': {
     'byteOffsetInSection': null,
     'length': 1,
+    // As with playerColours, this is technically incorrect, but there isn't much value in implementing this for older
+    // games because 1. it would require implementing playerColours and 2. it's only relevant for multiplayer games,
+    // however logic for identifying multiplayer games before build 230620 hasn't been implemented (see gameMode)
     'sectionByBuild': {
-      '98650': 23,
-      '262623': 24,
+      '310700': 24,
       '395070': 25
     },
     'type': 'bool'
@@ -483,7 +492,8 @@ export default {
     },
     'type': 'string'
   },
-  // This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed. Otherwise it's 72 bytes long.
+  // This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed.
+  // Otherwise it's 72 bytes long.
   'section30Skip3': {
     'byteOffsetInSection': null,
     'length': null,
@@ -503,7 +513,8 @@ export default {
       }
     }
   },
-  // This is where a large chunk of game options are stored (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)
+  // This is where a large chunk of game options are stored
+  // (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)
   'gameOptionsMap': {
     'byteOffsetInSection': null,
     'length': null,

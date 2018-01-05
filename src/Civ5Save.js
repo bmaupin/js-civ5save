@@ -114,15 +114,6 @@ class Civ5Save {
         saveGameVersion = properties.saveGameVersion.getValue(this._saveData);
       }
 
-      // Before build 310700, playerColours is a list of bytes. There isn't much value in implementing that. And
-      // privateGame comes after playerColours.
-      // TODO: move this logic into property definitions file
-      if (propertyName === 'playerColours' || propertyName === 'privateGame') {
-        if (Number(this.gameBuild) < 310700) {
-          continue;
-        }
-      }
-
       // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
       let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);
 
@@ -132,8 +123,9 @@ class Civ5Save {
         continue;
       }
 
+      let propertyLength = propertyDefinition.length;
       if (propertyDefinition.hasOwnProperty('getLength')) {
-        propertyDefinition.length = propertyDefinition.getLength(properties.enabledDLC.getArray());
+        propertyLength = propertyDefinition.getLength(properties.enabledDLC.getArray());
       }
 
       let propertyByteOffset = 0;
@@ -149,7 +141,7 @@ class Civ5Save {
         properties[propertyName] = Civ5SavePropertyFactory.fromType(
           propertyDefinition.type,
           propertyByteOffset,
-          propertyDefinition.length,
+          propertyLength,
           this._saveData);
       } catch (e) {
         throw new ParseError(`Failure parsing save at property ${propertyName}`);
@@ -249,6 +241,10 @@ class Civ5Save {
 
   /**
    * Game build number.
+   *
+   * Note that for games created or saved before build 230620, this will return the game build that was used to create
+   * the save file. Starting with build 230620, this will return the game build that was last used to save the save
+   * file.
    * @type {string}
    */
   get gameBuild() {
@@ -475,6 +471,9 @@ class Civ5Save {
 
   /**
    * Private setting for multiplayer games.
+   *
+   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn't
+   * implemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.
    * @type {boolean}
    */
   get privateGame() {
