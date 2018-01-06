@@ -30,7 +30,7 @@ test('Test creating Civ5Save instances from local save files', async () => {
     });
   }
 
-  for (let i = 0, len = filenames.length; i < len; i++) {
+  for (let i = 0; i < filenames.length; i++) {
     let filename = filenames[i];
     try {
       let fileBlob = await getFileBlob(path.join(resourceDir, filename));
