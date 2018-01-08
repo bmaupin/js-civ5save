@@ -38,7 +38,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/Civ5Save.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Civ5SaveDataView from &apos;./Civ5SaveDataView&apos;;
-import Civ5SavePropertyDefinitions from &apos;./Civ5SavePropertyDefinitions.json&apos;;
+import Civ5SavePropertyDefinitions from &apos;./Civ5SavePropertyDefinitions.js&apos;;
 import Civ5SavePropertyFactory from &apos;./Civ5SavePropertyFactory&apos;;
 import ExtendableError from &apos;./ExtendableError&apos;;
 
@@ -65,10 +65,6 @@ class Civ5Save {
      * @private
      */
     this._verifyFileSignature();
-    /**
-     * @private
-     */
-    this._gameBuild = this._getGameBuild();
     /**
      * @private
      */
@@ -141,57 +137,42 @@ class Civ5Save {
    * @private
    */
   _getProperties() {
-    let previousPropertyName = &apos;&apos;;
+    let previousPropertyName = null;
     let previousPropertySection = 0;
     let properties = new Map();
-    let sectionOffsets = this._getSectionOffsets();
+    let saveGameVersion = null;
+    let sectionOffsets = null;
 
     for (let propertyName in Civ5SavePropertyDefinitions) {
-      // Skip string array properties since there isn&apos;t much value in implementing them until they&apos;re needed, plus the
-      // string array containing player colours doesn&apos;t seem to have a predictable length (can have 63 or 64 items)
-      if ([&apos;playerColours&apos;, &apos;playerNames2&apos;, &apos;section23Skip1&apos;].includes(propertyName)) {
-        continue;
+      // Check for currentTurn since gameBuild may not be available as a property
+      if (propertyName === &apos;currentTurn&apos;) {
+        this._setGameBuild(properties.gameBuild);
+        sectionOffsets = this._getSectionOffsets(this.gameBuild);
+      }
+      if (previousPropertyName === &apos;saveGameVersion&apos;) {
+        saveGameVersion = properties.saveGameVersion.getValue(this._saveData);
       }
 
       // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
       let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);
 
-      let propertySection = this._getPropertySection(propertyDefinition);
+      let propertySection = this._getPropertySection(propertyDefinition, saveGameVersion, this.gameBuild);
       // If propertySection is null, it means the property isn&apos;t available for the particular game build
       if (this._isNullOrUndefined(propertySection)) {
         continue;
       }
 
-      if (propertyName === &apos;section30Skip1&apos;) {
-        if (properties.enabledDLC.getArray().includes(&apos;Expansion - Gods and Kings&apos;) ||
-          properties.enabledDLC.getArray().includes(&apos;Expansion - Brave New World&apos;)) {
-          propertyDefinition.length = 76;
-        } else {
-          propertyDefinition.length = 72;
-        }
-      } else if (propertyName === &apos;section30Skip3&apos;) {
-        if (properties.enabledDLC.getArray().includes(&apos;Expansion - Brave New World&apos;)) {
-          propertyDefinition.length = 80;
-        } else if (properties.enabledDLC.getArray().includes(&apos;Expansion - Gods and Kings&apos;)) {
-          propertyDefinition.length = 76;
-        } else {
-          propertyDefinition.length = 72;
-        }
+      let propertyLength = propertyDefinition.length;
+      if (propertyDefinition.hasOwnProperty(&apos;getLength&apos;)) {
+        propertyLength = propertyDefinition.getLength(properties.enabledDLC.getArray());
       }
 
-      let propertyByteOffset = null;
+      let propertyByteOffset = 0;
       if (propertySection === previousPropertySection) {
         let previousProperty = properties[previousPropertyName];
         propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
 
-      // Workaround for a couple values that are preceded by string arrays (see comment above)
-      } else if (propertyName === &apos;privateGame&apos;) {
-        propertyByteOffset = sectionOffsets[propertySection].start - 10;
-
-      } else if (propertyName === &apos;turnTimerLength&apos;) {
-        propertyByteOffset = sectionOffsets[propertySection].start - 4;
-
-      } else {
+      } else if (previousPropertyName !== null) {
         propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
       }
 
@@ -199,7 +180,7 @@ class Civ5Save {
         properties[propertyName] = Civ5SavePropertyFactory.fromType(
           propertyDefinition.type,
           propertyByteOffset,
-          propertyDefinition.length,
+          propertyLength,
           this._saveData);
       } catch (e) {
         throw new ParseError(`Failure parsing save at property ${propertyName}`);
@@ -215,7 +196,7 @@ class Civ5Save {
   /**
    * @private
    */
-  _getSectionOffsets() {
+  _getSectionOffsets(gameBuild) {
     const SECTION_DELIMITER = [0x40, 0, 0, 0];
 
     const LAST_PROPERTY_DEFINITION = Civ5SavePropertyDefinitions[Object.keys(Civ5SavePropertyDefinitions)[Object.keys(
@@ -234,9 +215,9 @@ class Civ5Save {
     for (let byteOffset = 0; byteOffset &lt; saveDataBytes.length; byteOffset++) {
       if (this._areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
         // Player colour section before build 310700 contains hex values, which can include the section delimiter
-        if (Number(this.gameBuild) &lt; 310700) {
+        if (Number(gameBuild) &lt; 310700) {
           let playerColourSection = 23;
-          if (Number(this.gameBuild) &gt;= 262623) {
+          if (Number(gameBuild) &gt;= 262623) {
             playerColourSection = 24;
           }
           if (sectionOffsets.length === playerColourSection) {
@@ -274,10 +255,15 @@ class Civ5Save {
   /**
    * @private
    */
-  _getPropertySection(propertyDefinition) {
+  _getPropertySection(propertyDefinition, saveGameVersion, gameBuild) {
+    if (propertyDefinition.hasOwnProperty(&apos;getSection&apos;)) {
+      return propertyDefinition.getSection(saveGameVersion);
+    }
+
     let propertySection = null;
+
     for (let build in propertyDefinition.sectionByBuild) {
-      if (Number.parseInt(this.gameBuild) &gt;= Number.parseInt(build)) {
+      if (Number.parseInt(gameBuild) &gt;= Number.parseInt(build)) {
         propertySection = propertyDefinition.sectionByBuild[build];
       }
     }
@@ -294,6 +280,10 @@ class Civ5Save {
 
   /**
    * Game build number.
+   *
+   * Note that for games created or saved before build 230620, this will return the game build that was used to create
+   * the save file. Starting with build 230620, this will return the game build that was last used to save the save
+   * file.
    * @type {string}
    */
   get gameBuild() {
@@ -337,6 +327,20 @@ class Civ5Save {
   }
 
   /**
+   * @private
+   */
+  _setGameBuild(gameBuildProperty) {
+    if (typeof gameBuildProperty !== &apos;undefined&apos;) {
+      /**
+       * @private
+       */
+      this._gameBuild = gameBuildProperty.getValue(this._saveData);
+    } else {
+      this._gameBuild = this._getGameBuild();
+    }
+  }
+
+  /**
    * Game version.
    *
    * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used
@@ -359,9 +363,9 @@ class Civ5Save {
   /**
    * Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.
    *
-   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used
-   * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply
-   * the spot is there but empty).
+   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620 because the meaning
+   * of its value is unknown. `undefined` is used instead of `null` because `null` might incorrectly imply the value is
+   * empty.
    * @type {string|undefined}
    */
   get gameMode() {
@@ -509,6 +513,9 @@ class Civ5Save {
 
   /**
    * Private setting for multiplayer games.
+   *
+   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn&apos;t
+   * implemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.
    * @type {boolean}
    */
   get privateGame() {
