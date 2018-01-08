@@ -567,7 +567,7 @@
     "__docId__": 48,
     "kind": "file",
     "name": "src/Civ5Save.js",
-    "content": "import Civ5SaveDataView from './Civ5SaveDataView';\nimport Civ5SavePropertyDefinitions from './Civ5SavePropertyDefinitions.json';\nimport Civ5SavePropertyFactory from './Civ5SavePropertyFactory';\nimport ExtendableError from './ExtendableError';\n\n/**\n * A Civilization V save file object.\n */\nclass Civ5Save {\n  /**\n   * Create a Civ5Save object.\n   *\n   * As an alternative, a static factory method is available for more convenient instantiation from a file: [fromFile](#static-method-fromFile)\n   * @param {DataView} saveData - The save file contents.\n   * @throws {InvalidSignatureError} Invalid file signature.\n   * @throws {ParseError} Error while parsing the save file.\n   */\n  constructor(saveData) {\n    /**\n     * @private\n     */\n    // TODO: Convert fields and methods starting with underscores to private once it makes it into the spec\n    // (https://github.com/tc39/proposals)\n    this._saveData = new Civ5SaveDataView(saveData.buffer);\n    /**\n     * @private\n     */\n    this._verifyFileSignature();\n    /**\n     * @private\n     */\n    this._gameBuild = this._getGameBuild();\n    /**\n     * @private\n     */\n    this._properties = this._getProperties();\n  }\n\n  /**\n   * Create a Civ5Save object from a file.\n   *\n   * Reading data from a file needs to be done asynchronously; since the\n   * [constructor](#instance-constructor-constructor) cannot be async, this static factory is provided as an alternative\n   * way to instantiate a Civ5Save object from a file (https://stackoverflow.com/a/24686979/399105).\n   * @param {File} saveFile - A Civilization V save file.\n   * @return {Civ5Save} A Civ5Save object.\n   * @throws {InvalidSignatureError} Invalid file signature.\n   * @throws {ParseError} Error while parsing the save file.\n   * @example\n   * try {\n   *   let save = await Civ5Save.fromFile(saveFile);\n   *   ...\n   */\n  static async fromFile(saveFile) {\n    let saveData = await Civ5Save._loadData(saveFile);\n    return new Civ5Save(saveData);\n  }\n\n  /**\n   * @private\n   */\n  static _loadData(saveFile) {\n    return new Promise(function (resolve, reject) {\n      let reader = new FileReader();\n\n      reader.onload = function () {\n        // Use a DataView for the savegame data since the ArrayBuffer returned by reader.result can't be used to\n        // manipulate the data. A typed array such as Int8Array wouldn't be ideal either since the data contains types\n        // of variable lengths\n        resolve(new DataView(reader.result));\n      };\n      reader.onerror = function () {\n        reject(reader.error);\n      };\n\n      reader.readAsArrayBuffer(saveFile);\n    });\n  }\n\n  /**\n   * Write Civ5Save object to a blob.\n   * @return {Blob} The save file with any changes.\n   * @example\n   * let downloadURL = window.URL.createObjectURL(save.toBlob());\n   */\n  toBlob() {\n    return new Blob([this._saveData], {\n      type: 'application/octet-stream'\n    });\n  }\n\n  /**\n   * @private\n   */\n  _verifyFileSignature() {\n    if (this._saveData.getString(0, 4) !== 'CIV5') {\n      throw new InvalidSignatureError('File signature does not match. Is this a Civ 5 savegame?');\n    }\n  }\n\n  /**\n   * @private\n   */\n  _getProperties() {\n    let previousPropertyName = '';\n    let previousPropertySection = 0;\n    let properties = new Map();\n    let sectionOffsets = this._getSectionOffsets();\n\n    for (let propertyName in Civ5SavePropertyDefinitions) {\n      // Skip string array properties since there isn't much value in implementing them until they're needed, plus the\n      // string array containing player colours doesn't seem to have a predictable length (can have 63 or 64 items)\n      if (['playerColours', 'playerNames2', 'section23Skip1'].includes(propertyName)) {\n        continue;\n      }\n\n      // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class\n      let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);\n\n      let propertySection = this._getPropertySection(propertyDefinition);\n      // If propertySection is null, it means the property isn't available for the particular game build\n      if (this._isNullOrUndefined(propertySection)) {\n        continue;\n      }\n\n      if (propertyName === 'section30Skip1') {\n        if (properties.enabledDLC.getArray().includes('Expansion - Gods and Kings') ||\n          properties.enabledDLC.getArray().includes('Expansion - Brave New World')) {\n          propertyDefinition.length = 76;\n        } else {\n          propertyDefinition.length = 72;\n        }\n      } else if (propertyName === 'section30Skip3') {\n        if (properties.enabledDLC.getArray().includes('Expansion - Brave New World')) {\n          propertyDefinition.length = 80;\n        } else if (properties.enabledDLC.getArray().includes('Expansion - Gods and Kings')) {\n          propertyDefinition.length = 76;\n        } else {\n          propertyDefinition.length = 72;\n        }\n      }\n\n      let propertyByteOffset = null;\n      if (propertySection === previousPropertySection) {\n        let previousProperty = properties[previousPropertyName];\n        propertyByteOffset = previousProperty.byteOffset + previousProperty.length;\n\n      // Workaround for a couple values that are preceded by string arrays (see comment above)\n      } else if (propertyName === 'privateGame') {\n        propertyByteOffset = sectionOffsets[propertySection].start - 10;\n\n      } else if (propertyName === 'turnTimerLength') {\n        propertyByteOffset = sectionOffsets[propertySection].start - 4;\n\n      } else {\n        propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;\n      }\n\n      try {\n        properties[propertyName] = Civ5SavePropertyFactory.fromType(\n          propertyDefinition.type,\n          propertyByteOffset,\n          propertyDefinition.length,\n          this._saveData);\n      } catch (e) {\n        throw new ParseError(`Failure parsing save at property ${propertyName}`);\n      }\n\n      previousPropertyName = propertyName;\n      previousPropertySection = propertySection;\n    }\n\n    return properties;\n  }\n\n  /**\n   * @private\n   */\n  _getSectionOffsets() {\n    const SECTION_DELIMITER = [0x40, 0, 0, 0];\n\n    const LAST_PROPERTY_DEFINITION = Civ5SavePropertyDefinitions[Object.keys(Civ5SavePropertyDefinitions)[Object.keys(\n      Civ5SavePropertyDefinitions).length - 1]];\n    const LAST_SECTION = LAST_PROPERTY_DEFINITION.sectionByBuild[Object.keys(\n      LAST_PROPERTY_DEFINITION.sectionByBuild)[Object.keys(\n      LAST_PROPERTY_DEFINITION.sectionByBuild).length - 1]];\n\n    let saveDataBytes = new Int8Array(this._saveData.buffer);\n    let sectionOffsets = [];\n    let section = {\n      start: 0,\n    };\n    sectionOffsets.push(section);\n\n    for (let byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {\n      if (this._areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {\n        // Player colour section before build 310700 contains hex values, which can include the section delimiter\n        if (Number(this.gameBuild) < 310700) {\n          let playerColourSection = 23;\n          if (Number(this.gameBuild) >= 262623) {\n            playerColourSection = 24;\n          }\n          if (sectionOffsets.length === playerColourSection) {\n            if (byteOffset - sectionOffsets[sectionOffsets.length - 1].start < 270) {\n              continue;\n            }\n          }\n        }\n\n        let section = {\n          start: byteOffset,\n        };\n        sectionOffsets.push(section);\n        sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;\n\n        if (sectionOffsets.length === LAST_SECTION) {\n          break;\n        }\n      }\n    }\n\n    return sectionOffsets;\n  }\n\n  /**\n   * @private\n   * @see https://stackoverflow.com/a/22395463/399105\n   */\n  _areArraysEqual(array1, array2) {\n    return (array1.length === array2.length) && array1.every(function(element, index) {\n      return element === array2[index];\n    });\n  }\n\n  /**\n   * @private\n   */\n  _getPropertySection(propertyDefinition) {\n    let propertySection = null;\n    for (let build in propertyDefinition.sectionByBuild) {\n      if (Number.parseInt(this.gameBuild) >= Number.parseInt(build)) {\n        propertySection = propertyDefinition.sectionByBuild[build];\n      }\n    }\n\n    return propertySection;\n  }\n\n  /**\n   * @private\n   */\n  _isNullOrUndefined(variable) {\n    return typeof variable === 'undefined' || variable === null;\n  }\n\n  /**\n   * Game build number.\n   * @type {string}\n   */\n  get gameBuild() {\n    return this._gameBuild;\n  }\n\n  /**\n   * @private\n   */\n  // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the\n  // game build for all savegame versions\n  _getGameBuild() {\n    const GAME_BUILD_MARKER = 'FINAL_RELEASE';\n    const GAME_BUILD_MARKER_ARRAY = (function() {\n      let gameBuildMarkerArray = [];\n      for (let i = 0; i < GAME_BUILD_MARKER.length; i++) {\n        gameBuildMarkerArray.push(GAME_BUILD_MARKER.charCodeAt(i));\n      }\n      return gameBuildMarkerArray;\n    }());\n\n    let gameBuildMarkerByteOffset = 0;\n    let saveDataBytes = new Int8Array(this._saveData.buffer);\n    for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {\n      if (this._areArraysEqual(\n        saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),\n        GAME_BUILD_MARKER_ARRAY)) {\n        gameBuildMarkerByteOffset = byteOffset;\n        break;\n      }\n    }\n\n    let gameBuild = '';\n    let byteOffset = gameBuildMarkerByteOffset - 2;\n    while (saveDataBytes.slice(byteOffset, byteOffset + 1)[0] !== 0) {\n      gameBuild = String.fromCharCode(saveDataBytes.slice(byteOffset, byteOffset + 1)) + gameBuild;\n      byteOffset--;\n    }\n\n    return gameBuild;\n  }\n\n  /**\n   * Game version.\n   *\n   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used\n   * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply\n   * the spot is there but empty).\n   * @type {string|undefined}\n   */\n  get gameVersion() {\n    return this._getPropertyIfDefined('gameVersion');\n  }\n\n  /**\n   * Current turn.\n   * @type {number}\n   */\n  get currentTurn() {\n    return this._getPropertyIfDefined('currentTurn');\n  }\n\n  /**\n   * Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.\n   *\n   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used\n   * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply\n   * the spot is there but empty).\n   * @type {string|undefined}\n   */\n  get gameMode() {\n    if (Number(this.gameBuild) >= 230620) {\n      return Civ5SavePropertyDefinitions.gameMode.values[this._properties.gameMode.getValue(this._saveData)];\n    }\n  }\n\n  /**\n   * Game difficulty.\n   * @type {string}\n   */\n  get difficulty() {\n    return this._getBeautifiedPropertyIfDefined('difficulty');\n  }\n\n  /**\n   * Starting era.\n   * @type {string}\n   */\n  get startingEra() {\n    return this._getBeautifiedPropertyIfDefined('startingEra');\n  }\n\n  /**\n   * Current era.\n   * @type {string}\n   */\n  get currentEra() {\n    return this._getBeautifiedPropertyIfDefined('currentEra');\n  }\n\n  /**\n   * Game pace.\n   * @type {string}\n   */\n  get gamePace() {\n    return this._getBeautifiedPropertyIfDefined('gamePace');\n  }\n\n  /**\n   * Map size.\n   * @type {string}\n   */\n  get mapSize() {\n    return this._getBeautifiedPropertyIfDefined('mapSize');\n  }\n\n  /**\n   * Map file.\n   * @type {string}\n   */\n  get mapFile() {\n    let mapFileValue = this._getPropertyIfDefined('mapFile');\n    if (!this._isNullOrUndefined(mapFileValue)) {\n      return this._beautifyMapFileValue(mapFileValue);\n    }\n  }\n\n  /**\n   * List of enabled DLC.\n   * @type {Array}\n   */\n  get enabledDLC() {\n    if (this._properties.hasOwnProperty('enabledDLC')) {\n      return this._properties.enabledDLC.getArray();\n    }\n  }\n\n  /**\n   * List of players as objects with their civilization and status as properties.\n   *\n   * Civilization will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700.\n   *\n   * Status is one of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,\n   *     `Civ5Save.PLAYER_STATUSES.NONE`.\n   * @type {Array.<{civilization: string|undefined, status: number}>}\n   */\n  get players() {\n    if (this._isNullOrUndefined(this._players)) {\n      /**\n       * @private\n       */\n      this._players = new Array();\n      let playerStatuses = this._properties.playerStatuses.getArray();\n      for (let i = 0; i < playerStatuses.length; i++) {\n        let player = new Object();\n        player.status = Civ5SavePropertyDefinitions.playerStatuses.values[playerStatuses[i]];\n\n        if (player.status === Civ5Save.PLAYER_STATUSES.NONE) {\n          break;\n        }\n\n        if (this._properties.hasOwnProperty('playerCivilizations')) {\n          if (this._properties.playerCivilizations.getArray()[i] === '') {\n            break;\n          }\n          player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);\n\n        } else if (i === 0 && this._properties.hasOwnProperty('player1Civilization')) {\n          player.civilization = this._beautifyPropertyValue(\n            this._properties.player1Civilization.getValue(this._saveData));\n        }\n\n        this._players.push(player);\n      }\n    }\n\n    return this._players;\n  }\n\n  /**\n   * Max turns.\n   * @type {number}\n   */\n  get maxTurns() {\n    return this._getPropertyIfDefined('maxTurns');\n  }\n\n  /**\n   * Max turns.\n   * @type {number}\n   */\n  set maxTurns(newValue) {\n    this._properties.maxTurns.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n   *     Otherwise, it is in minutes.\n   * @type {number}\n   */\n  get turnTimerLength() {\n    return this._getPropertyIfDefined('turnTimerLength');\n  }\n\n  /**\n   * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n   *     Otherwise, it is in minutes.\n   * @type {number}\n   */\n  set turnTimerLength(newValue) {\n    this._properties.turnTimerLength.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Private setting for multiplayer games.\n   * @type {boolean}\n   */\n  get privateGame() {\n    return this._getPropertyIfDefined('privateGame');\n  }\n\n  /**\n   * Private setting for multiplayer games.\n   * @type {boolean}\n   */\n  set privateGame(newValue) {\n    this._properties.privateGame.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Time victory.\n   * @type {boolean}\n   */\n  get timeVictory() {\n    return this._getPropertyIfDefined('timeVictory');\n  }\n\n  /**\n   * Time victory.\n   * @type {boolean}\n   */\n  set timeVictory(newValue) {\n    this._properties.timeVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Science victory.\n   * @type {boolean}\n   */\n  get scienceVictory() {\n    return this._getPropertyIfDefined('scienceVictory');\n  }\n\n  /**\n   * Science victory.\n   * @type {boolean}\n   */\n  set scienceVictory(newValue) {\n    this._properties.scienceVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Domination victory.\n   * @type {boolean}\n   */\n  get dominationVictory() {\n    return this._getPropertyIfDefined('dominationVictory');\n  }\n\n  /**\n   * Domination victory.\n   * @type {boolean}\n   */\n  set dominationVictory(newValue) {\n    this._properties.dominationVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Cultural victory.\n   * @type {boolean}\n   */\n  get culturalVictory() {\n    return this._getPropertyIfDefined('culturalVictory');\n  }\n\n  /**\n   * Cultural victory.\n   * @type {boolean}\n   */\n  set culturalVictory(newValue) {\n    this._properties.culturalVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Diplomatic victory.\n   * @type {boolean}\n   */\n  get diplomaticVictory() {\n    return this._getPropertyIfDefined('diplomaticVictory');\n  }\n\n  /**\n   * Diplomatic victory.\n   * @type {boolean}\n   */\n  set diplomaticVictory(newValue) {\n    this._properties.diplomaticVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Always peace.\n   * @type {boolean}\n   */\n  get alwaysPeace() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_PEACE');\n  }\n\n  /**\n   * Always peace.\n   * @type {boolean}\n   */\n  set alwaysPeace(newValue) {\n    this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);\n  }\n\n  /**\n   * Always war.\n   * @type {boolean}\n   */\n  get alwaysWar() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_WAR');\n  }\n\n  /**\n   * Always war.\n   * @type {boolean}\n   */\n  set alwaysWar(newValue) {\n    this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);\n  }\n\n  /**\n   * Complete kills.\n   * @type {boolean}\n   */\n  get completeKills() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_COMPLETE_KILLS');\n  }\n\n  /**\n   * Complete kills.\n   * @type {boolean}\n   */\n  set completeKills(newValue) {\n    this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);\n  }\n\n  /**\n   * Lock mods.\n   * @type {boolean}\n   */\n  get lockMods() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_LOCK_MODS');\n  }\n\n  /**\n   * Lock mods.\n   * @type {boolean}\n   */\n  set lockMods(newValue) {\n    this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);\n  }\n\n  /**\n   * New random seed.\n   * @type {boolean}\n   */\n  get newRandomSeed() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NEW_RANDOM_SEED');\n  }\n\n  /**\n   * New random seed.\n   * @type {boolean}\n   */\n  set newRandomSeed(newValue) {\n    this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);\n  }\n\n  /**\n   * No barbarians.\n   * @type {boolean}\n   */\n  get noBarbarians() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_BARBARIANS');\n  }\n\n  /**\n   * No barbarians.\n   * @type {boolean}\n   */\n  set noBarbarians(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);\n  }\n\n  /**\n   * No changing war or peace.\n   * @type {boolean}\n   */\n  get noChangingWarPeace() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CHANGING_WAR_PEACE');\n  }\n\n  /**\n   * No changing war or peace.\n   * @type {boolean}\n   */\n  set noChangingWarPeace(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);\n  }\n\n  /**\n   * No city razing.\n   * @type {boolean}\n   */\n  get noCityRazing() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CITY_RAZING');\n  }\n\n  /**\n   * No city razing.\n   * @type {boolean}\n   */\n  set noCityRazing(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);\n  }\n\n  /**\n   * No cultural overview UI.\n   * @type {boolean}\n   */\n  get noCultureOverviewUI() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CULTURE_OVERVIEW_UI');\n  }\n\n  /**\n   * No cultural overview UI.\n   * @type {boolean}\n   */\n  set noCultureOverviewUI(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);\n  }\n\n  /**\n   * No espionage.\n   * @type {boolean}\n   */\n  get noEspionage() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_ESPIONAGE');\n  }\n\n  /**\n   * No espionage.\n   * @type {boolean}\n   */\n  set noEspionage(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);\n  }\n\n  /**\n   * No happiness.\n   * @type {boolean}\n   */\n  get noHappiness() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_HAPPINESS');\n  }\n\n  /**\n   * No happiness.\n   * @type {boolean}\n   */\n  set noHappiness(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);\n  }\n\n  /**\n   * No policies.\n   * @type {boolean}\n   */\n  get noPolicies() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_POLICIES');\n  }\n\n  /**\n   * No policies.\n   * @type {boolean}\n   */\n  set noPolicies(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);\n  }\n\n  /**\n   * No religion.\n   * @type {boolean}\n   */\n  get noReligion() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_RELIGION');\n  }\n\n  /**\n   * No religion.\n   * @type {boolean}\n   */\n  set noReligion(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);\n  }\n\n  /**\n   * No science.\n   * @type {boolean}\n   */\n  get noScience() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_SCIENCE');\n  }\n\n  /**\n   * No science.\n   * @type {boolean}\n   */\n  set noScience(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);\n  }\n\n  /**\n   * No world congress.\n   * @type {boolean}\n   */\n  get noWorldCongress() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_LEAGUES');\n  }\n\n  /**\n   * No world congress.\n   * @type {boolean}\n   */\n  set noWorldCongress(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);\n  }\n\n  /**\n   * One-city challenge.\n   * @type {boolean}\n   */\n  get oneCityChallenge() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ONE_CITY_CHALLENGE');\n  }\n\n  /**\n   * One-city challenge.\n   * @type {boolean}\n   */\n  set oneCityChallenge(newValue) {\n    this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);\n  }\n\n  /**\n   * Pitboss.\n   * @type {boolean}\n   * @see https://github.com/Bownairo/Civ5SaveEditor\n   */\n  get pitboss() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');\n  }\n\n  /**\n   * Pitboss.\n   * @type {boolean}\n   * @see https://github.com/Bownairo/Civ5SaveEditor\n   */\n  set pitboss(newValue) {\n    this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);\n  }\n\n  /**\n   * Policy saving.\n   * @type {boolean}\n   */\n  get policySaving() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_POLICY_SAVING');\n  }\n\n  /**\n   * Policy saving.\n   * @type {boolean}\n   */\n  set policySaving(newValue) {\n    this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);\n  }\n\n  /**\n   * Promotion saving.\n   * @type {boolean}\n   */\n  get promotionSaving() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PROMOTION_SAVING');\n  }\n\n  /**\n   * Promotion saving.\n   * @type {boolean}\n   */\n  set promotionSaving(newValue) {\n    this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);\n  }\n\n  /**\n   * Raging barbarians.\n   * @type {boolean}\n   */\n  get ragingBarbarians() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RAGING_BARBARIANS');\n  }\n\n  /**\n   * Raging barbarians.\n   * @type {boolean}\n   */\n  set ragingBarbarians(newValue) {\n    this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);\n  }\n\n  /**\n   * Random personalities.\n   * @type {boolean}\n   */\n  get randomPersonalities() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RANDOM_PERSONALITIES');\n  }\n\n  /**\n   * Random personalities.\n   * @type {boolean}\n   */\n  set randomPersonalities(newValue) {\n    this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);\n  }\n\n  /**\n   * Turn timer enabled.\n   * @type {boolean}\n   */\n  get turnTimerEnabled() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_END_TURN_TIMER_ENABLED');\n  }\n\n  /**\n   * Turn timer enabled.\n   * @type {boolean}\n   */\n  set turnTimerEnabled(newValue) {\n    this._setNewGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);\n  }\n\n  /**\n   * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or\n   *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.\n   * @type {string}\n   * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/\n   */\n  get turnMode() {\n    if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === true) {\n      return Civ5Save.TURN_MODES.HYBRID;\n    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === true) {\n      return Civ5Save.TURN_MODES.SIMULTANEOUS;\n    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === false &&\n      this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === false) {\n      return Civ5Save.TURN_MODES.SEQUENTIAL;\n    }\n  }\n\n  /**\n   * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or\n   *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.\n   * @type {string}\n   * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/\n   */\n  set turnMode(newValue) {\n    if (newValue === Civ5Save.TURN_MODES.HYBRID) {\n      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', true);\n      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);\n    } else if (newValue === Civ5Save.TURN_MODES.SIMULTANEOUS) {\n      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);\n      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', true);\n    } else if (newValue === Civ5Save.TURN_MODES.SEQUENTIAL) {\n      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);\n      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);\n    }\n  }\n\n  /**\n   * @private\n   */\n  _getPropertyIfDefined(propertyName) {\n    if (this._properties.hasOwnProperty(propertyName)) {\n      return this._properties[propertyName].getValue(this._saveData);\n    }\n  }\n\n  /**\n   * @private\n   */\n  _getBeautifiedPropertyIfDefined(propertyName) {\n    if (this._properties.hasOwnProperty(propertyName)) {\n      return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));\n    }\n  }\n\n  /**\n   * @private\n   */\n  _beautifyPropertyValue(propertyValue) {\n    propertyValue = propertyValue.split('_')[1];\n    propertyValue = propertyValue.toLowerCase();\n    propertyValue = propertyValue.charAt(0).toUpperCase() + propertyValue.slice(1);\n    return propertyValue;\n  }\n\n  /**\n   * @private\n   */\n  _beautifyMapFileValue(mapFileValue) {\n    mapFileValue = mapFileValue.split('/').slice(-1)[0];\n    mapFileValue = mapFileValue.split('\\\\').slice(-1)[0];\n    mapFileValue = mapFileValue.substring(0, mapFileValue.lastIndexOf('.'));\n    mapFileValue = mapFileValue.replace(/_/g, ' ');\n    return mapFileValue;\n  }\n\n  /**\n   * @private\n   */\n  _setNewGameOption(newGameOptionKey, newGameOptionValue) {\n    let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);\n    if (!this._isNullOrUndefined(newSaveData)) {\n      this._saveData = newSaveData;\n    }\n  }\n}\n\n// TODO: Turn these into class fields once the proposal makes it into the spec (https://github.com/tc39/proposals)\nCiv5Save.GAME_MODES = {\n  SINGLE: 'Single player',\n  MULTI: 'Multiplayer',\n  HOTSEAT: 'Hotseat'\n};\n\nCiv5Save.PLAYER_STATUSES = {\n  AI: 'AI',\n  DEAD: 'Dead',\n  HUMAN: 'Human',\n  NONE: 'None'\n};\n\nCiv5Save.TURN_MODES = {\n  HYBRID: 'Hybrid',\n  SEQUENTIAL: 'Sequential',\n  SIMULTANEOUS: 'Simultaneous'\n};\n\nexport default Civ5Save;\n\n/**\n * Error signifying the file signature is invalid for a Civ5Save file.\n */\nexport class InvalidSignatureError extends ExtendableError {}\n\n/**\n * Error signifying there was a problem parsing the save file.\n */\nexport class ParseError extends ExtendableError {}\n",
+    "content": "import Civ5SaveDataView from './Civ5SaveDataView';\nimport Civ5SavePropertyDefinitions from './Civ5SavePropertyDefinitions.js';\nimport Civ5SavePropertyFactory from './Civ5SavePropertyFactory';\nimport ExtendableError from './ExtendableError';\n\n/**\n * A Civilization V save file object.\n */\nclass Civ5Save {\n  /**\n   * Create a Civ5Save object.\n   *\n   * As an alternative, a static factory method is available for more convenient instantiation from a file: [fromFile](#static-method-fromFile)\n   * @param {DataView} saveData - The save file contents.\n   * @throws {InvalidSignatureError} Invalid file signature.\n   * @throws {ParseError} Error while parsing the save file.\n   */\n  constructor(saveData) {\n    /**\n     * @private\n     */\n    // TODO: Convert fields and methods starting with underscores to private once it makes it into the spec\n    // (https://github.com/tc39/proposals)\n    this._saveData = new Civ5SaveDataView(saveData.buffer);\n    /**\n     * @private\n     */\n    this._verifyFileSignature();\n    /**\n     * @private\n     */\n    this._properties = this._getProperties();\n  }\n\n  /**\n   * Create a Civ5Save object from a file.\n   *\n   * Reading data from a file needs to be done asynchronously; since the\n   * [constructor](#instance-constructor-constructor) cannot be async, this static factory is provided as an alternative\n   * way to instantiate a Civ5Save object from a file (https://stackoverflow.com/a/24686979/399105).\n   * @param {File} saveFile - A Civilization V save file.\n   * @return {Civ5Save} A Civ5Save object.\n   * @throws {InvalidSignatureError} Invalid file signature.\n   * @throws {ParseError} Error while parsing the save file.\n   * @example\n   * try {\n   *   let save = await Civ5Save.fromFile(saveFile);\n   *   ...\n   */\n  static async fromFile(saveFile) {\n    let saveData = await Civ5Save._loadData(saveFile);\n    return new Civ5Save(saveData);\n  }\n\n  /**\n   * @private\n   */\n  static _loadData(saveFile) {\n    return new Promise(function (resolve, reject) {\n      let reader = new FileReader();\n\n      reader.onload = function () {\n        // Use a DataView for the savegame data since the ArrayBuffer returned by reader.result can't be used to\n        // manipulate the data. A typed array such as Int8Array wouldn't be ideal either since the data contains types\n        // of variable lengths\n        resolve(new DataView(reader.result));\n      };\n      reader.onerror = function () {\n        reject(reader.error);\n      };\n\n      reader.readAsArrayBuffer(saveFile);\n    });\n  }\n\n  /**\n   * Write Civ5Save object to a blob.\n   * @return {Blob} The save file with any changes.\n   * @example\n   * let downloadURL = window.URL.createObjectURL(save.toBlob());\n   */\n  toBlob() {\n    return new Blob([this._saveData], {\n      type: 'application/octet-stream'\n    });\n  }\n\n  /**\n   * @private\n   */\n  _verifyFileSignature() {\n    if (this._saveData.getString(0, 4) !== 'CIV5') {\n      throw new InvalidSignatureError('File signature does not match. Is this a Civ 5 savegame?');\n    }\n  }\n\n  /**\n   * @private\n   */\n  _getProperties() {\n    let previousPropertyName = null;\n    let previousPropertySection = 0;\n    let properties = new Map();\n    let saveGameVersion = null;\n    let sectionOffsets = null;\n\n    for (let propertyName in Civ5SavePropertyDefinitions) {\n      // Check for currentTurn since gameBuild may not be available as a property\n      if (propertyName === 'currentTurn') {\n        this._setGameBuild(properties.gameBuild);\n        sectionOffsets = this._getSectionOffsets(this.gameBuild);\n      }\n      if (previousPropertyName === 'saveGameVersion') {\n        saveGameVersion = properties.saveGameVersion.getValue(this._saveData);\n      }\n\n      // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class\n      let propertyDefinition = Object.assign({}, Civ5SavePropertyDefinitions[propertyName]);\n\n      let propertySection = this._getPropertySection(propertyDefinition, saveGameVersion, this.gameBuild);\n      // If propertySection is null, it means the property isn't available for the particular game build\n      if (this._isNullOrUndefined(propertySection)) {\n        continue;\n      }\n\n      let propertyLength = propertyDefinition.length;\n      if (propertyDefinition.hasOwnProperty('getLength')) {\n        propertyLength = propertyDefinition.getLength(properties.enabledDLC.getArray());\n      }\n\n      let propertyByteOffset = 0;\n      if (propertySection === previousPropertySection) {\n        let previousProperty = properties[previousPropertyName];\n        propertyByteOffset = previousProperty.byteOffset + previousProperty.length;\n\n      } else if (previousPropertyName !== null) {\n        propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;\n      }\n\n      try {\n        properties[propertyName] = Civ5SavePropertyFactory.fromType(\n          propertyDefinition.type,\n          propertyByteOffset,\n          propertyLength,\n          this._saveData);\n      } catch (e) {\n        throw new ParseError(`Failure parsing save at property ${propertyName}`);\n      }\n\n      previousPropertyName = propertyName;\n      previousPropertySection = propertySection;\n    }\n\n    return properties;\n  }\n\n  /**\n   * @private\n   */\n  _getSectionOffsets(gameBuild) {\n    const SECTION_DELIMITER = [0x40, 0, 0, 0];\n\n    const LAST_PROPERTY_DEFINITION = Civ5SavePropertyDefinitions[Object.keys(Civ5SavePropertyDefinitions)[Object.keys(\n      Civ5SavePropertyDefinitions).length - 1]];\n    const LAST_SECTION = LAST_PROPERTY_DEFINITION.sectionByBuild[Object.keys(\n      LAST_PROPERTY_DEFINITION.sectionByBuild)[Object.keys(\n      LAST_PROPERTY_DEFINITION.sectionByBuild).length - 1]];\n\n    let saveDataBytes = new Int8Array(this._saveData.buffer);\n    let sectionOffsets = [];\n    let section = {\n      start: 0,\n    };\n    sectionOffsets.push(section);\n\n    for (let byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {\n      if (this._areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {\n        // Player colour section before build 310700 contains hex values, which can include the section delimiter\n        if (Number(gameBuild) < 310700) {\n          let playerColourSection = 23;\n          if (Number(gameBuild) >= 262623) {\n            playerColourSection = 24;\n          }\n          if (sectionOffsets.length === playerColourSection) {\n            if (byteOffset - sectionOffsets[sectionOffsets.length - 1].start < 270) {\n              continue;\n            }\n          }\n        }\n\n        let section = {\n          start: byteOffset,\n        };\n        sectionOffsets.push(section);\n        sectionOffsets[sectionOffsets.length - 2].end = byteOffset - 1;\n\n        if (sectionOffsets.length === LAST_SECTION) {\n          break;\n        }\n      }\n    }\n\n    return sectionOffsets;\n  }\n\n  /**\n   * @private\n   * @see https://stackoverflow.com/a/22395463/399105\n   */\n  _areArraysEqual(array1, array2) {\n    return (array1.length === array2.length) && array1.every(function(element, index) {\n      return element === array2[index];\n    });\n  }\n\n  /**\n   * @private\n   */\n  _getPropertySection(propertyDefinition, saveGameVersion, gameBuild) {\n    if (propertyDefinition.hasOwnProperty('getSection')) {\n      return propertyDefinition.getSection(saveGameVersion);\n    }\n\n    let propertySection = null;\n\n    for (let build in propertyDefinition.sectionByBuild) {\n      if (Number.parseInt(gameBuild) >= Number.parseInt(build)) {\n        propertySection = propertyDefinition.sectionByBuild[build];\n      }\n    }\n\n    return propertySection;\n  }\n\n  /**\n   * @private\n   */\n  _isNullOrUndefined(variable) {\n    return typeof variable === 'undefined' || variable === null;\n  }\n\n  /**\n   * Game build number.\n   *\n   * Note that for games created or saved before build 230620, this will return the game build that was used to create\n   * the save file. Starting with build 230620, this will return the game build that was last used to save the save\n   * file.\n   * @type {string}\n   */\n  get gameBuild() {\n    return this._gameBuild;\n  }\n\n  /**\n   * @private\n   */\n  // Game build was only added to the beginning of the savegame in game version 1.0.2. This should be able to get the\n  // game build for all savegame versions\n  _getGameBuild() {\n    const GAME_BUILD_MARKER = 'FINAL_RELEASE';\n    const GAME_BUILD_MARKER_ARRAY = (function() {\n      let gameBuildMarkerArray = [];\n      for (let i = 0; i < GAME_BUILD_MARKER.length; i++) {\n        gameBuildMarkerArray.push(GAME_BUILD_MARKER.charCodeAt(i));\n      }\n      return gameBuildMarkerArray;\n    }());\n\n    let gameBuildMarkerByteOffset = 0;\n    let saveDataBytes = new Int8Array(this._saveData.buffer);\n    for (let byteOffset = 0; byteOffset <= saveDataBytes.length; byteOffset++) {\n      if (this._areArraysEqual(\n        saveDataBytes.slice(byteOffset, byteOffset + GAME_BUILD_MARKER_ARRAY.length),\n        GAME_BUILD_MARKER_ARRAY)) {\n        gameBuildMarkerByteOffset = byteOffset;\n        break;\n      }\n    }\n\n    let gameBuild = '';\n    let byteOffset = gameBuildMarkerByteOffset - 2;\n    while (saveDataBytes.slice(byteOffset, byteOffset + 1)[0] !== 0) {\n      gameBuild = String.fromCharCode(saveDataBytes.slice(byteOffset, byteOffset + 1)) + gameBuild;\n      byteOffset--;\n    }\n\n    return gameBuild;\n  }\n\n  /**\n   * @private\n   */\n  _setGameBuild(gameBuildProperty) {\n    if (typeof gameBuildProperty !== 'undefined') {\n      /**\n       * @private\n       */\n      this._gameBuild = gameBuildProperty.getValue(this._saveData);\n    } else {\n      this._gameBuild = this._getGameBuild();\n    }\n  }\n\n  /**\n   * Game version.\n   *\n   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used\n   * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply\n   * the spot is there but empty).\n   * @type {string|undefined}\n   */\n  get gameVersion() {\n    return this._getPropertyIfDefined('gameVersion');\n  }\n\n  /**\n   * Current turn.\n   * @type {number}\n   */\n  get currentTurn() {\n    return this._getPropertyIfDefined('currentTurn');\n  }\n\n  /**\n   * Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.\n   *\n   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620 because the meaning\n   * of its value is unknown. `undefined` is used instead of `null` because `null` might incorrectly imply the value is\n   * empty.\n   * @type {string|undefined}\n   */\n  get gameMode() {\n    if (Number(this.gameBuild) >= 230620) {\n      return Civ5SavePropertyDefinitions.gameMode.values[this._properties.gameMode.getValue(this._saveData)];\n    }\n  }\n\n  /**\n   * Game difficulty.\n   * @type {string}\n   */\n  get difficulty() {\n    return this._getBeautifiedPropertyIfDefined('difficulty');\n  }\n\n  /**\n   * Starting era.\n   * @type {string}\n   */\n  get startingEra() {\n    return this._getBeautifiedPropertyIfDefined('startingEra');\n  }\n\n  /**\n   * Current era.\n   * @type {string}\n   */\n  get currentEra() {\n    return this._getBeautifiedPropertyIfDefined('currentEra');\n  }\n\n  /**\n   * Game pace.\n   * @type {string}\n   */\n  get gamePace() {\n    return this._getBeautifiedPropertyIfDefined('gamePace');\n  }\n\n  /**\n   * Map size.\n   * @type {string}\n   */\n  get mapSize() {\n    return this._getBeautifiedPropertyIfDefined('mapSize');\n  }\n\n  /**\n   * Map file.\n   * @type {string}\n   */\n  get mapFile() {\n    let mapFileValue = this._getPropertyIfDefined('mapFile');\n    if (!this._isNullOrUndefined(mapFileValue)) {\n      return this._beautifyMapFileValue(mapFileValue);\n    }\n  }\n\n  /**\n   * List of enabled DLC.\n   * @type {Array}\n   */\n  get enabledDLC() {\n    if (this._properties.hasOwnProperty('enabledDLC')) {\n      return this._properties.enabledDLC.getArray();\n    }\n  }\n\n  /**\n   * List of players as objects with their civilization and status as properties.\n   *\n   * Civilization will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700.\n   *\n   * Status is one of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,\n   *     `Civ5Save.PLAYER_STATUSES.NONE`.\n   * @type {Array.<{civilization: string|undefined, status: number}>}\n   */\n  get players() {\n    if (this._isNullOrUndefined(this._players)) {\n      /**\n       * @private\n       */\n      this._players = new Array();\n      let playerStatuses = this._properties.playerStatuses.getArray();\n      for (let i = 0; i < playerStatuses.length; i++) {\n        let player = new Object();\n        player.status = Civ5SavePropertyDefinitions.playerStatuses.values[playerStatuses[i]];\n\n        if (player.status === Civ5Save.PLAYER_STATUSES.NONE) {\n          break;\n        }\n\n        if (this._properties.hasOwnProperty('playerCivilizations')) {\n          if (this._properties.playerCivilizations.getArray()[i] === '') {\n            break;\n          }\n          player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);\n\n        } else if (i === 0 && this._properties.hasOwnProperty('player1Civilization')) {\n          player.civilization = this._beautifyPropertyValue(\n            this._properties.player1Civilization.getValue(this._saveData));\n        }\n\n        this._players.push(player);\n      }\n    }\n\n    return this._players;\n  }\n\n  /**\n   * Max turns.\n   * @type {number}\n   */\n  get maxTurns() {\n    return this._getPropertyIfDefined('maxTurns');\n  }\n\n  /**\n   * Max turns.\n   * @type {number}\n   */\n  set maxTurns(newValue) {\n    this._properties.maxTurns.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n   *     Otherwise, it is in minutes.\n   * @type {number}\n   */\n  get turnTimerLength() {\n    return this._getPropertyIfDefined('turnTimerLength');\n  }\n\n  /**\n   * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n   *     Otherwise, it is in minutes.\n   * @type {number}\n   */\n  set turnTimerLength(newValue) {\n    this._properties.turnTimerLength.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Private setting for multiplayer games.\n   *\n   * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn't\n   * implemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.\n   * @type {boolean}\n   */\n  get privateGame() {\n    return this._getPropertyIfDefined('privateGame');\n  }\n\n  /**\n   * Private setting for multiplayer games.\n   * @type {boolean}\n   */\n  set privateGame(newValue) {\n    this._properties.privateGame.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Time victory.\n   * @type {boolean}\n   */\n  get timeVictory() {\n    return this._getPropertyIfDefined('timeVictory');\n  }\n\n  /**\n   * Time victory.\n   * @type {boolean}\n   */\n  set timeVictory(newValue) {\n    this._properties.timeVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Science victory.\n   * @type {boolean}\n   */\n  get scienceVictory() {\n    return this._getPropertyIfDefined('scienceVictory');\n  }\n\n  /**\n   * Science victory.\n   * @type {boolean}\n   */\n  set scienceVictory(newValue) {\n    this._properties.scienceVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Domination victory.\n   * @type {boolean}\n   */\n  get dominationVictory() {\n    return this._getPropertyIfDefined('dominationVictory');\n  }\n\n  /**\n   * Domination victory.\n   * @type {boolean}\n   */\n  set dominationVictory(newValue) {\n    this._properties.dominationVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Cultural victory.\n   * @type {boolean}\n   */\n  get culturalVictory() {\n    return this._getPropertyIfDefined('culturalVictory');\n  }\n\n  /**\n   * Cultural victory.\n   * @type {boolean}\n   */\n  set culturalVictory(newValue) {\n    this._properties.culturalVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Diplomatic victory.\n   * @type {boolean}\n   */\n  get diplomaticVictory() {\n    return this._getPropertyIfDefined('diplomaticVictory');\n  }\n\n  /**\n   * Diplomatic victory.\n   * @type {boolean}\n   */\n  set diplomaticVictory(newValue) {\n    this._properties.diplomaticVictory.setValue(this._saveData, newValue);\n  }\n\n  /**\n   * Always peace.\n   * @type {boolean}\n   */\n  get alwaysPeace() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_PEACE');\n  }\n\n  /**\n   * Always peace.\n   * @type {boolean}\n   */\n  set alwaysPeace(newValue) {\n    this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);\n  }\n\n  /**\n   * Always war.\n   * @type {boolean}\n   */\n  get alwaysWar() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_WAR');\n  }\n\n  /**\n   * Always war.\n   * @type {boolean}\n   */\n  set alwaysWar(newValue) {\n    this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);\n  }\n\n  /**\n   * Complete kills.\n   * @type {boolean}\n   */\n  get completeKills() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_COMPLETE_KILLS');\n  }\n\n  /**\n   * Complete kills.\n   * @type {boolean}\n   */\n  set completeKills(newValue) {\n    this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);\n  }\n\n  /**\n   * Lock mods.\n   * @type {boolean}\n   */\n  get lockMods() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_LOCK_MODS');\n  }\n\n  /**\n   * Lock mods.\n   * @type {boolean}\n   */\n  set lockMods(newValue) {\n    this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);\n  }\n\n  /**\n   * New random seed.\n   * @type {boolean}\n   */\n  get newRandomSeed() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NEW_RANDOM_SEED');\n  }\n\n  /**\n   * New random seed.\n   * @type {boolean}\n   */\n  set newRandomSeed(newValue) {\n    this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);\n  }\n\n  /**\n   * No barbarians.\n   * @type {boolean}\n   */\n  get noBarbarians() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_BARBARIANS');\n  }\n\n  /**\n   * No barbarians.\n   * @type {boolean}\n   */\n  set noBarbarians(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);\n  }\n\n  /**\n   * No changing war or peace.\n   * @type {boolean}\n   */\n  get noChangingWarPeace() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CHANGING_WAR_PEACE');\n  }\n\n  /**\n   * No changing war or peace.\n   * @type {boolean}\n   */\n  set noChangingWarPeace(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);\n  }\n\n  /**\n   * No city razing.\n   * @type {boolean}\n   */\n  get noCityRazing() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CITY_RAZING');\n  }\n\n  /**\n   * No city razing.\n   * @type {boolean}\n   */\n  set noCityRazing(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);\n  }\n\n  /**\n   * No cultural overview UI.\n   * @type {boolean}\n   */\n  get noCultureOverviewUI() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CULTURE_OVERVIEW_UI');\n  }\n\n  /**\n   * No cultural overview UI.\n   * @type {boolean}\n   */\n  set noCultureOverviewUI(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);\n  }\n\n  /**\n   * No espionage.\n   * @type {boolean}\n   */\n  get noEspionage() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_ESPIONAGE');\n  }\n\n  /**\n   * No espionage.\n   * @type {boolean}\n   */\n  set noEspionage(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);\n  }\n\n  /**\n   * No happiness.\n   * @type {boolean}\n   */\n  get noHappiness() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_HAPPINESS');\n  }\n\n  /**\n   * No happiness.\n   * @type {boolean}\n   */\n  set noHappiness(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);\n  }\n\n  /**\n   * No policies.\n   * @type {boolean}\n   */\n  get noPolicies() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_POLICIES');\n  }\n\n  /**\n   * No policies.\n   * @type {boolean}\n   */\n  set noPolicies(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);\n  }\n\n  /**\n   * No religion.\n   * @type {boolean}\n   */\n  get noReligion() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_RELIGION');\n  }\n\n  /**\n   * No religion.\n   * @type {boolean}\n   */\n  set noReligion(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);\n  }\n\n  /**\n   * No science.\n   * @type {boolean}\n   */\n  get noScience() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_SCIENCE');\n  }\n\n  /**\n   * No science.\n   * @type {boolean}\n   */\n  set noScience(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);\n  }\n\n  /**\n   * No world congress.\n   * @type {boolean}\n   */\n  get noWorldCongress() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_LEAGUES');\n  }\n\n  /**\n   * No world congress.\n   * @type {boolean}\n   */\n  set noWorldCongress(newValue) {\n    this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);\n  }\n\n  /**\n   * One-city challenge.\n   * @type {boolean}\n   */\n  get oneCityChallenge() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ONE_CITY_CHALLENGE');\n  }\n\n  /**\n   * One-city challenge.\n   * @type {boolean}\n   */\n  set oneCityChallenge(newValue) {\n    this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);\n  }\n\n  /**\n   * Pitboss.\n   * @type {boolean}\n   * @see https://github.com/Bownairo/Civ5SaveEditor\n   */\n  get pitboss() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');\n  }\n\n  /**\n   * Pitboss.\n   * @type {boolean}\n   * @see https://github.com/Bownairo/Civ5SaveEditor\n   */\n  set pitboss(newValue) {\n    this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);\n  }\n\n  /**\n   * Policy saving.\n   * @type {boolean}\n   */\n  get policySaving() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_POLICY_SAVING');\n  }\n\n  /**\n   * Policy saving.\n   * @type {boolean}\n   */\n  set policySaving(newValue) {\n    this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);\n  }\n\n  /**\n   * Promotion saving.\n   * @type {boolean}\n   */\n  get promotionSaving() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PROMOTION_SAVING');\n  }\n\n  /**\n   * Promotion saving.\n   * @type {boolean}\n   */\n  set promotionSaving(newValue) {\n    this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);\n  }\n\n  /**\n   * Raging barbarians.\n   * @type {boolean}\n   */\n  get ragingBarbarians() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RAGING_BARBARIANS');\n  }\n\n  /**\n   * Raging barbarians.\n   * @type {boolean}\n   */\n  set ragingBarbarians(newValue) {\n    this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);\n  }\n\n  /**\n   * Random personalities.\n   * @type {boolean}\n   */\n  get randomPersonalities() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RANDOM_PERSONALITIES');\n  }\n\n  /**\n   * Random personalities.\n   * @type {boolean}\n   */\n  set randomPersonalities(newValue) {\n    this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);\n  }\n\n  /**\n   * Turn timer enabled.\n   * @type {boolean}\n   */\n  get turnTimerEnabled() {\n    return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_END_TURN_TIMER_ENABLED');\n  }\n\n  /**\n   * Turn timer enabled.\n   * @type {boolean}\n   */\n  set turnTimerEnabled(newValue) {\n    this._setNewGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);\n  }\n\n  /**\n   * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or\n   *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.\n   * @type {string}\n   * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/\n   */\n  get turnMode() {\n    if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === true) {\n      return Civ5Save.TURN_MODES.HYBRID;\n    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === true) {\n      return Civ5Save.TURN_MODES.SIMULTANEOUS;\n    } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === false &&\n      this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === false) {\n      return Civ5Save.TURN_MODES.SEQUENTIAL;\n    }\n  }\n\n  /**\n   * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or\n   *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.\n   * @type {string}\n   * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/\n   */\n  set turnMode(newValue) {\n    if (newValue === Civ5Save.TURN_MODES.HYBRID) {\n      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', true);\n      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);\n    } else if (newValue === Civ5Save.TURN_MODES.SIMULTANEOUS) {\n      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);\n      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', true);\n    } else if (newValue === Civ5Save.TURN_MODES.SEQUENTIAL) {\n      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);\n      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);\n    }\n  }\n\n  /**\n   * @private\n   */\n  _getPropertyIfDefined(propertyName) {\n    if (this._properties.hasOwnProperty(propertyName)) {\n      return this._properties[propertyName].getValue(this._saveData);\n    }\n  }\n\n  /**\n   * @private\n   */\n  _getBeautifiedPropertyIfDefined(propertyName) {\n    if (this._properties.hasOwnProperty(propertyName)) {\n      return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));\n    }\n  }\n\n  /**\n   * @private\n   */\n  _beautifyPropertyValue(propertyValue) {\n    propertyValue = propertyValue.split('_')[1];\n    propertyValue = propertyValue.toLowerCase();\n    propertyValue = propertyValue.charAt(0).toUpperCase() + propertyValue.slice(1);\n    return propertyValue;\n  }\n\n  /**\n   * @private\n   */\n  _beautifyMapFileValue(mapFileValue) {\n    mapFileValue = mapFileValue.split('/').slice(-1)[0];\n    mapFileValue = mapFileValue.split('\\\\').slice(-1)[0];\n    mapFileValue = mapFileValue.substring(0, mapFileValue.lastIndexOf('.'));\n    mapFileValue = mapFileValue.replace(/_/g, ' ');\n    return mapFileValue;\n  }\n\n  /**\n   * @private\n   */\n  _setNewGameOption(newGameOptionKey, newGameOptionValue) {\n    let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);\n    if (!this._isNullOrUndefined(newSaveData)) {\n      this._saveData = newSaveData;\n    }\n  }\n}\n\n// TODO: Turn these into class fields once the proposal makes it into the spec (https://github.com/tc39/proposals)\nCiv5Save.GAME_MODES = {\n  SINGLE: 'Single player',\n  MULTI: 'Multiplayer',\n  HOTSEAT: 'Hotseat'\n};\n\nCiv5Save.PLAYER_STATUSES = {\n  AI: 'AI',\n  DEAD: 'Dead',\n  HUMAN: 'Human',\n  NONE: 'None'\n};\n\nCiv5Save.TURN_MODES = {\n  HYBRID: 'Hybrid',\n  SEQUENTIAL: 'Sequential',\n  SIMULTANEOUS: 'Simultaneous'\n};\n\nexport default Civ5Save;\n\n/**\n * Error signifying the file signature is invalid for a Civ5Save file.\n */\nexport class InvalidSignatureError extends ExtendableError {}\n\n/**\n * Error signifying there was a problem parsing the save file.\n */\nexport class ParseError extends ExtendableError {}\n",
     "static": true,
     "longname": "/home/bmaupin/Dropbox/Projects/js-civ5save/src/Civ5Save.js",
     "access": "public",
@@ -586,7 +586,7 @@
     "importPath": "civ5save/src/Civ5Save.js",
     "importStyle": "{InvalidSignatureError}",
     "description": "Error signifying the file signature is invalid for a Civ5Save file.",
-    "lineNumber": 1032,
+    "lineNumber": 1039,
     "interface": false,
     "extends": [
       "src/ExtendableError.js~ExtendableError"
@@ -604,7 +604,7 @@
     "importPath": "civ5save/src/Civ5Save.js",
     "importStyle": "{ParseError}",
     "description": "Error signifying there was a problem parsing the save file.",
-    "lineNumber": 1037,
+    "lineNumber": 1044,
     "interface": false,
     "extends": [
       "src/ExtendableError.js~ExtendableError"
@@ -684,10 +684,10 @@
   {
     "__docId__": 54,
     "kind": "member",
-    "name": "_gameBuild",
+    "name": "_properties",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#_gameBuild",
+    "longname": "src/Civ5Save.js~Civ5Save#_properties",
     "access": "private",
     "description": "",
     "lineNumber": 32,
@@ -700,23 +700,6 @@
   },
   {
     "__docId__": 55,
-    "kind": "member",
-    "name": "_properties",
-    "memberof": "src/Civ5Save.js~Civ5Save",
-    "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#_properties",
-    "access": "private",
-    "description": "",
-    "lineNumber": 36,
-    "ignore": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 56,
     "kind": "method",
     "name": "fromFile",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -729,7 +712,7 @@
     "examples": [
       "try {\n  let save = await Civ5Save.fromFile(saveFile);\n  ..."
     ],
-    "lineNumber": 54,
+    "lineNumber": 50,
     "params": [
       {
         "nullable": null,
@@ -766,7 +749,7 @@
     ]
   },
   {
-    "__docId__": 57,
+    "__docId__": 56,
     "kind": "method",
     "name": "_loadData",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -776,7 +759,7 @@
     "longname": "src/Civ5Save.js~Civ5Save._loadData",
     "access": "private",
     "description": "",
-    "lineNumber": 62,
+    "lineNumber": 58,
     "ignore": true,
     "params": [
       {
@@ -793,7 +776,7 @@
     }
   },
   {
-    "__docId__": 58,
+    "__docId__": 57,
     "kind": "method",
     "name": "toBlob",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -806,7 +789,7 @@
     "examples": [
       "let downloadURL = window.URL.createObjectURL(save.toBlob());"
     ],
-    "lineNumber": 86,
+    "lineNumber": 82,
     "return": {
       "nullable": null,
       "types": [
@@ -818,7 +801,7 @@
     "params": []
   },
   {
-    "__docId__": 59,
+    "__docId__": 58,
     "kind": "method",
     "name": "_verifyFileSignature",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -828,13 +811,13 @@
     "longname": "src/Civ5Save.js~Civ5Save#_verifyFileSignature",
     "access": "private",
     "description": "",
-    "lineNumber": 95,
+    "lineNumber": 91,
     "ignore": true,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 60,
+    "__docId__": 59,
     "kind": "method",
     "name": "_getProperties",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -844,7 +827,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_getProperties",
     "access": "private",
     "description": "",
-    "lineNumber": 104,
+    "lineNumber": 100,
     "ignore": true,
     "params": [],
     "return": {
@@ -854,7 +837,7 @@
     }
   },
   {
-    "__docId__": 61,
+    "__docId__": 60,
     "kind": "method",
     "name": "_getSectionOffsets",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -864,9 +847,16 @@
     "longname": "src/Civ5Save.js~Civ5Save#_getSectionOffsets",
     "access": "private",
     "description": "",
-    "lineNumber": 179,
+    "lineNumber": 160,
     "ignore": true,
-    "params": [],
+    "params": [
+      {
+        "name": "gameBuild",
+        "types": [
+          "*"
+        ]
+      }
+    ],
     "return": {
       "types": [
         "*"
@@ -874,7 +864,7 @@
     }
   },
   {
-    "__docId__": 62,
+    "__docId__": 61,
     "kind": "method",
     "name": "_areArraysEqual",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -887,7 +877,7 @@
     "see": [
       "https://stackoverflow.com/a/22395463/399105"
     ],
-    "lineNumber": 229,
+    "lineNumber": 210,
     "ignore": true,
     "params": [
       {
@@ -910,7 +900,7 @@
     }
   },
   {
-    "__docId__": 63,
+    "__docId__": 62,
     "kind": "method",
     "name": "_getPropertySection",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -920,11 +910,23 @@
     "longname": "src/Civ5Save.js~Civ5Save#_getPropertySection",
     "access": "private",
     "description": "",
-    "lineNumber": 238,
+    "lineNumber": 219,
     "ignore": true,
     "params": [
       {
         "name": "propertyDefinition",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "saveGameVersion",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "gameBuild",
         "types": [
           "*"
         ]
@@ -937,7 +939,7 @@
     }
   },
   {
-    "__docId__": 64,
+    "__docId__": 63,
     "kind": "method",
     "name": "_isNullOrUndefined",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -947,7 +949,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_isNullOrUndefined",
     "access": "private",
     "description": "",
-    "lineNumber": 252,
+    "lineNumber": 238,
     "ignore": true,
     "params": [
       {
@@ -964,7 +966,7 @@
     }
   },
   {
-    "__docId__": 65,
+    "__docId__": 64,
     "kind": "get",
     "name": "gameBuild",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -973,8 +975,8 @@
     "static": false,
     "longname": "src/Civ5Save.js~Civ5Save#gameBuild",
     "access": "public",
-    "description": "Game build number.",
-    "lineNumber": 260,
+    "description": "Game build number.\n\nNote that for games created or saved before build 230620, this will return the game build that was used to create\nthe save file. Starting with build 230620, this will return the game build that was last used to save the save\nfile.",
+    "lineNumber": 250,
     "type": {
       "nullable": null,
       "types": [
@@ -985,7 +987,7 @@
     }
   },
   {
-    "__docId__": 66,
+    "__docId__": 65,
     "kind": "method",
     "name": "_getGameBuild",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -995,7 +997,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_getGameBuild",
     "access": "private",
     "description": "",
-    "lineNumber": 269,
+    "lineNumber": 259,
     "ignore": true,
     "params": [],
     "return": {
@@ -1005,7 +1007,47 @@
     }
   },
   {
+    "__docId__": 66,
+    "kind": "method",
+    "name": "_setGameBuild",
+    "memberof": "src/Civ5Save.js~Civ5Save",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/Civ5Save.js~Civ5Save#_setGameBuild",
+    "access": "private",
+    "description": "",
+    "lineNumber": 293,
+    "ignore": true,
+    "params": [
+      {
+        "name": "gameBuildProperty",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
     "__docId__": 67,
+    "kind": "member",
+    "name": "_gameBuild",
+    "memberof": "src/Civ5Save.js~Civ5Save",
+    "static": false,
+    "longname": "src/Civ5Save.js~Civ5Save#_gameBuild",
+    "access": "private",
+    "description": "",
+    "lineNumber": 298,
+    "ignore": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 69,
     "kind": "get",
     "name": "gameVersion",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -1015,50 +1057,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#gameVersion",
     "access": "public",
     "description": "Game version.\n\nNote that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used\ninstead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply\nthe spot is there but empty).",
-    "lineNumber": 308,
-    "type": {
-      "nullable": null,
-      "types": [
-        "string",
-        "undefined"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 68,
-    "kind": "get",
-    "name": "currentTurn",
-    "memberof": "src/Civ5Save.js~Civ5Save",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#currentTurn",
-    "access": "public",
-    "description": "Current turn.",
-    "lineNumber": 316,
-    "type": {
-      "nullable": null,
-      "types": [
-        "number"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 69,
-    "kind": "get",
-    "name": "gameMode",
-    "memberof": "src/Civ5Save.js~Civ5Save",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#gameMode",
-    "access": "public",
-    "description": "Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.\n\nNote that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used\ninstead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply\nthe spot is there but empty).",
-    "lineNumber": 328,
+    "lineNumber": 312,
     "type": {
       "nullable": null,
       "types": [
@@ -1072,19 +1071,19 @@
   {
     "__docId__": 70,
     "kind": "get",
-    "name": "difficulty",
+    "name": "currentTurn",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#difficulty",
+    "longname": "src/Civ5Save.js~Civ5Save#currentTurn",
     "access": "public",
-    "description": "Game difficulty.",
-    "lineNumber": 338,
+    "description": "Current turn.",
+    "lineNumber": 320,
     "type": {
       "nullable": null,
       "types": [
-        "string"
+        "number"
       ],
       "spread": false,
       "description": null
@@ -1093,19 +1092,20 @@
   {
     "__docId__": 71,
     "kind": "get",
-    "name": "startingEra",
+    "name": "gameMode",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#startingEra",
+    "longname": "src/Civ5Save.js~Civ5Save#gameMode",
     "access": "public",
-    "description": "Starting era.",
-    "lineNumber": 346,
+    "description": "Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.\n\nNote that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620 because the meaning\nof its value is unknown. `undefined` is used instead of `null` because `null` might incorrectly imply the value is\nempty.",
+    "lineNumber": 332,
     "type": {
       "nullable": null,
       "types": [
-        "string"
+        "string",
+        "undefined"
       ],
       "spread": false,
       "description": null
@@ -1114,15 +1114,15 @@
   {
     "__docId__": 72,
     "kind": "get",
-    "name": "currentEra",
+    "name": "difficulty",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#currentEra",
+    "longname": "src/Civ5Save.js~Civ5Save#difficulty",
     "access": "public",
-    "description": "Current era.",
-    "lineNumber": 354,
+    "description": "Game difficulty.",
+    "lineNumber": 342,
     "type": {
       "nullable": null,
       "types": [
@@ -1135,15 +1135,15 @@
   {
     "__docId__": 73,
     "kind": "get",
-    "name": "gamePace",
+    "name": "startingEra",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#gamePace",
+    "longname": "src/Civ5Save.js~Civ5Save#startingEra",
     "access": "public",
-    "description": "Game pace.",
-    "lineNumber": 362,
+    "description": "Starting era.",
+    "lineNumber": 350,
     "type": {
       "nullable": null,
       "types": [
@@ -1156,15 +1156,15 @@
   {
     "__docId__": 74,
     "kind": "get",
-    "name": "mapSize",
+    "name": "currentEra",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#mapSize",
+    "longname": "src/Civ5Save.js~Civ5Save#currentEra",
     "access": "public",
-    "description": "Map size.",
-    "lineNumber": 370,
+    "description": "Current era.",
+    "lineNumber": 358,
     "type": {
       "nullable": null,
       "types": [
@@ -1177,15 +1177,15 @@
   {
     "__docId__": 75,
     "kind": "get",
-    "name": "mapFile",
+    "name": "gamePace",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#mapFile",
+    "longname": "src/Civ5Save.js~Civ5Save#gamePace",
     "access": "public",
-    "description": "Map file.",
-    "lineNumber": 378,
+    "description": "Game pace.",
+    "lineNumber": 366,
     "type": {
       "nullable": null,
       "types": [
@@ -1198,6 +1198,48 @@
   {
     "__docId__": 76,
     "kind": "get",
+    "name": "mapSize",
+    "memberof": "src/Civ5Save.js~Civ5Save",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/Civ5Save.js~Civ5Save#mapSize",
+    "access": "public",
+    "description": "Map size.",
+    "lineNumber": 374,
+    "type": {
+      "nullable": null,
+      "types": [
+        "string"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 77,
+    "kind": "get",
+    "name": "mapFile",
+    "memberof": "src/Civ5Save.js~Civ5Save",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/Civ5Save.js~Civ5Save#mapFile",
+    "access": "public",
+    "description": "Map file.",
+    "lineNumber": 382,
+    "type": {
+      "nullable": null,
+      "types": [
+        "string"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 78,
+    "kind": "get",
     "name": "enabledDLC",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
@@ -1206,7 +1248,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#enabledDLC",
     "access": "public",
     "description": "List of enabled DLC.",
-    "lineNumber": 389,
+    "lineNumber": 393,
     "type": {
       "nullable": null,
       "types": [
@@ -1217,7 +1259,7 @@
     }
   },
   {
-    "__docId__": 77,
+    "__docId__": 79,
     "kind": "get",
     "name": "players",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -1227,7 +1269,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#players",
     "access": "public",
     "description": "List of players as objects with their civilization and status as properties.\n\nCivilization will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700.\n\nStatus is one of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,\n    `Civ5Save.PLAYER_STATUSES.NONE`.",
-    "lineNumber": 404,
+    "lineNumber": 408,
     "type": {
       "nullable": null,
       "types": [
@@ -1238,7 +1280,7 @@
     }
   },
   {
-    "__docId__": 78,
+    "__docId__": 80,
     "kind": "member",
     "name": "_players",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -1246,7 +1288,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_players",
     "access": "private",
     "description": "",
-    "lineNumber": 409,
+    "lineNumber": 413,
     "ignore": true,
     "type": {
       "types": [
@@ -1255,59 +1297,17 @@
     }
   },
   {
-    "__docId__": 79,
-    "kind": "get",
-    "name": "maxTurns",
-    "memberof": "src/Civ5Save.js~Civ5Save",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#maxTurns",
-    "access": "public",
-    "description": "Max turns.",
-    "lineNumber": 441,
-    "type": {
-      "nullable": null,
-      "types": [
-        "number"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 80,
-    "kind": "set",
-    "name": "maxTurns",
-    "memberof": "src/Civ5Save.js~Civ5Save",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#maxTurns",
-    "access": "public",
-    "description": "Max turns.",
-    "lineNumber": 449,
-    "type": {
-      "nullable": null,
-      "types": [
-        "number"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
     "__docId__": 81,
     "kind": "get",
-    "name": "turnTimerLength",
+    "name": "maxTurns",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#turnTimerLength",
+    "longname": "src/Civ5Save.js~Civ5Save#maxTurns",
     "access": "public",
-    "description": "Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n    Otherwise, it is in minutes.",
-    "lineNumber": 458,
+    "description": "Max turns.",
+    "lineNumber": 445,
     "type": {
       "nullable": null,
       "types": [
@@ -1320,15 +1320,15 @@
   {
     "__docId__": 82,
     "kind": "set",
-    "name": "turnTimerLength",
+    "name": "maxTurns",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#turnTimerLength",
+    "longname": "src/Civ5Save.js~Civ5Save#maxTurns",
     "access": "public",
-    "description": "Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n    Otherwise, it is in minutes.",
-    "lineNumber": 467,
+    "description": "Max turns.",
+    "lineNumber": 453,
     "type": {
       "nullable": null,
       "types": [
@@ -1341,19 +1341,19 @@
   {
     "__docId__": 83,
     "kind": "get",
-    "name": "privateGame",
+    "name": "turnTimerLength",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#privateGame",
+    "longname": "src/Civ5Save.js~Civ5Save#turnTimerLength",
     "access": "public",
-    "description": "Private setting for multiplayer games.",
-    "lineNumber": 475,
+    "description": "Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n    Otherwise, it is in minutes.",
+    "lineNumber": 462,
     "type": {
       "nullable": null,
       "types": [
-        "boolean"
+        "number"
       ],
       "spread": false,
       "description": null
@@ -1362,19 +1362,19 @@
   {
     "__docId__": 84,
     "kind": "set",
-    "name": "privateGame",
+    "name": "turnTimerLength",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#privateGame",
+    "longname": "src/Civ5Save.js~Civ5Save#turnTimerLength",
     "access": "public",
-    "description": "Private setting for multiplayer games.",
-    "lineNumber": 483,
+    "description": "Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.\n    Otherwise, it is in minutes.",
+    "lineNumber": 471,
     "type": {
       "nullable": null,
       "types": [
-        "boolean"
+        "number"
       ],
       "spread": false,
       "description": null
@@ -1383,15 +1383,15 @@
   {
     "__docId__": 85,
     "kind": "get",
-    "name": "timeVictory",
+    "name": "privateGame",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#timeVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#privateGame",
     "access": "public",
-    "description": "Time victory.",
-    "lineNumber": 491,
+    "description": "Private setting for multiplayer games.\n\nNote that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn't\nimplemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.",
+    "lineNumber": 482,
     "type": {
       "nullable": null,
       "types": [
@@ -1404,15 +1404,15 @@
   {
     "__docId__": 86,
     "kind": "set",
-    "name": "timeVictory",
+    "name": "privateGame",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#timeVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#privateGame",
     "access": "public",
-    "description": "Time victory.",
-    "lineNumber": 499,
+    "description": "Private setting for multiplayer games.",
+    "lineNumber": 490,
     "type": {
       "nullable": null,
       "types": [
@@ -1425,15 +1425,15 @@
   {
     "__docId__": 87,
     "kind": "get",
-    "name": "scienceVictory",
+    "name": "timeVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#scienceVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#timeVictory",
     "access": "public",
-    "description": "Science victory.",
-    "lineNumber": 507,
+    "description": "Time victory.",
+    "lineNumber": 498,
     "type": {
       "nullable": null,
       "types": [
@@ -1446,15 +1446,15 @@
   {
     "__docId__": 88,
     "kind": "set",
-    "name": "scienceVictory",
+    "name": "timeVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#scienceVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#timeVictory",
     "access": "public",
-    "description": "Science victory.",
-    "lineNumber": 515,
+    "description": "Time victory.",
+    "lineNumber": 506,
     "type": {
       "nullable": null,
       "types": [
@@ -1467,15 +1467,15 @@
   {
     "__docId__": 89,
     "kind": "get",
-    "name": "dominationVictory",
+    "name": "scienceVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#dominationVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#scienceVictory",
     "access": "public",
-    "description": "Domination victory.",
-    "lineNumber": 523,
+    "description": "Science victory.",
+    "lineNumber": 514,
     "type": {
       "nullable": null,
       "types": [
@@ -1488,15 +1488,15 @@
   {
     "__docId__": 90,
     "kind": "set",
-    "name": "dominationVictory",
+    "name": "scienceVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#dominationVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#scienceVictory",
     "access": "public",
-    "description": "Domination victory.",
-    "lineNumber": 531,
+    "description": "Science victory.",
+    "lineNumber": 522,
     "type": {
       "nullable": null,
       "types": [
@@ -1509,15 +1509,15 @@
   {
     "__docId__": 91,
     "kind": "get",
-    "name": "culturalVictory",
+    "name": "dominationVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#culturalVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#dominationVictory",
     "access": "public",
-    "description": "Cultural victory.",
-    "lineNumber": 539,
+    "description": "Domination victory.",
+    "lineNumber": 530,
     "type": {
       "nullable": null,
       "types": [
@@ -1530,15 +1530,15 @@
   {
     "__docId__": 92,
     "kind": "set",
-    "name": "culturalVictory",
+    "name": "dominationVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#culturalVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#dominationVictory",
     "access": "public",
-    "description": "Cultural victory.",
-    "lineNumber": 547,
+    "description": "Domination victory.",
+    "lineNumber": 538,
     "type": {
       "nullable": null,
       "types": [
@@ -1551,15 +1551,15 @@
   {
     "__docId__": 93,
     "kind": "get",
-    "name": "diplomaticVictory",
+    "name": "culturalVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#diplomaticVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#culturalVictory",
     "access": "public",
-    "description": "Diplomatic victory.",
-    "lineNumber": 555,
+    "description": "Cultural victory.",
+    "lineNumber": 546,
     "type": {
       "nullable": null,
       "types": [
@@ -1572,15 +1572,15 @@
   {
     "__docId__": 94,
     "kind": "set",
-    "name": "diplomaticVictory",
+    "name": "culturalVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#diplomaticVictory",
+    "longname": "src/Civ5Save.js~Civ5Save#culturalVictory",
     "access": "public",
-    "description": "Diplomatic victory.",
-    "lineNumber": 563,
+    "description": "Cultural victory.",
+    "lineNumber": 554,
     "type": {
       "nullable": null,
       "types": [
@@ -1593,15 +1593,15 @@
   {
     "__docId__": 95,
     "kind": "get",
-    "name": "alwaysPeace",
+    "name": "diplomaticVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#alwaysPeace",
+    "longname": "src/Civ5Save.js~Civ5Save#diplomaticVictory",
     "access": "public",
-    "description": "Always peace.",
-    "lineNumber": 571,
+    "description": "Diplomatic victory.",
+    "lineNumber": 562,
     "type": {
       "nullable": null,
       "types": [
@@ -1614,15 +1614,15 @@
   {
     "__docId__": 96,
     "kind": "set",
-    "name": "alwaysPeace",
+    "name": "diplomaticVictory",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#alwaysPeace",
+    "longname": "src/Civ5Save.js~Civ5Save#diplomaticVictory",
     "access": "public",
-    "description": "Always peace.",
-    "lineNumber": 579,
+    "description": "Diplomatic victory.",
+    "lineNumber": 570,
     "type": {
       "nullable": null,
       "types": [
@@ -1635,15 +1635,15 @@
   {
     "__docId__": 97,
     "kind": "get",
-    "name": "alwaysWar",
+    "name": "alwaysPeace",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#alwaysWar",
+    "longname": "src/Civ5Save.js~Civ5Save#alwaysPeace",
     "access": "public",
-    "description": "Always war.",
-    "lineNumber": 587,
+    "description": "Always peace.",
+    "lineNumber": 578,
     "type": {
       "nullable": null,
       "types": [
@@ -1656,15 +1656,15 @@
   {
     "__docId__": 98,
     "kind": "set",
-    "name": "alwaysWar",
+    "name": "alwaysPeace",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#alwaysWar",
+    "longname": "src/Civ5Save.js~Civ5Save#alwaysPeace",
     "access": "public",
-    "description": "Always war.",
-    "lineNumber": 595,
+    "description": "Always peace.",
+    "lineNumber": 586,
     "type": {
       "nullable": null,
       "types": [
@@ -1677,15 +1677,15 @@
   {
     "__docId__": 99,
     "kind": "get",
-    "name": "completeKills",
+    "name": "alwaysWar",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#completeKills",
+    "longname": "src/Civ5Save.js~Civ5Save#alwaysWar",
     "access": "public",
-    "description": "Complete kills.",
-    "lineNumber": 603,
+    "description": "Always war.",
+    "lineNumber": 594,
     "type": {
       "nullable": null,
       "types": [
@@ -1698,15 +1698,15 @@
   {
     "__docId__": 100,
     "kind": "set",
-    "name": "completeKills",
+    "name": "alwaysWar",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#completeKills",
+    "longname": "src/Civ5Save.js~Civ5Save#alwaysWar",
     "access": "public",
-    "description": "Complete kills.",
-    "lineNumber": 611,
+    "description": "Always war.",
+    "lineNumber": 602,
     "type": {
       "nullable": null,
       "types": [
@@ -1719,15 +1719,15 @@
   {
     "__docId__": 101,
     "kind": "get",
-    "name": "lockMods",
+    "name": "completeKills",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#lockMods",
+    "longname": "src/Civ5Save.js~Civ5Save#completeKills",
     "access": "public",
-    "description": "Lock mods.",
-    "lineNumber": 619,
+    "description": "Complete kills.",
+    "lineNumber": 610,
     "type": {
       "nullable": null,
       "types": [
@@ -1740,15 +1740,15 @@
   {
     "__docId__": 102,
     "kind": "set",
-    "name": "lockMods",
+    "name": "completeKills",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#lockMods",
+    "longname": "src/Civ5Save.js~Civ5Save#completeKills",
     "access": "public",
-    "description": "Lock mods.",
-    "lineNumber": 627,
+    "description": "Complete kills.",
+    "lineNumber": 618,
     "type": {
       "nullable": null,
       "types": [
@@ -1761,15 +1761,15 @@
   {
     "__docId__": 103,
     "kind": "get",
-    "name": "newRandomSeed",
+    "name": "lockMods",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#newRandomSeed",
+    "longname": "src/Civ5Save.js~Civ5Save#lockMods",
     "access": "public",
-    "description": "New random seed.",
-    "lineNumber": 635,
+    "description": "Lock mods.",
+    "lineNumber": 626,
     "type": {
       "nullable": null,
       "types": [
@@ -1782,15 +1782,15 @@
   {
     "__docId__": 104,
     "kind": "set",
-    "name": "newRandomSeed",
+    "name": "lockMods",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#newRandomSeed",
+    "longname": "src/Civ5Save.js~Civ5Save#lockMods",
     "access": "public",
-    "description": "New random seed.",
-    "lineNumber": 643,
+    "description": "Lock mods.",
+    "lineNumber": 634,
     "type": {
       "nullable": null,
       "types": [
@@ -1803,15 +1803,15 @@
   {
     "__docId__": 105,
     "kind": "get",
-    "name": "noBarbarians",
+    "name": "newRandomSeed",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noBarbarians",
+    "longname": "src/Civ5Save.js~Civ5Save#newRandomSeed",
     "access": "public",
-    "description": "No barbarians.",
-    "lineNumber": 651,
+    "description": "New random seed.",
+    "lineNumber": 642,
     "type": {
       "nullable": null,
       "types": [
@@ -1824,15 +1824,15 @@
   {
     "__docId__": 106,
     "kind": "set",
-    "name": "noBarbarians",
+    "name": "newRandomSeed",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noBarbarians",
+    "longname": "src/Civ5Save.js~Civ5Save#newRandomSeed",
     "access": "public",
-    "description": "No barbarians.",
-    "lineNumber": 659,
+    "description": "New random seed.",
+    "lineNumber": 650,
     "type": {
       "nullable": null,
       "types": [
@@ -1845,15 +1845,15 @@
   {
     "__docId__": 107,
     "kind": "get",
-    "name": "noChangingWarPeace",
+    "name": "noBarbarians",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noChangingWarPeace",
+    "longname": "src/Civ5Save.js~Civ5Save#noBarbarians",
     "access": "public",
-    "description": "No changing war or peace.",
-    "lineNumber": 667,
+    "description": "No barbarians.",
+    "lineNumber": 658,
     "type": {
       "nullable": null,
       "types": [
@@ -1866,15 +1866,15 @@
   {
     "__docId__": 108,
     "kind": "set",
-    "name": "noChangingWarPeace",
+    "name": "noBarbarians",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noChangingWarPeace",
+    "longname": "src/Civ5Save.js~Civ5Save#noBarbarians",
     "access": "public",
-    "description": "No changing war or peace.",
-    "lineNumber": 675,
+    "description": "No barbarians.",
+    "lineNumber": 666,
     "type": {
       "nullable": null,
       "types": [
@@ -1887,15 +1887,15 @@
   {
     "__docId__": 109,
     "kind": "get",
-    "name": "noCityRazing",
+    "name": "noChangingWarPeace",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noCityRazing",
+    "longname": "src/Civ5Save.js~Civ5Save#noChangingWarPeace",
     "access": "public",
-    "description": "No city razing.",
-    "lineNumber": 683,
+    "description": "No changing war or peace.",
+    "lineNumber": 674,
     "type": {
       "nullable": null,
       "types": [
@@ -1908,15 +1908,15 @@
   {
     "__docId__": 110,
     "kind": "set",
-    "name": "noCityRazing",
+    "name": "noChangingWarPeace",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noCityRazing",
+    "longname": "src/Civ5Save.js~Civ5Save#noChangingWarPeace",
     "access": "public",
-    "description": "No city razing.",
-    "lineNumber": 691,
+    "description": "No changing war or peace.",
+    "lineNumber": 682,
     "type": {
       "nullable": null,
       "types": [
@@ -1929,15 +1929,15 @@
   {
     "__docId__": 111,
     "kind": "get",
-    "name": "noCultureOverviewUI",
+    "name": "noCityRazing",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
+    "longname": "src/Civ5Save.js~Civ5Save#noCityRazing",
     "access": "public",
-    "description": "No cultural overview UI.",
-    "lineNumber": 699,
+    "description": "No city razing.",
+    "lineNumber": 690,
     "type": {
       "nullable": null,
       "types": [
@@ -1950,15 +1950,15 @@
   {
     "__docId__": 112,
     "kind": "set",
-    "name": "noCultureOverviewUI",
+    "name": "noCityRazing",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
+    "longname": "src/Civ5Save.js~Civ5Save#noCityRazing",
     "access": "public",
-    "description": "No cultural overview UI.",
-    "lineNumber": 707,
+    "description": "No city razing.",
+    "lineNumber": 698,
     "type": {
       "nullable": null,
       "types": [
@@ -1971,15 +1971,15 @@
   {
     "__docId__": 113,
     "kind": "get",
-    "name": "noEspionage",
+    "name": "noCultureOverviewUI",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noEspionage",
+    "longname": "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
     "access": "public",
-    "description": "No espionage.",
-    "lineNumber": 715,
+    "description": "No cultural overview UI.",
+    "lineNumber": 706,
     "type": {
       "nullable": null,
       "types": [
@@ -1992,15 +1992,15 @@
   {
     "__docId__": 114,
     "kind": "set",
-    "name": "noEspionage",
+    "name": "noCultureOverviewUI",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noEspionage",
+    "longname": "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
     "access": "public",
-    "description": "No espionage.",
-    "lineNumber": 723,
+    "description": "No cultural overview UI.",
+    "lineNumber": 714,
     "type": {
       "nullable": null,
       "types": [
@@ -2013,15 +2013,15 @@
   {
     "__docId__": 115,
     "kind": "get",
-    "name": "noHappiness",
+    "name": "noEspionage",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noHappiness",
+    "longname": "src/Civ5Save.js~Civ5Save#noEspionage",
     "access": "public",
-    "description": "No happiness.",
-    "lineNumber": 731,
+    "description": "No espionage.",
+    "lineNumber": 722,
     "type": {
       "nullable": null,
       "types": [
@@ -2034,15 +2034,15 @@
   {
     "__docId__": 116,
     "kind": "set",
-    "name": "noHappiness",
+    "name": "noEspionage",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noHappiness",
+    "longname": "src/Civ5Save.js~Civ5Save#noEspionage",
     "access": "public",
-    "description": "No happiness.",
-    "lineNumber": 739,
+    "description": "No espionage.",
+    "lineNumber": 730,
     "type": {
       "nullable": null,
       "types": [
@@ -2055,15 +2055,15 @@
   {
     "__docId__": 117,
     "kind": "get",
-    "name": "noPolicies",
+    "name": "noHappiness",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noPolicies",
+    "longname": "src/Civ5Save.js~Civ5Save#noHappiness",
     "access": "public",
-    "description": "No policies.",
-    "lineNumber": 747,
+    "description": "No happiness.",
+    "lineNumber": 738,
     "type": {
       "nullable": null,
       "types": [
@@ -2076,15 +2076,15 @@
   {
     "__docId__": 118,
     "kind": "set",
-    "name": "noPolicies",
+    "name": "noHappiness",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noPolicies",
+    "longname": "src/Civ5Save.js~Civ5Save#noHappiness",
     "access": "public",
-    "description": "No policies.",
-    "lineNumber": 755,
+    "description": "No happiness.",
+    "lineNumber": 746,
     "type": {
       "nullable": null,
       "types": [
@@ -2097,15 +2097,15 @@
   {
     "__docId__": 119,
     "kind": "get",
-    "name": "noReligion",
+    "name": "noPolicies",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noReligion",
+    "longname": "src/Civ5Save.js~Civ5Save#noPolicies",
     "access": "public",
-    "description": "No religion.",
-    "lineNumber": 763,
+    "description": "No policies.",
+    "lineNumber": 754,
     "type": {
       "nullable": null,
       "types": [
@@ -2118,15 +2118,15 @@
   {
     "__docId__": 120,
     "kind": "set",
-    "name": "noReligion",
+    "name": "noPolicies",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noReligion",
+    "longname": "src/Civ5Save.js~Civ5Save#noPolicies",
     "access": "public",
-    "description": "No religion.",
-    "lineNumber": 771,
+    "description": "No policies.",
+    "lineNumber": 762,
     "type": {
       "nullable": null,
       "types": [
@@ -2139,15 +2139,15 @@
   {
     "__docId__": 121,
     "kind": "get",
-    "name": "noScience",
+    "name": "noReligion",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noScience",
+    "longname": "src/Civ5Save.js~Civ5Save#noReligion",
     "access": "public",
-    "description": "No science.",
-    "lineNumber": 779,
+    "description": "No religion.",
+    "lineNumber": 770,
     "type": {
       "nullable": null,
       "types": [
@@ -2160,15 +2160,15 @@
   {
     "__docId__": 122,
     "kind": "set",
-    "name": "noScience",
+    "name": "noReligion",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noScience",
+    "longname": "src/Civ5Save.js~Civ5Save#noReligion",
     "access": "public",
-    "description": "No science.",
-    "lineNumber": 787,
+    "description": "No religion.",
+    "lineNumber": 778,
     "type": {
       "nullable": null,
       "types": [
@@ -2181,15 +2181,15 @@
   {
     "__docId__": 123,
     "kind": "get",
-    "name": "noWorldCongress",
+    "name": "noScience",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noWorldCongress",
+    "longname": "src/Civ5Save.js~Civ5Save#noScience",
     "access": "public",
-    "description": "No world congress.",
-    "lineNumber": 795,
+    "description": "No science.",
+    "lineNumber": 786,
     "type": {
       "nullable": null,
       "types": [
@@ -2202,15 +2202,15 @@
   {
     "__docId__": 124,
     "kind": "set",
-    "name": "noWorldCongress",
+    "name": "noScience",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#noWorldCongress",
+    "longname": "src/Civ5Save.js~Civ5Save#noScience",
     "access": "public",
-    "description": "No world congress.",
-    "lineNumber": 803,
+    "description": "No science.",
+    "lineNumber": 794,
     "type": {
       "nullable": null,
       "types": [
@@ -2223,15 +2223,15 @@
   {
     "__docId__": 125,
     "kind": "get",
-    "name": "oneCityChallenge",
+    "name": "noWorldCongress",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#oneCityChallenge",
+    "longname": "src/Civ5Save.js~Civ5Save#noWorldCongress",
     "access": "public",
-    "description": "One-city challenge.",
-    "lineNumber": 811,
+    "description": "No world congress.",
+    "lineNumber": 802,
     "type": {
       "nullable": null,
       "types": [
@@ -2244,15 +2244,15 @@
   {
     "__docId__": 126,
     "kind": "set",
-    "name": "oneCityChallenge",
+    "name": "noWorldCongress",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#oneCityChallenge",
+    "longname": "src/Civ5Save.js~Civ5Save#noWorldCongress",
     "access": "public",
-    "description": "One-city challenge.",
-    "lineNumber": 819,
+    "description": "No world congress.",
+    "lineNumber": 810,
     "type": {
       "nullable": null,
       "types": [
@@ -2265,18 +2265,15 @@
   {
     "__docId__": 127,
     "kind": "get",
-    "name": "pitboss",
+    "name": "oneCityChallenge",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#pitboss",
+    "longname": "src/Civ5Save.js~Civ5Save#oneCityChallenge",
     "access": "public",
-    "description": "Pitboss.",
-    "see": [
-      "https://github.com/Bownairo/Civ5SaveEditor"
-    ],
-    "lineNumber": 828,
+    "description": "One-city challenge.",
+    "lineNumber": 818,
     "type": {
       "nullable": null,
       "types": [
@@ -2289,18 +2286,15 @@
   {
     "__docId__": 128,
     "kind": "set",
-    "name": "pitboss",
+    "name": "oneCityChallenge",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#pitboss",
+    "longname": "src/Civ5Save.js~Civ5Save#oneCityChallenge",
     "access": "public",
-    "description": "Pitboss.",
-    "see": [
-      "https://github.com/Bownairo/Civ5SaveEditor"
-    ],
-    "lineNumber": 837,
+    "description": "One-city challenge.",
+    "lineNumber": 826,
     "type": {
       "nullable": null,
       "types": [
@@ -2313,15 +2307,18 @@
   {
     "__docId__": 129,
     "kind": "get",
-    "name": "policySaving",
+    "name": "pitboss",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#policySaving",
+    "longname": "src/Civ5Save.js~Civ5Save#pitboss",
     "access": "public",
-    "description": "Policy saving.",
-    "lineNumber": 845,
+    "description": "Pitboss.",
+    "see": [
+      "https://github.com/Bownairo/Civ5SaveEditor"
+    ],
+    "lineNumber": 835,
     "type": {
       "nullable": null,
       "types": [
@@ -2334,15 +2331,18 @@
   {
     "__docId__": 130,
     "kind": "set",
-    "name": "policySaving",
+    "name": "pitboss",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#policySaving",
+    "longname": "src/Civ5Save.js~Civ5Save#pitboss",
     "access": "public",
-    "description": "Policy saving.",
-    "lineNumber": 853,
+    "description": "Pitboss.",
+    "see": [
+      "https://github.com/Bownairo/Civ5SaveEditor"
+    ],
+    "lineNumber": 844,
     "type": {
       "nullable": null,
       "types": [
@@ -2355,15 +2355,15 @@
   {
     "__docId__": 131,
     "kind": "get",
-    "name": "promotionSaving",
+    "name": "policySaving",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#promotionSaving",
+    "longname": "src/Civ5Save.js~Civ5Save#policySaving",
     "access": "public",
-    "description": "Promotion saving.",
-    "lineNumber": 861,
+    "description": "Policy saving.",
+    "lineNumber": 852,
     "type": {
       "nullable": null,
       "types": [
@@ -2376,15 +2376,15 @@
   {
     "__docId__": 132,
     "kind": "set",
-    "name": "promotionSaving",
+    "name": "policySaving",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#promotionSaving",
+    "longname": "src/Civ5Save.js~Civ5Save#policySaving",
     "access": "public",
-    "description": "Promotion saving.",
-    "lineNumber": 869,
+    "description": "Policy saving.",
+    "lineNumber": 860,
     "type": {
       "nullable": null,
       "types": [
@@ -2397,15 +2397,15 @@
   {
     "__docId__": 133,
     "kind": "get",
-    "name": "ragingBarbarians",
+    "name": "promotionSaving",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#ragingBarbarians",
+    "longname": "src/Civ5Save.js~Civ5Save#promotionSaving",
     "access": "public",
-    "description": "Raging barbarians.",
-    "lineNumber": 877,
+    "description": "Promotion saving.",
+    "lineNumber": 868,
     "type": {
       "nullable": null,
       "types": [
@@ -2418,15 +2418,15 @@
   {
     "__docId__": 134,
     "kind": "set",
-    "name": "ragingBarbarians",
+    "name": "promotionSaving",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#ragingBarbarians",
+    "longname": "src/Civ5Save.js~Civ5Save#promotionSaving",
     "access": "public",
-    "description": "Raging barbarians.",
-    "lineNumber": 885,
+    "description": "Promotion saving.",
+    "lineNumber": 876,
     "type": {
       "nullable": null,
       "types": [
@@ -2439,15 +2439,15 @@
   {
     "__docId__": 135,
     "kind": "get",
-    "name": "randomPersonalities",
+    "name": "ragingBarbarians",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#randomPersonalities",
+    "longname": "src/Civ5Save.js~Civ5Save#ragingBarbarians",
     "access": "public",
-    "description": "Random personalities.",
-    "lineNumber": 893,
+    "description": "Raging barbarians.",
+    "lineNumber": 884,
     "type": {
       "nullable": null,
       "types": [
@@ -2460,15 +2460,15 @@
   {
     "__docId__": 136,
     "kind": "set",
-    "name": "randomPersonalities",
+    "name": "ragingBarbarians",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#randomPersonalities",
+    "longname": "src/Civ5Save.js~Civ5Save#ragingBarbarians",
     "access": "public",
-    "description": "Random personalities.",
-    "lineNumber": 901,
+    "description": "Raging barbarians.",
+    "lineNumber": 892,
     "type": {
       "nullable": null,
       "types": [
@@ -2481,15 +2481,15 @@
   {
     "__docId__": 137,
     "kind": "get",
-    "name": "turnTimerEnabled",
+    "name": "randomPersonalities",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#turnTimerEnabled",
+    "longname": "src/Civ5Save.js~Civ5Save#randomPersonalities",
     "access": "public",
-    "description": "Turn timer enabled.",
-    "lineNumber": 909,
+    "description": "Random personalities.",
+    "lineNumber": 900,
     "type": {
       "nullable": null,
       "types": [
@@ -2502,15 +2502,15 @@
   {
     "__docId__": 138,
     "kind": "set",
-    "name": "turnTimerEnabled",
+    "name": "randomPersonalities",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "src/Civ5Save.js~Civ5Save#turnTimerEnabled",
+    "longname": "src/Civ5Save.js~Civ5Save#randomPersonalities",
     "access": "public",
-    "description": "Turn timer enabled.",
-    "lineNumber": 917,
+    "description": "Random personalities.",
+    "lineNumber": 908,
     "type": {
       "nullable": null,
       "types": [
@@ -2523,6 +2523,48 @@
   {
     "__docId__": 139,
     "kind": "get",
+    "name": "turnTimerEnabled",
+    "memberof": "src/Civ5Save.js~Civ5Save",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/Civ5Save.js~Civ5Save#turnTimerEnabled",
+    "access": "public",
+    "description": "Turn timer enabled.",
+    "lineNumber": 916,
+    "type": {
+      "nullable": null,
+      "types": [
+        "boolean"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 140,
+    "kind": "set",
+    "name": "turnTimerEnabled",
+    "memberof": "src/Civ5Save.js~Civ5Save",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/Civ5Save.js~Civ5Save#turnTimerEnabled",
+    "access": "public",
+    "description": "Turn timer enabled.",
+    "lineNumber": 924,
+    "type": {
+      "nullable": null,
+      "types": [
+        "boolean"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 141,
+    "kind": "get",
     "name": "turnMode",
     "memberof": "src/Civ5Save.js~Civ5Save",
     "generator": false,
@@ -2534,7 +2576,7 @@
     "see": [
       "http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/"
     ],
-    "lineNumber": 927,
+    "lineNumber": 934,
     "type": {
       "nullable": null,
       "types": [
@@ -2545,7 +2587,7 @@
     }
   },
   {
-    "__docId__": 140,
+    "__docId__": 142,
     "kind": "set",
     "name": "turnMode",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -2558,7 +2600,7 @@
     "see": [
       "http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/"
     ],
-    "lineNumber": 944,
+    "lineNumber": 951,
     "type": {
       "nullable": null,
       "types": [
@@ -2569,7 +2611,7 @@
     }
   },
   {
-    "__docId__": 141,
+    "__docId__": 143,
     "kind": "method",
     "name": "_getPropertyIfDefined",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -2579,7 +2621,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_getPropertyIfDefined",
     "access": "private",
     "description": "",
-    "lineNumber": 960,
+    "lineNumber": 967,
     "ignore": true,
     "params": [
       {
@@ -2596,7 +2638,7 @@
     }
   },
   {
-    "__docId__": 142,
+    "__docId__": 144,
     "kind": "method",
     "name": "_getBeautifiedPropertyIfDefined",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -2606,7 +2648,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_getBeautifiedPropertyIfDefined",
     "access": "private",
     "description": "",
-    "lineNumber": 969,
+    "lineNumber": 976,
     "ignore": true,
     "params": [
       {
@@ -2623,7 +2665,7 @@
     }
   },
   {
-    "__docId__": 143,
+    "__docId__": 145,
     "kind": "method",
     "name": "_beautifyPropertyValue",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -2633,7 +2675,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_beautifyPropertyValue",
     "access": "private",
     "description": "",
-    "lineNumber": 978,
+    "lineNumber": 985,
     "ignore": true,
     "params": [
       {
@@ -2650,7 +2692,7 @@
     }
   },
   {
-    "__docId__": 144,
+    "__docId__": 146,
     "kind": "method",
     "name": "_beautifyMapFileValue",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -2660,7 +2702,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_beautifyMapFileValue",
     "access": "private",
     "description": "",
-    "lineNumber": 988,
+    "lineNumber": 995,
     "ignore": true,
     "params": [
       {
@@ -2677,7 +2719,7 @@
     }
   },
   {
-    "__docId__": 145,
+    "__docId__": 147,
     "kind": "method",
     "name": "_setNewGameOption",
     "memberof": "src/Civ5Save.js~Civ5Save",
@@ -2687,7 +2729,7 @@
     "longname": "src/Civ5Save.js~Civ5Save#_setNewGameOption",
     "access": "private",
     "description": "",
-    "lineNumber": 999,
+    "lineNumber": 1006,
     "ignore": true,
     "params": [
       {
@@ -2706,7 +2748,7 @@
     "return": null
   },
   {
-    "__docId__": 147,
+    "__docId__": 149,
     "kind": "file",
     "name": "src/Civ5SaveBoolProperty.js",
     "content": "import Civ5SaveProperty from './Civ5SaveProperty';\n\n/**\n * @ignore\n */\nexport default class Civ5SaveBoolProperty extends Civ5SaveProperty {\n  /**\n   * @ignore\n   */\n  getValue(saveData) {\n    if (this.length === 1) {\n      return Boolean(saveData.getUint8(this.byteOffset));\n    } else if (this.length === 4) {\n      return Boolean(saveData.getUint32(this.byteOffset, true));\n    }\n  }\n\n  /**\n   * @ignore\n   */\n  setValue(saveData, newValue) {\n    if (this.length === 1) {\n      saveData.setUint8(this.byteOffset, Number(newValue));\n    } else if (this.length === 4) {\n      saveData.setUint32(this.byteOffset, Number(newValue), true);\n    }\n  }\n}\n",
@@ -2717,7 +2759,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 148,
+    "__docId__": 150,
     "kind": "class",
     "name": "Civ5SaveBoolProperty",
     "memberof": "src/Civ5SaveBoolProperty.js",
@@ -2736,7 +2778,7 @@
     ]
   },
   {
-    "__docId__": 149,
+    "__docId__": 151,
     "kind": "method",
     "name": "getValue",
     "memberof": "src/Civ5SaveBoolProperty.js~Civ5SaveBoolProperty",
@@ -2763,7 +2805,7 @@
     }
   },
   {
-    "__docId__": 150,
+    "__docId__": 152,
     "kind": "method",
     "name": "setValue",
     "memberof": "src/Civ5SaveBoolProperty.js~Civ5SaveBoolProperty",
@@ -2792,7 +2834,7 @@
     "return": null
   },
   {
-    "__docId__": 151,
+    "__docId__": 153,
     "kind": "file",
     "name": "src/Civ5SaveDLCStringArray.js",
     "content": "import Civ5SaveIntProperty from './Civ5SaveIntProperty';\nimport Civ5SaveStringProperty from './Civ5SaveStringProperty';\n\n/**\n * @ignore\n */\nexport default class Civ5SaveDLCStringArray {\n  /**\n   * @ignore\n   */\n  constructor(byteOffset, saveData) {\n    /**\n     * @ignore\n     */\n    this.byteOffset = byteOffset;\n    /**\n     * @ignore\n     */\n    this.length = 4;\n    /**\n     * @private\n     */\n    this._array = new Array();\n    /**\n     * @private\n     */\n    this._size = new Civ5SaveIntProperty(this.byteOffset, 4, saveData);\n\n    if (this._getSize(saveData) > 0) {\n      let currentByteOffset = this.byteOffset + 4;\n      for (let i = 0; i < this._getSize(saveData); i++) {\n        // Skip 16 byte unique identifier followed by 0100 0000\n        currentByteOffset += 20;\n        let dlcName = new Civ5SaveStringProperty(currentByteOffset, null, saveData);\n        currentByteOffset += dlcName.length;\n\n        this._array.push(dlcName.getValue(saveData));\n      }\n\n      this.length = currentByteOffset - this.byteOffset;\n    }\n\n    Object.freeze(this._array);\n  }\n\n  /**\n   * @private\n   */\n  _getSize(saveData) {\n    return this._size.getValue(saveData);\n  }\n\n  /**\n   * @ignore\n   */\n  getArray() {\n    return this._array;\n  }\n}\n",
@@ -2803,7 +2845,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 152,
+    "__docId__": 154,
     "kind": "class",
     "name": "Civ5SaveDLCStringArray",
     "memberof": "src/Civ5SaveDLCStringArray.js",
@@ -2819,7 +2861,7 @@
     "interface": false
   },
   {
-    "__docId__": 153,
+    "__docId__": 155,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Civ5SaveDLCStringArray.js~Civ5SaveDLCStringArray",
@@ -2833,7 +2875,7 @@
     "ignore": true
   },
   {
-    "__docId__": 154,
+    "__docId__": 156,
     "kind": "member",
     "name": "byteOffset",
     "memberof": "src/Civ5SaveDLCStringArray.js~Civ5SaveDLCStringArray",
@@ -2850,7 +2892,7 @@
     }
   },
   {
-    "__docId__": 155,
+    "__docId__": 157,
     "kind": "member",
     "name": "length",
     "memberof": "src/Civ5SaveDLCStringArray.js~Civ5SaveDLCStringArray",
@@ -2867,7 +2909,7 @@
     }
   },
   {
-    "__docId__": 156,
+    "__docId__": 158,
     "kind": "member",
     "name": "_array",
     "memberof": "src/Civ5SaveDLCStringArray.js~Civ5SaveDLCStringArray",
@@ -2884,7 +2926,7 @@
     }
   },
   {
-    "__docId__": 157,
+    "__docId__": 159,
     "kind": "member",
     "name": "_size",
     "memberof": "src/Civ5SaveDLCStringArray.js~Civ5SaveDLCStringArray",
@@ -2901,7 +2943,7 @@
     }
   },
   {
-    "__docId__": 159,
+    "__docId__": 161,
     "kind": "method",
     "name": "_getSize",
     "memberof": "src/Civ5SaveDLCStringArray.js~Civ5SaveDLCStringArray",
@@ -2928,7 +2970,7 @@
     }
   },
   {
-    "__docId__": 160,
+    "__docId__": 162,
     "kind": "method",
     "name": "getArray",
     "memberof": "src/Civ5SaveDLCStringArray.js~Civ5SaveDLCStringArray",
@@ -2948,7 +2990,7 @@
     }
   },
   {
-    "__docId__": 161,
+    "__docId__": 163,
     "kind": "file",
     "name": "src/Civ5SaveDataView.js",
     "content": "/**\n * @ignore\n */\n// Subclassing DataView in babel requires https://www.npmjs.com/package/babel-plugin-transform-builtin-extend\nexport default class Civ5SaveDataView extends DataView {\n  /**\n   * @ignore\n   */\n  getString(byteOffset, byteLength) {\n    if (typeof TextDecoder === 'function') {\n      return new TextDecoder().decode(this.buffer.slice(byteOffset, byteOffset + byteLength));\n    } else {\n      // https://stackoverflow.com/a/17192845/399105\n      let encodedString = String.fromCharCode.apply(null, new Uint8Array(this.buffer.slice(byteOffset,\n        byteOffset + byteLength)));\n      return decodeURIComponent(escape(encodedString));\n    }\n  }\n}\n",
@@ -2959,7 +3001,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 162,
+    "__docId__": 164,
     "kind": "class",
     "name": "Civ5SaveDataView",
     "memberof": "src/Civ5SaveDataView.js",
@@ -2978,7 +3020,7 @@
     ]
   },
   {
-    "__docId__": 163,
+    "__docId__": 165,
     "kind": "method",
     "name": "getString",
     "memberof": "src/Civ5SaveDataView.js~Civ5SaveDataView",
@@ -3011,7 +3053,7 @@
     }
   },
   {
-    "__docId__": 164,
+    "__docId__": 166,
     "kind": "file",
     "name": "src/Civ5SaveIntArray.js",
     "content": "import Civ5SaveIntProperty from './Civ5SaveIntProperty';\n\n/**\n * @ignore\n */\nexport default class Civ5SaveIntArray {\n  /**\n   * @ignore\n   */\n  constructor(byteOffset, items, saveData) {\n    /**\n     * @ignore\n     */\n    this.byteOffset = byteOffset;\n    /**\n     * @private\n     */\n    this._array = new Array();\n\n    let currentByteOffset = this.byteOffset;\n    for (let i = 0; i < items; i++) {\n      let arrayItem = new Civ5SaveIntProperty(currentByteOffset, 4, saveData);\n      currentByteOffset += arrayItem.length;\n      this._array.push(arrayItem.getValue(saveData));\n    }\n\n    /**\n     * @ignore\n     */\n    this.length = currentByteOffset - this.byteOffset;\n    Object.freeze(this._array);\n  }\n\n  /**\n   * @ignore\n   */\n  getArray() {\n    return this._array;\n  }\n}\n",
@@ -3022,7 +3064,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 165,
+    "__docId__": 167,
     "kind": "class",
     "name": "Civ5SaveIntArray",
     "memberof": "src/Civ5SaveIntArray.js",
@@ -3038,7 +3080,7 @@
     "interface": false
   },
   {
-    "__docId__": 166,
+    "__docId__": 168,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Civ5SaveIntArray.js~Civ5SaveIntArray",
@@ -3052,7 +3094,7 @@
     "ignore": true
   },
   {
-    "__docId__": 167,
+    "__docId__": 169,
     "kind": "member",
     "name": "byteOffset",
     "memberof": "src/Civ5SaveIntArray.js~Civ5SaveIntArray",
@@ -3069,7 +3111,7 @@
     }
   },
   {
-    "__docId__": 168,
+    "__docId__": 170,
     "kind": "member",
     "name": "_array",
     "memberof": "src/Civ5SaveIntArray.js~Civ5SaveIntArray",
@@ -3086,7 +3128,7 @@
     }
   },
   {
-    "__docId__": 169,
+    "__docId__": 171,
     "kind": "member",
     "name": "length",
     "memberof": "src/Civ5SaveIntArray.js~Civ5SaveIntArray",
@@ -3103,7 +3145,7 @@
     }
   },
   {
-    "__docId__": 170,
+    "__docId__": 172,
     "kind": "method",
     "name": "getArray",
     "memberof": "src/Civ5SaveIntArray.js~Civ5SaveIntArray",
@@ -3123,7 +3165,7 @@
     }
   },
   {
-    "__docId__": 171,
+    "__docId__": 173,
     "kind": "file",
     "name": "src/Civ5SaveIntProperty.js",
     "content": "import Civ5SaveProperty from './Civ5SaveProperty';\n\n/**\n * @ignore\n */\nexport default class Civ5SaveIntProperty extends Civ5SaveProperty {\n  /**\n   * @ignore\n   */\n  getValue(saveData) {\n    if (this.length === 1) {\n      return saveData.getUint8(this.byteOffset);\n    } else if (this.length === 4) {\n      return saveData.getUint32(this.byteOffset, true);\n    }\n  }\n\n  /**\n   * @ignore\n   */\n  setValue(saveData, newValue) {\n    if (this.length === 1) {\n      saveData.setUint8(this.byteOffset, newValue);\n    } else if (this.length === 4) {\n      saveData.setUint32(this.byteOffset, newValue, true);\n    }\n  }\n}\n",
@@ -3134,7 +3176,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 172,
+    "__docId__": 174,
     "kind": "class",
     "name": "Civ5SaveIntProperty",
     "memberof": "src/Civ5SaveIntProperty.js",
@@ -3153,7 +3195,7 @@
     ]
   },
   {
-    "__docId__": 173,
+    "__docId__": 175,
     "kind": "method",
     "name": "getValue",
     "memberof": "src/Civ5SaveIntProperty.js~Civ5SaveIntProperty",
@@ -3180,7 +3222,7 @@
     }
   },
   {
-    "__docId__": 174,
+    "__docId__": 176,
     "kind": "method",
     "name": "setValue",
     "memberof": "src/Civ5SaveIntProperty.js~Civ5SaveIntProperty",
@@ -3209,7 +3251,7 @@
     "return": null
   },
   {
-    "__docId__": 175,
+    "__docId__": 177,
     "kind": "file",
     "name": "src/Civ5SaveProperty.js",
     "content": "/**\n * @ignore\n */\nexport default class Civ5SaveProperty {\n  /**\n   * @ignore\n   */\n  constructor(byteOffset, length) {\n    /**\n     * @ignore\n     */\n    this.byteOffset = byteOffset;\n    /**\n     * @ignore\n     */\n    this.length = length;\n  }\n}\n",
@@ -3220,7 +3262,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 176,
+    "__docId__": 178,
     "kind": "class",
     "name": "Civ5SaveProperty",
     "memberof": "src/Civ5SaveProperty.js",
@@ -3236,7 +3278,7 @@
     "interface": false
   },
   {
-    "__docId__": 177,
+    "__docId__": 179,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Civ5SaveProperty.js~Civ5SaveProperty",
@@ -3250,7 +3292,7 @@
     "ignore": true
   },
   {
-    "__docId__": 178,
+    "__docId__": 180,
     "kind": "member",
     "name": "byteOffset",
     "memberof": "src/Civ5SaveProperty.js~Civ5SaveProperty",
@@ -3267,7 +3309,7 @@
     }
   },
   {
-    "__docId__": 179,
+    "__docId__": 181,
     "kind": "member",
     "name": "length",
     "memberof": "src/Civ5SaveProperty.js~Civ5SaveProperty",
@@ -3284,7 +3326,18 @@
     }
   },
   {
-    "__docId__": 180,
+    "__docId__": 182,
+    "kind": "file",
+    "name": "src/Civ5SavePropertyDefinitions.js",
+    "content": "export default {\n  'fileSignature': {\n    'byteOffsetInSection': 0,\n    'length': 4,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string',\n    // Game build is a later property and not yet defined, so the section will need to be determined without it\n    getSection() {\n      return 1;\n    }\n  },\n  'saveGameVersion': {\n    'byteOffsetInSection': 4,\n    'length': 4,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'int',\n    // Game build is a later property and not yet defined, so the section will need to be determined without it\n    getSection() {\n      return 1;\n    }\n  },\n  // This property is updated if the game is saved with a newer version of Civ 5\n  'gameVersion': {\n    'byteOffsetInSection': 8,\n    'length': null,\n    'sectionByBuild': {\n      '230620': 1\n    },\n    'type': 'string',\n    // Game build is a later property and not yet defined, so the section will need to be determined without it\n    getSection(saveGameVersion) {\n      if (saveGameVersion >= 7) {\n        return 1;\n      } else {\n        return null;\n      }\n    }\n  },\n  // This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally\n  // used when the save file was created is stored later, after gameOptionsMap.\n  'gameBuild': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '230620': 1\n    },\n    'type': 'string',\n    // Game build is not yet defined, so the section will need to be determined without it\n    getSection(saveGameVersion) {\n      if (saveGameVersion >= 7) {\n        return 1;\n      } else {\n        return null;\n      }\n    }\n  },\n  'currentTurn': {\n    'byteOffsetInSection': null,\n    'length': 4,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'int'\n  },\n  // This property exists in all versions but only seems to gain significance around build 230620\n  'gameMode': {\n    'byteOffsetInSection': null,\n    'length': 1,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'int',\n    'values': [\n      'Single player',\n      'Multiplayer',\n      'Hotseat'\n    ]\n  },\n  'player1Civilization': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string'\n  },\n  'difficulty': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string'\n  },\n  'startingEra': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string'\n  },\n  'currentEra': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string'\n  },\n  'gamePace': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string'\n  },\n  'mapSize': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string'\n  },\n  // The map file appears multiple times; I have no idea why (see section19Map)\n  'mapFile': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'string'\n  },\n  'enabledDLC': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 1\n    },\n    'type': 'dlcStringArray'\n  },\n  // Players after the first player marked as none seem to be superfluous\n  'playerStatuses': {\n    'byteOffsetInSection': 4,\n    // Length is number of items, not bytes\n    'length': 64,\n    'sectionByBuild': {\n      '98650': 4\n    },\n    'type': 'intArray',\n    'values': [\n      '',\n      'AI',\n      'Dead',\n      'Human',\n      'None'\n    ]\n  },\n  // Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there\n  // at all\n  'playerCivilizations': {\n    'byteOffsetInSection': 4,\n    // Length is number of items, not bytes\n    'length': 64,\n    'sectionByBuild': {\n      '310700': 8\n    },\n    'type': 'stringArray'\n  },\n  // This is rare but seems to contain the full path to the save file, e.g.\n  // C:\\Users\\Username\\Documents\\My Games\\Sid Meier's Civilization 5\\Saves\\multi\\auto\\AutoSave_0310 AD-2030.Civ5Save\n  'section19SkipSavePath': {\n    'byteOffsetInSection': 260,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 17,\n      '262623': 18,\n      '395070': 19\n    },\n    'type': 'string'\n  },\n  // This appears to contain the current OS username\n  'section19SkipUsername': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 17,\n      '262623': 18,\n      '395070': 19\n    },\n    'type': 'string'\n  },\n  'section19Skip1': {\n    'byteOffsetInSection': null,\n    'length': 7,\n    'sectionByBuild': {\n      '98650': 17,\n      '262623': 18,\n      '395070': 19\n    },\n    'type': 'bytes'\n  },\n  'section19Map': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 17,\n      '262623': 18,\n      '395070': 19\n    },\n    'type': 'string'\n  },\n  'section19Skip2': {\n    'byteOffsetInSection': null,\n    'length': 4,\n    'sectionByBuild': {\n      '98650': 17,\n      '262623': 18,\n      '395070': 19\n    },\n    'type': 'bytes'\n  },\n  // https://gaming.stackexchange.com/a/273907/154341\n  'maxTurns': {\n    'byteOffsetInSection': null,\n    'length': 4,\n    'sectionByBuild': {\n      '98650': 17,\n      '262623': 18,\n      '395070': 19\n    },\n    'type': 'int'\n  },\n  // This seems to be the second place in the file with player names\n  'playerNames2': {\n    'byteOffsetInSection': 4,\n    // Length is number of items, not bytes\n    'length': 64,\n    'sectionByBuild': {\n      '98650': 21,\n      '262623': 22,\n      '395070': 23\n    },\n    'type': 'stringArray'\n  },\n  'section23Skip1': {\n    'byteOffsetInSection': null,\n    'length': 4,\n    'sectionByBuild': {\n      '98650': 21,\n      '262623': 22,\n      '395070': 23\n    },\n    'type': 'int'\n  },\n  // https://steamcommunity.com/app/8930/discussions/0/864973761026018000/#c619568192863618582\n  'turnTimerLength': {\n    'byteOffsetInSection': null,\n    'length': 4,\n    'sectionByBuild': {\n      '98650': 21,\n      '262623': 22,\n      '395070': 23\n    },\n    'type': 'int'\n  },\n  'playerColours': {\n    'byteOffsetInSection': 4,\n    // Length is number of items, not bytes\n    'length': 64,\n    // This is technically incorrect; before build 310700 this property exists, but it's a list of bytes instead of a\n    // list of strings, and there isn't much value in adding the extra complexity for old save games. For reference, the\n    // correct values are:\n    //  '98650': 23,\n    //  '262623': 24,\n    //  '395070': 25\n    'sectionByBuild': {\n      '310700': 24,\n      '395070': 25\n    },\n    'type': 'stringArray'\n  },\n  // https://github.com/Canardlaquay/Civ5SavePrivate\n  'privateGame': {\n    'byteOffsetInSection': null,\n    'length': 1,\n    // As with playerColours, this is technically incorrect, but there isn't much value in implementing this for older\n    // games because 1. it would require implementing playerColours and 2. it's only relevant for multiplayer games,\n    // however logic for identifying multiplayer games before build 230620 hasn't been implemented (see gameMode)\n    'sectionByBuild': {\n      '310700': 24,\n      '395070': 25\n    },\n    'type': 'bool'\n  },\n  'section29Timer1': {\n    'byteOffsetInSection': 269,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'string'\n  },\n  'section29Skip1': {\n    'byteOffsetInSection': null,\n    'length': 12,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'bytes'\n  },\n  'section29TurnTimer': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'string'\n  },\n  'section29TxtKeyTurnTimer': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'string'\n  },\n  'section29Timer2': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'string'\n  },\n  'section29Skip2': {\n    'byteOffsetInSection': null,\n    'length': 25,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'bytes'\n  },\n  // https://gaming.stackexchange.com/a/273907/154341\n  'timeVictory': {\n    'byteOffsetInSection': null,\n    'length': 1,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'bool'\n  },\n  // https://gaming.stackexchange.com/a/273907/154341\n  'scienceVictory': {\n    'byteOffsetInSection': null,\n    'length': 1,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'bool'\n  },\n  // https://gaming.stackexchange.com/a/273907/154341\n  'dominationVictory': {\n    'byteOffsetInSection': null,\n    'length': 1,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'bool'\n  },\n  // https://gaming.stackexchange.com/a/273907/154341\n  'culturalVictory': {\n    'byteOffsetInSection': null,\n    'length': 1,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'bool'\n  },\n  // https://gaming.stackexchange.com/a/273907/154341\n  'diplomaticVictory': {\n    'byteOffsetInSection': null,\n    'length': 1,\n    'sectionByBuild': {\n      '98650': 27,\n      '262623': 28,\n      '395070': 29\n    },\n    'type': 'bool'\n  },\n  // This section is 76 bytes long if either expansion pack is installed. Otherwise it's 72 bytes long.\n  'section30Skip1': {\n    'byteOffsetInSection': 4,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'bytes',\n    getLength(enabledDLC) {\n      if (enabledDLC.includes('Expansion - Gods and Kings') || enabledDLC.includes('Expansion - Brave New World')) {\n        return 76;\n      } else {\n        return 72;\n      }\n    }\n  },\n  'section30MapSize1': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'string'\n  },\n  'section30TxtKeyMapHelp': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'string'\n  },\n  'section30Skip2': {\n    'byteOffsetInSection': null,\n    'length': 8,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'bytes'\n  },\n  'section30MapSize2': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'string'\n  },\n  'section30TxtKeyMapSize': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'string'\n  },\n  'section30MapSize3': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'string'\n  },\n  // This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed.\n  // Otherwise it's 72 bytes long.\n  'section30Skip3': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'bytes',\n    getLength(enabledDLC) {\n      if (enabledDLC.includes('Expansion - Brave New World')) {\n        return 80;\n      } else if (enabledDLC.includes('Expansion - Gods and Kings')) {\n        return 76;\n      } else {\n        return 72;\n      }\n    }\n  },\n  // This is where a large chunk of game options are stored\n  // (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)\n  'gameOptionsMap': {\n    'byteOffsetInSection': null,\n    'length': null,\n    'sectionByBuild': {\n      '98650': 28,\n      '262623': 29,\n      '395070': 30\n    },\n    'type': 'stringToBoolMap'\n  }\n};\n",
+    "static": true,
+    "longname": "/home/bmaupin/Dropbox/Projects/js-civ5save/src/Civ5SavePropertyDefinitions.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 183,
     "kind": "file",
     "name": "src/Civ5SavePropertyFactory.js",
     "content": "import Civ5SaveBoolProperty from './Civ5SaveBoolProperty';\nimport Civ5SaveDLCStringArray from './Civ5SaveDLCStringArray';\nimport Civ5SaveIntArray from './Civ5SaveIntArray';\nimport Civ5SaveIntProperty from './Civ5SaveIntProperty';\nimport Civ5SaveProperty from './Civ5SaveProperty';\nimport Civ5SaveStringArray from './Civ5SaveStringArray';\nimport Civ5SaveStringProperty from './Civ5SaveStringProperty';\nimport Civ5SaveStringToBoolMap from './Civ5SaveStringToBoolMap';\n\n/**\n * @ignore\n */\nexport default class Civ5SavePropertyFactory {\n  /**\n   * @ignore\n   */\n  static fromType(type, byteOffset, length, saveData) {\n    switch (type) {\n    case 'bool':\n      return new Civ5SaveBoolProperty(byteOffset, length);\n\n    case 'bytes':\n      return new Civ5SaveProperty(byteOffset, length);\n\n    case 'dlcStringArray':\n      return new Civ5SaveDLCStringArray(byteOffset, saveData);\n\n    case 'int':\n      return new Civ5SaveIntProperty(byteOffset, length);\n\n    case 'intArray':\n      return new Civ5SaveIntArray(byteOffset, length, saveData);\n\n    case 'string':\n      return new Civ5SaveStringProperty(byteOffset, length, saveData);\n\n    case 'stringArray':\n      return new Civ5SaveStringArray(byteOffset, length, saveData);\n\n    case 'stringToBoolMap':\n      return new Civ5SaveStringToBoolMap(byteOffset, saveData);\n\n    default:\n      throw new Error(`Property type ${type} not handled`);\n    }\n  }\n}\n",
@@ -3295,7 +3348,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 181,
+    "__docId__": 184,
     "kind": "class",
     "name": "Civ5SavePropertyFactory",
     "memberof": "src/Civ5SavePropertyFactory.js",
@@ -3311,7 +3364,7 @@
     "interface": false
   },
   {
-    "__docId__": 182,
+    "__docId__": 185,
     "kind": "method",
     "name": "fromType",
     "memberof": "src/Civ5SavePropertyFactory.js~Civ5SavePropertyFactory",
@@ -3356,7 +3409,7 @@
     }
   },
   {
-    "__docId__": 183,
+    "__docId__": 186,
     "kind": "file",
     "name": "src/Civ5SaveStringArray.js",
     "content": "import Civ5SaveStringProperty from './Civ5SaveStringProperty';\n\n/**\n * @ignore\n */\nexport default class Civ5SaveStringArray {\n  /**\n   * @ignore\n   */\n  constructor(byteOffset, items, saveData) {\n    /**\n     * @ignore\n     */\n    this.byteOffset = byteOffset;\n    /**\n     * @private\n     */\n    this._array = new Array();\n\n    let currentByteOffset = this.byteOffset;\n    for (let i = 0; i < items; i++) {\n      let arrayItem = new Civ5SaveStringProperty(currentByteOffset, null, saveData);\n      currentByteOffset += arrayItem.length;\n      this._array.push(arrayItem.getValue(saveData));\n    }\n\n    /**\n     * @ignore\n     */\n    this.length = currentByteOffset - this.byteOffset;\n    Object.freeze(this._array);\n  }\n\n  /**\n   * @ignore\n   */\n  getArray() {\n    return this._array;\n  }\n}\n",
@@ -3367,7 +3420,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 184,
+    "__docId__": 187,
     "kind": "class",
     "name": "Civ5SaveStringArray",
     "memberof": "src/Civ5SaveStringArray.js",
@@ -3383,7 +3436,7 @@
     "interface": false
   },
   {
-    "__docId__": 185,
+    "__docId__": 188,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Civ5SaveStringArray.js~Civ5SaveStringArray",
@@ -3397,7 +3450,7 @@
     "ignore": true
   },
   {
-    "__docId__": 186,
+    "__docId__": 189,
     "kind": "member",
     "name": "byteOffset",
     "memberof": "src/Civ5SaveStringArray.js~Civ5SaveStringArray",
@@ -3414,7 +3467,7 @@
     }
   },
   {
-    "__docId__": 187,
+    "__docId__": 190,
     "kind": "member",
     "name": "_array",
     "memberof": "src/Civ5SaveStringArray.js~Civ5SaveStringArray",
@@ -3431,7 +3484,7 @@
     }
   },
   {
-    "__docId__": 188,
+    "__docId__": 191,
     "kind": "member",
     "name": "length",
     "memberof": "src/Civ5SaveStringArray.js~Civ5SaveStringArray",
@@ -3448,7 +3501,7 @@
     }
   },
   {
-    "__docId__": 189,
+    "__docId__": 192,
     "kind": "method",
     "name": "getArray",
     "memberof": "src/Civ5SaveStringArray.js~Civ5SaveStringArray",
@@ -3468,7 +3521,7 @@
     }
   },
   {
-    "__docId__": 190,
+    "__docId__": 193,
     "kind": "file",
     "name": "src/Civ5SaveStringProperty.js",
     "content": "import Civ5SaveProperty from './Civ5SaveProperty';\n\n/**\n * @ignore\n */\nexport default class Civ5SaveStringProperty extends Civ5SaveProperty {\n  /**\n   * @ignore\n   */\n  constructor(byteOffset, length, saveData) {\n    super(byteOffset, length);\n\n    if (this._isNullOrUndefined(this.length)) {\n      /**\n       * @ignore\n       */\n      this.length = this._getStringLength(saveData, this.byteOffset) + 4;\n    }\n  }\n\n  /**\n   * @private\n   */\n  _isNullOrUndefined(variable) {\n    return typeof variable === 'undefined' || variable === null;\n  }\n\n  /**\n   * @private\n   */\n  _getStringLength(saveData, byteOffset) {\n    return saveData.getUint32(byteOffset, true);\n  }\n\n  /**\n   * @ignore\n   */\n  getValue(saveData) {\n    return saveData.getString(this.byteOffset + 4, this.length - 4);\n  }\n}\n",
@@ -3479,7 +3532,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 191,
+    "__docId__": 194,
     "kind": "class",
     "name": "Civ5SaveStringProperty",
     "memberof": "src/Civ5SaveStringProperty.js",
@@ -3498,7 +3551,7 @@
     ]
   },
   {
-    "__docId__": 192,
+    "__docId__": 195,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Civ5SaveStringProperty.js~Civ5SaveStringProperty",
@@ -3512,7 +3565,7 @@
     "ignore": true
   },
   {
-    "__docId__": 193,
+    "__docId__": 196,
     "kind": "member",
     "name": "length",
     "memberof": "src/Civ5SaveStringProperty.js~Civ5SaveStringProperty",
@@ -3529,7 +3582,7 @@
     }
   },
   {
-    "__docId__": 194,
+    "__docId__": 197,
     "kind": "method",
     "name": "_isNullOrUndefined",
     "memberof": "src/Civ5SaveStringProperty.js~Civ5SaveStringProperty",
@@ -3556,7 +3609,7 @@
     }
   },
   {
-    "__docId__": 195,
+    "__docId__": 198,
     "kind": "method",
     "name": "_getStringLength",
     "memberof": "src/Civ5SaveStringProperty.js~Civ5SaveStringProperty",
@@ -3589,7 +3642,7 @@
     }
   },
   {
-    "__docId__": 196,
+    "__docId__": 199,
     "kind": "method",
     "name": "getValue",
     "memberof": "src/Civ5SaveStringProperty.js~Civ5SaveStringProperty",
@@ -3616,7 +3669,7 @@
     }
   },
   {
-    "__docId__": 197,
+    "__docId__": 200,
     "kind": "file",
     "name": "src/Civ5SaveStringToBoolMap.js",
     "content": "import Civ5SaveBoolProperty from './Civ5SaveBoolProperty';\nimport Civ5SaveDataView from './Civ5SaveDataView';\nimport Civ5SaveIntProperty from './Civ5SaveIntProperty';\nimport Civ5SaveStringProperty from './Civ5SaveStringProperty';\n\n/**\n * @ignore\n */\nexport default class Civ5SaveStringToBoolMap {\n  /**\n   * @ignore\n   */\n  constructor(byteOffset, saveData) {\n    /**\n     * @ignore\n     */\n    this.byteOffset = byteOffset;\n    /**\n     * @ignore\n     */\n    this.length = 4;\n    /**\n     * @private\n     */\n    this._items = new Map();\n    /**\n     * @private\n     */\n    this._size = new Civ5SaveIntProperty(this.byteOffset, 4, saveData);\n\n    if (this._getSize(saveData) > 0) {\n      let currentByteOffset = this.byteOffset + 4;\n      for (let i = 0; i < this._getSize(saveData); i++) {\n        currentByteOffset = this._addItemToMap(saveData, currentByteOffset);\n      }\n    }\n  }\n\n  /**\n   * @private\n   */\n  _addItemToMap(saveData, byteOffset) {\n    let itemKeyProperty = new Civ5SaveStringProperty(byteOffset, null, saveData);\n    byteOffset += itemKeyProperty.length;\n    let itemValueProperty = new Civ5SaveBoolProperty(byteOffset, 4, saveData);\n    byteOffset += itemValueProperty.length;\n\n    this._items.set(itemKeyProperty.getValue(saveData), itemValueProperty);\n    this.length = byteOffset - this.byteOffset;\n\n    return byteOffset;\n  }\n\n  /**\n   * @private\n   */\n  _getSize(saveData) {\n    return this._size.getValue(saveData);\n  }\n\n  /**\n   * @private\n   */\n  _setSize(saveData, newValue) {\n    this._size.setValue(saveData, newValue);\n  }\n\n  /**\n   * @ignore\n   */\n  getValue(saveData, itemKey) {\n    if (this._items.has(itemKey)) {\n      return this._items.get(itemKey).getValue(saveData);\n    } else {\n      return false;\n    }\n  }\n\n  /**\n   * @ignore\n   */\n  setValue(saveData, itemKey, newItemValue) {\n    if (this._items.has(itemKey)) {\n      this._items.get(itemKey).setValue(saveData, newItemValue);\n\n    } else {\n      return this._addItemToSaveData(saveData, itemKey, newItemValue);\n    }\n  }\n\n  /**\n   * @private\n   */\n  _addItemToSaveData(saveData, itemKey, newItemValue) {\n    this._setSize(saveData, this._getSize(saveData) + 1);\n\n    let itemKeyLengthArray = this._int32ToUint8Array(itemKey.length);\n    let itemKeyArray = this._stringToUint8Array(itemKey);\n    let itemValueArray = this._int32ToUint8Array(Number(newItemValue));\n    let arrayToInsert = this._concatTypedArrays(\n      this._concatTypedArrays(\n        itemKeyLengthArray,\n        itemKeyArray\n      ),\n      itemValueArray\n    );\n\n    let newSaveDataTypedArray = this._insertIntoTypedArray(\n      new Uint8Array(saveData.buffer),\n      arrayToInsert,\n      this.byteOffset + this.length);\n    let newSaveData = new Civ5SaveDataView(newSaveDataTypedArray.buffer);\n\n    this._addItemToMap(newSaveData, this.byteOffset + this.length);\n\n    return newSaveData;\n  }\n\n  /**\n   * @private\n   */\n  // Inspired by https://stackoverflow.com/a/12965194/399105\n  _int32ToUint8Array(int32) {\n    let int32Array = new Uint8Array(4);\n    for (let i = 0; i < int32Array.length; i++) {\n      let byte = int32 & 0xff;\n      int32Array[i] = byte;\n      int32 = (int32 - byte) / 256;\n    }\n    return int32Array;\n  }\n\n  /**\n   * @private\n   */\n  _stringToUint8Array(string) {\n    let stringArray = new Uint8Array(string.length);\n    for (let i = 0; i < string.length; i++) {\n      stringArray[i] = string.charCodeAt(i);\n    }\n    return stringArray;\n  }\n\n  /**\n   * @private\n   */\n  // https://stackoverflow.com/a/33703102/399105\n  _concatTypedArrays(a, b) {\n    var c = new (a.constructor)(a.length + b.length);\n    c.set(a, 0);\n    c.set(b, a.length);\n    return c;\n  }\n\n  /**\n   * @private\n   */\n  _insertIntoTypedArray(array, arrayToInsert, insertAtByteOffset) {\n    return this._concatTypedArrays(\n      this._concatTypedArrays(\n        array.slice(0, insertAtByteOffset),\n        arrayToInsert\n      ),\n      array.slice(insertAtByteOffset, array.length)\n    );\n  }\n}\n",
@@ -3627,7 +3680,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 198,
+    "__docId__": 201,
     "kind": "class",
     "name": "Civ5SaveStringToBoolMap",
     "memberof": "src/Civ5SaveStringToBoolMap.js",
@@ -3643,7 +3696,7 @@
     "interface": false
   },
   {
-    "__docId__": 199,
+    "__docId__": 202,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3657,7 +3710,7 @@
     "ignore": true
   },
   {
-    "__docId__": 200,
+    "__docId__": 203,
     "kind": "member",
     "name": "byteOffset",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3674,7 +3727,7 @@
     }
   },
   {
-    "__docId__": 201,
+    "__docId__": 204,
     "kind": "member",
     "name": "length",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3691,7 +3744,7 @@
     }
   },
   {
-    "__docId__": 202,
+    "__docId__": 205,
     "kind": "member",
     "name": "_items",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3708,7 +3761,7 @@
     }
   },
   {
-    "__docId__": 203,
+    "__docId__": 206,
     "kind": "member",
     "name": "_size",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3725,7 +3778,7 @@
     }
   },
   {
-    "__docId__": 204,
+    "__docId__": 207,
     "kind": "method",
     "name": "_addItemToMap",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3758,7 +3811,7 @@
     }
   },
   {
-    "__docId__": 206,
+    "__docId__": 209,
     "kind": "method",
     "name": "_getSize",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3785,7 +3838,7 @@
     }
   },
   {
-    "__docId__": 207,
+    "__docId__": 210,
     "kind": "method",
     "name": "_setSize",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3814,7 +3867,7 @@
     "return": null
   },
   {
-    "__docId__": 208,
+    "__docId__": 211,
     "kind": "method",
     "name": "getValue",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3847,7 +3900,7 @@
     }
   },
   {
-    "__docId__": 209,
+    "__docId__": 212,
     "kind": "method",
     "name": "setValue",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3886,7 +3939,7 @@
     }
   },
   {
-    "__docId__": 210,
+    "__docId__": 213,
     "kind": "method",
     "name": "_addItemToSaveData",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3925,7 +3978,7 @@
     }
   },
   {
-    "__docId__": 211,
+    "__docId__": 214,
     "kind": "method",
     "name": "_int32ToUint8Array",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3952,7 +4005,7 @@
     }
   },
   {
-    "__docId__": 212,
+    "__docId__": 215,
     "kind": "method",
     "name": "_stringToUint8Array",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -3979,7 +4032,7 @@
     }
   },
   {
-    "__docId__": 213,
+    "__docId__": 216,
     "kind": "method",
     "name": "_concatTypedArrays",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -4012,7 +4065,7 @@
     }
   },
   {
-    "__docId__": 214,
+    "__docId__": 217,
     "kind": "method",
     "name": "_insertIntoTypedArray",
     "memberof": "src/Civ5SaveStringToBoolMap.js~Civ5SaveStringToBoolMap",
@@ -4051,7 +4104,7 @@
     }
   },
   {
-    "__docId__": 215,
+    "__docId__": 218,
     "kind": "file",
     "name": "src/ExtendableError.js",
     "content": "/**\n * @ignore\n * @see https://stackoverflow.com/a/32749533/399105\n */\nexport default class ExtendableError extends Error {\n  /**\n   * @ignore\n   */\n  constructor(message) {\n    super(message);\n    /**\n     * @ignore\n     */\n    this.name = this.constructor.name;\n    if (typeof Error.captureStackTrace === 'function') {\n      Error.captureStackTrace(this, this.constructor);\n    } else {\n      /**\n       * @ignore\n       */\n      this.stack = (new Error(message)).stack;\n    }\n  }\n}\n",
@@ -4062,7 +4115,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 216,
+    "__docId__": 219,
     "kind": "class",
     "name": "ExtendableError",
     "memberof": "src/ExtendableError.js",
@@ -4084,7 +4137,7 @@
     ]
   },
   {
-    "__docId__": 217,
+    "__docId__": 220,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/ExtendableError.js~ExtendableError",
@@ -4098,7 +4151,7 @@
     "ignore": true
   },
   {
-    "__docId__": 218,
+    "__docId__": 221,
     "kind": "member",
     "name": "name",
     "memberof": "src/ExtendableError.js~ExtendableError",
@@ -4115,7 +4168,7 @@
     }
   },
   {
-    "__docId__": 219,
+    "__docId__": 222,
     "kind": "member",
     "name": "stack",
     "memberof": "src/ExtendableError.js~ExtendableError",
@@ -4141,7 +4194,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"author\": \"https://bmaupin.github.io\",\n  \"bugs\": {\n    \"url\": \"https://github.com/bmaupin/js-civ5save/issues\"\n  },\n  \"dependencies\": {\n    \"babel-runtime\": \"^6.26.0\"\n  },\n  \"description\": \"Library for working with Civilization V save files\",\n  \"devDependencies\": {\n    \"babel-eslint\": \"^7.2.3\",\n    \"babel-jest\": \"^20.0.3\",\n    \"babel-loader\": \"^7.1.2\",\n    \"babel-plugin-transform-builtin-extend\": \"^1.1.2\",\n    \"babel-plugin-transform-runtime\": \"^6.23.0\",\n    \"babel-preset-env\": \"^1.6.0\",\n    \"coveralls\": \"^2.13.1\",\n    \"esdoc\": \"^1.0.2\",\n    \"esdoc-standard-plugin\": \"^1.0.0\",\n    \"eslint\": \"^4.2.0\",\n    \"eslint-loader\": \"^1.9.0\",\n    \"eslint-plugin-json\": \"^1.2.0\",\n    \"jest\": \"^20.0.4\",\n    \"webpack\": \"^3.3.0\"\n  },\n  \"esdoc\": {\n    \"source\": \"./src\",\n    \"destination\": \"./docs\",\n    \"plugins\": [\n      {\n        \"name\": \"esdoc-standard-plugin\",\n        \"option\": {\n          \"accessor\": {\"access\": [\"public\"], \"autoPrivate\": true},\n          \"undocumentIdentifier\": {\"enable\": false}\n        }\n      }\n    ]\n  },\n  \"files\": [\n    \"dist/\"\n  ],\n  \"homepage\": \"https://github.com/bmaupin/js-civ5save#readme\",\n  \"jest\": {\n    \"testURL\": \"file://test\"\n  },\n  \"keywords\": [\n    \"civ5save\",\n    \"civ5\",\n    \"CivV\",\n    \"Civilization 5\",\n    \"Civilization V\"\n  ],\n  \"license\": \"MIT\",\n  \"main\": \"dist/civ5save.js\",\n  \"name\": \"civ5save\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/bmaupin/js-civ5save.git\"\n  },\n  \"scripts\": {\n    \"build\": \"webpack && NODE_ENV=production webpack && esdoc\",\n    \"lint\": \"eslint src/*\",\n    \"test\": \"jest --coverage\"\n  },\n  \"version\": \"0.1.0\"\n}\n",
+    "content": "{\n  \"author\": \"https://bmaupin.github.io\",\n  \"bugs\": {\n    \"url\": \"https://github.com/bmaupin/js-civ5save/issues\"\n  },\n  \"dependencies\": {\n    \"babel-runtime\": \"^6.26.0\"\n  },\n  \"description\": \"Library for working with Civilization V save files\",\n  \"devDependencies\": {\n    \"babel-eslint\": \"^7.2.3\",\n    \"babel-jest\": \"^20.0.3\",\n    \"babel-loader\": \"^7.1.2\",\n    \"babel-minify-webpack-plugin\": \"^0.2.0\",\n    \"babel-plugin-transform-builtin-extend\": \"^1.1.2\",\n    \"babel-plugin-transform-runtime\": \"^6.23.0\",\n    \"babel-preset-env\": \"^1.6.0\",\n    \"coveralls\": \"^2.13.1\",\n    \"esdoc\": \"^1.0.2\",\n    \"esdoc-standard-plugin\": \"^1.0.0\",\n    \"eslint\": \"^4.2.0\",\n    \"eslint-loader\": \"^1.9.0\",\n    \"eslint-plugin-json\": \"^1.2.0\",\n    \"jest\": \"^20.0.4\",\n    \"webpack\": \"^3.3.0\"\n  },\n  \"esdoc\": {\n    \"source\": \"./src\",\n    \"destination\": \"./docs\",\n    \"plugins\": [\n      {\n        \"name\": \"esdoc-standard-plugin\",\n        \"option\": {\n          \"accessor\": {\n            \"access\": [\n              \"public\"\n            ],\n            \"autoPrivate\": true\n          },\n          \"undocumentIdentifier\": {\n            \"enable\": false\n          }\n        }\n      }\n    ]\n  },\n  \"files\": [\n    \"dist/\"\n  ],\n  \"homepage\": \"https://github.com/bmaupin/js-civ5save#readme\",\n  \"jest\": {\n    \"testURL\": \"file://test\"\n  },\n  \"keywords\": [\n    \"civ5save\",\n    \"civ5\",\n    \"CivV\",\n    \"Civilization 5\",\n    \"Civilization V\"\n  ],\n  \"license\": \"MIT\",\n  \"main\": \"dist/civ5save.js\",\n  \"name\": \"civ5save\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/bmaupin/js-civ5save.git\"\n  },\n  \"scripts\": {\n    \"build\": \"webpack && NODE_ENV=production webpack && esdoc\",\n    \"lint\": \"eslint src/*\",\n    \"test\": \"jest --coverage\"\n  },\n  \"version\": \"0.2.0\"\n}\n",
     "longname": "/home/bmaupin/Dropbox/Projects/js-civ5save/package.json",
     "name": "package.json",
     "static": true,

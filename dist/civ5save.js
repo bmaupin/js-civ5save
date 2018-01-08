@@ -1824,10 +1824,6 @@ var Civ5Save = function () {
     /**
      * @private
      */
-    this._gameBuild = this._getGameBuild();
-    /**
-     * @private
-     */
     this._properties = this._getProperties();
   }
 
@@ -1883,59 +1879,46 @@ var Civ5Save = function () {
   }, {
     key: '_getProperties',
     value: function _getProperties() {
-      var previousPropertyName = '';
+      var previousPropertyName = null;
       var previousPropertySection = 0;
       var properties = new _map2.default();
-      var sectionOffsets = this._getSectionOffsets();
+      var saveGameVersion = null;
+      var sectionOffsets = null;
 
       for (var propertyName in _Civ5SavePropertyDefinitions2.default) {
-        // Skip string array properties since there isn't much value in implementing them until they're needed, plus the
-        // string array containing player colours doesn't seem to have a predictable length (can have 63 or 64 items)
-        if (['playerColours', 'playerNames2', 'section23Skip1'].includes(propertyName)) {
-          continue;
+        // Check for currentTurn since gameBuild may not be available as a property
+        if (propertyName === 'currentTurn') {
+          this._setGameBuild(properties.gameBuild);
+          sectionOffsets = this._getSectionOffsets(this.gameBuild);
+        }
+        if (previousPropertyName === 'saveGameVersion') {
+          saveGameVersion = properties.saveGameVersion.getValue(this._saveData);
         }
 
         // Make propertyDefinition a copy; otherwise it will modify the property for every instance of the Civ5Save class
         var propertyDefinition = (0, _assign2.default)({}, _Civ5SavePropertyDefinitions2.default[propertyName]);
 
-        var propertySection = this._getPropertySection(propertyDefinition);
+        var propertySection = this._getPropertySection(propertyDefinition, saveGameVersion, this.gameBuild);
         // If propertySection is null, it means the property isn't available for the particular game build
         if (this._isNullOrUndefined(propertySection)) {
           continue;
         }
 
-        if (propertyName === 'section30Skip1') {
-          if (properties.enabledDLC.getArray().includes('Expansion - Gods and Kings') || properties.enabledDLC.getArray().includes('Expansion - Brave New World')) {
-            propertyDefinition.length = 76;
-          } else {
-            propertyDefinition.length = 72;
-          }
-        } else if (propertyName === 'section30Skip3') {
-          if (properties.enabledDLC.getArray().includes('Expansion - Brave New World')) {
-            propertyDefinition.length = 80;
-          } else if (properties.enabledDLC.getArray().includes('Expansion - Gods and Kings')) {
-            propertyDefinition.length = 76;
-          } else {
-            propertyDefinition.length = 72;
-          }
+        var propertyLength = propertyDefinition.length;
+        if (propertyDefinition.hasOwnProperty('getLength')) {
+          propertyLength = propertyDefinition.getLength(properties.enabledDLC.getArray());
         }
 
-        var propertyByteOffset = null;
+        var propertyByteOffset = 0;
         if (propertySection === previousPropertySection) {
           var previousProperty = properties[previousPropertyName];
           propertyByteOffset = previousProperty.byteOffset + previousProperty.length;
-
-          // Workaround for a couple values that are preceded by string arrays (see comment above)
-        } else if (propertyName === 'privateGame') {
-          propertyByteOffset = sectionOffsets[propertySection].start - 10;
-        } else if (propertyName === 'turnTimerLength') {
-          propertyByteOffset = sectionOffsets[propertySection].start - 4;
-        } else {
+        } else if (previousPropertyName !== null) {
           propertyByteOffset = sectionOffsets[propertySection - 1].start + propertyDefinition.byteOffsetInSection;
         }
 
         try {
-          properties[propertyName] = _Civ5SavePropertyFactory2.default.fromType(propertyDefinition.type, propertyByteOffset, propertyDefinition.length, this._saveData);
+          properties[propertyName] = _Civ5SavePropertyFactory2.default.fromType(propertyDefinition.type, propertyByteOffset, propertyLength, this._saveData);
         } catch (e) {
           throw new ParseError('Failure parsing save at property ' + propertyName);
         }
@@ -1953,7 +1936,7 @@ var Civ5Save = function () {
 
   }, {
     key: '_getSectionOffsets',
-    value: function _getSectionOffsets() {
+    value: function _getSectionOffsets(gameBuild) {
       var SECTION_DELIMITER = [0x40, 0, 0, 0];
 
       var LAST_PROPERTY_DEFINITION = _Civ5SavePropertyDefinitions2.default[(0, _keys2.default)(_Civ5SavePropertyDefinitions2.default)[(0, _keys2.default)(_Civ5SavePropertyDefinitions2.default).length - 1]];
@@ -1969,9 +1952,9 @@ var Civ5Save = function () {
       for (var byteOffset = 0; byteOffset < saveDataBytes.length; byteOffset++) {
         if (this._areArraysEqual(saveDataBytes.slice(byteOffset, byteOffset + 4), SECTION_DELIMITER)) {
           // Player colour section before build 310700 contains hex values, which can include the section delimiter
-          if (Number(this.gameBuild) < 310700) {
+          if (Number(gameBuild) < 310700) {
             var playerColourSection = 23;
-            if (Number(this.gameBuild) >= 262623) {
+            if (Number(gameBuild) >= 262623) {
               playerColourSection = 24;
             }
             if (sectionOffsets.length === playerColourSection) {
@@ -2015,10 +1998,15 @@ var Civ5Save = function () {
 
   }, {
     key: '_getPropertySection',
-    value: function _getPropertySection(propertyDefinition) {
+    value: function _getPropertySection(propertyDefinition, saveGameVersion, gameBuild) {
+      if (propertyDefinition.hasOwnProperty('getSection')) {
+        return propertyDefinition.getSection(saveGameVersion);
+      }
+
       var propertySection = null;
+
       for (var build in propertyDefinition.sectionByBuild) {
-        if ((0, _parseInt2.default)(this.gameBuild) >= (0, _parseInt2.default)(build)) {
+        if ((0, _parseInt2.default)(gameBuild) >= (0, _parseInt2.default)(build)) {
           propertySection = propertyDefinition.sectionByBuild[build];
         }
       }
@@ -2038,6 +2026,10 @@ var Civ5Save = function () {
 
     /**
      * Game build number.
+     *
+     * Note that for games created or saved before build 230620, this will return the game build that was used to create
+     * the save file. Starting with build 230620, this will return the game build that was last used to save the save
+     * file.
      * @type {string}
      */
 
@@ -2077,6 +2069,23 @@ var Civ5Save = function () {
       }
 
       return gameBuild;
+    }
+
+    /**
+     * @private
+     */
+
+  }, {
+    key: '_setGameBuild',
+    value: function _setGameBuild(gameBuildProperty) {
+      if (typeof gameBuildProperty !== 'undefined') {
+        /**
+         * @private
+         */
+        this._gameBuild = gameBuildProperty.getValue(this._saveData);
+      } else {
+        this._gameBuild = this._getGameBuild();
+      }
     }
 
     /**
@@ -2177,9 +2186,9 @@ var Civ5Save = function () {
     /**
      * Game mode: one of `Civ5Save.GAME_MODES.SINGLE`, `Civ5Save.GAME_MODES.MULTI`, or `Civ5Save.GAME_MODES.HOTSEAT`.
      *
-     * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620. `undefined` is used
-     * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply
-     * the spot is there but empty).
+     * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 230620 because the meaning
+     * of its value is unknown. `undefined` is used instead of `null` because `null` might incorrectly imply the value is
+     * empty.
      * @type {string|undefined}
      */
 
@@ -2360,6 +2369,9 @@ var Civ5Save = function () {
 
     /**
      * Private setting for multiplayer games.
+     *
+     * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn't
+     * implemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.
      * @type {boolean}
      */
 
@@ -5579,478 +5591,531 @@ module.exports = Function.bind || function bind(that /*, args... */){
 
 /***/ }),
 /* 145 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = {
-	"fileSignature": {
-		"byteOffsetInSection": 0,
-		"length": 4,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"saveGameVersion": {
-		"byteOffsetInSection": 4,
-		"length": 4,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "int"
-	},
-	"gameVersion": {
-		"byteOffsetInSection": 8,
-		"length": null,
-		"sectionByBuild": {
-			"230620": 1
-		},
-		"type": "string"
-	},
-	"gameBuild": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"230620": 1
-		},
-		"type": "string"
-	},
-	"currentTurn": {
-		"byteOffsetInSection": null,
-		"length": 4,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "int"
-	},
-	"gameMode": {
-		"_comment": "This property exists in all versions but only seems to gain significance around build 230620",
-		"byteOffsetInSection": null,
-		"length": 1,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "int",
-		"values": [
-			"Single player",
-			"Multiplayer",
-			"Hotseat"
-		]
-	},
-	"player1Civilization": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"difficulty": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"startingEra": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"currentEra": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"gamePace": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"mapSize": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"mapFile": {
-		"_comment": "The map file appears multiple times; I have no idea why (see section19Map)",
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "string"
-	},
-	"enabledDLC": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 1
-		},
-		"type": "dlcStringArray"
-	},
-	"playerStatuses": {
-		"_comment": "Players after the first player marked as none seem to be superfluous. Length is number of items, not bytes.",
-		"byteOffsetInSection": 4,
-		"length": 64,
-		"sectionByBuild": {
-			"98650": 4
-		},
-		"type": "intArray",
-		"values": [
-			"",
-			"AI",
-			"Dead",
-			"Human",
-			"None"
-		]
-	},
-	"playerCivilizations": {
-		"_comment": "Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there at all. Length is number of items, not bytes.",
-		"byteOffsetInSection": 4,
-		"length": 64,
-		"sectionByBuild": {
-			"310700": 8
-		},
-		"type": "stringArray"
-	},
-	"section19SkipSavePath": {
-		"_comment": "This is rare but seems to contain the full path to the save file, e.g. C:\\Users\\Username\\Documents\\My Games\\Sid Meier's Civilization 5\\Saves\\multi\\auto\\AutoSave_0310 AD-2030.Civ5Save",
-		"byteOffsetInSection": 260,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 17,
-			"262623": 18,
-			"395070": 19
-		},
-		"type": "string"
-	},
-	"section19SkipUsername": {
-		"_comment": "This appears to contain the current OS username",
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 17,
-			"262623": 18,
-			"395070": 19
-		},
-		"type": "string"
-	},
-	"section19Skip1": {
-		"byteOffsetInSection": null,
-		"length": 7,
-		"sectionByBuild": {
-			"98650": 17,
-			"262623": 18,
-			"395070": 19
-		},
-		"type": "bytes"
-	},
-	"section19Map": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 17,
-			"262623": 18,
-			"395070": 19
-		},
-		"type": "string"
-	},
-	"section19Skip2": {
-		"byteOffsetInSection": null,
-		"length": 4,
-		"sectionByBuild": {
-			"98650": 17,
-			"262623": 18,
-			"395070": 19
-		},
-		"type": "bytes"
-	},
-	"maxTurns": {
-		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
-		"byteOffsetInSection": null,
-		"length": 4,
-		"sectionByBuild": {
-			"98650": 17,
-			"262623": 18,
-			"395070": 19
-		},
-		"type": "int"
-	},
-	"playerNames2": {
-		"_comment": "This seems to be the second place in the file with player names. There's enough space for 64 names",
-		"byteOffsetInSection": 4,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 21,
-			"262623": 22,
-			"395070": 23
-		},
-		"type": "stringArray"
-	},
-	"section23Skip1": {
-		"byteOffsetInSection": null,
-		"length": 4,
-		"sectionByBuild": {
-			"98650": 21,
-			"262623": 22,
-			"395070": 23
-		},
-		"type": "int"
-	},
-	"turnTimerLength": {
-		"_comment": "https://steamcommunity.com/app/8930/discussions/0/864973761026018000/#c619568192863618582",
-		"byteOffsetInSection": null,
-		"length": 4,
-		"sectionByBuild": {
-			"98650": 21,
-			"262623": 22,
-			"395070": 23
-		},
-		"type": "int"
-	},
-	"playerColours": {
-		"_comment": "Starting with build 310700 this is a list of strings. Before that it's a list of bytes. Seems like it can have 63 or 64 items.",
-		"byteOffsetInSection": 4,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 23,
-			"262623": 24,
-			"395070": 25
-		},
-		"type": "stringArray"
-	},
-	"privateGame": {
-		"_comment": "https://github.com/Canardlaquay/Civ5SavePrivate",
-		"byteOffsetInSection": null,
-		"length": 1,
-		"sectionByBuild": {
-			"98650": 23,
-			"262623": 24,
-			"395070": 25
-		},
-		"type": "bool"
-	},
-	"section29Timer1": {
-		"byteOffsetInSection": 269,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "string"
-	},
-	"section29Skip1": {
-		"byteOffsetInSection": null,
-		"length": 12,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "bytes"
-	},
-	"section29TurnTimer": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "string"
-	},
-	"section29TxtKeyTurnTimer": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "string"
-	},
-	"section29Timer2": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "string"
-	},
-	"section29Skip2": {
-		"byteOffsetInSection": null,
-		"length": 25,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "bytes"
-	},
-	"timeVictory": {
-		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
-		"byteOffsetInSection": null,
-		"length": 1,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "bool"
-	},
-	"scienceVictory": {
-		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
-		"byteOffsetInSection": null,
-		"length": 1,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "bool"
-	},
-	"dominationVictory": {
-		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
-		"byteOffsetInSection": null,
-		"length": 1,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "bool"
-	},
-	"culturalVictory": {
-		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
-		"byteOffsetInSection": null,
-		"length": 1,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "bool"
-	},
-	"diplomaticVictory": {
-		"_comment": "https://gaming.stackexchange.com/a/273907/154341",
-		"byteOffsetInSection": null,
-		"length": 1,
-		"sectionByBuild": {
-			"98650": 27,
-			"262623": 28,
-			"395070": 29
-		},
-		"type": "bool"
-	},
-	"section30Skip1": {
-		"_comment": "This section is 76 bytes long if either expansion pack is installed. Otherwise it's 72 bytes long.",
-		"byteOffsetInSection": 4,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "bytes"
-	},
-	"section30MapSize1": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "string"
-	},
-	"section30TxtKeyMapHelp": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "string"
-	},
-	"section30Skip2": {
-		"byteOffsetInSection": null,
-		"length": 8,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "bytes"
-	},
-	"section30MapSize2": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "string"
-	},
-	"section30TxtKeyMapSize": {
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "string"
-	},
-	"section30MapSize3": {
-		"_comment": "This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed. Otherwise it's 72 bytes long.",
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "string"
-	},
-	"section30Skip3": {
-		"byteOffsetInSection": null,
-		"length": 72,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "bytes"
-	},
-	"gameOptionsMap": {
-		"_comment": "This is where a large chunk of game options are stored (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)",
-		"byteOffsetInSection": null,
-		"length": null,
-		"sectionByBuild": {
-			"98650": 28,
-			"262623": 29,
-			"395070": 30
-		},
-		"type": "stringToBoolMap"
-	}
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  'fileSignature': {
+    'byteOffsetInSection': 0,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string',
+    // Game build is a later property and not yet defined, so the section will need to be determined without it
+    getSection: function getSection() {
+      return 1;
+    }
+  },
+  'saveGameVersion': {
+    'byteOffsetInSection': 4,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'int',
+    // Game build is a later property and not yet defined, so the section will need to be determined without it
+    getSection: function getSection() {
+      return 1;
+    }
+  },
+  // This property is updated if the game is saved with a newer version of Civ 5
+  'gameVersion': {
+    'byteOffsetInSection': 8,
+    'length': null,
+    'sectionByBuild': {
+      '230620': 1
+    },
+    'type': 'string',
+    // Game build is a later property and not yet defined, so the section will need to be determined without it
+    getSection: function getSection(saveGameVersion) {
+      if (saveGameVersion >= 7) {
+        return 1;
+      } else {
+        return null;
+      }
+    }
+  },
+  // This property is updated if the game is saved with a newer version of Civ 5. The build of Civ 5 that was originally
+  // used when the save file was created is stored later, after gameOptionsMap.
+  'gameBuild': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '230620': 1
+    },
+    'type': 'string',
+    // Game build is not yet defined, so the section will need to be determined without it
+    getSection: function getSection(saveGameVersion) {
+      if (saveGameVersion >= 7) {
+        return 1;
+      } else {
+        return null;
+      }
+    }
+  },
+  'currentTurn': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'int'
+  },
+  // This property exists in all versions but only seems to gain significance around build 230620
+  'gameMode': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'int',
+    'values': ['Single player', 'Multiplayer', 'Hotseat']
+  },
+  'player1Civilization': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string'
+  },
+  'difficulty': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string'
+  },
+  'startingEra': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string'
+  },
+  'currentEra': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string'
+  },
+  'gamePace': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string'
+  },
+  'mapSize': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string'
+  },
+  // The map file appears multiple times; I have no idea why (see section19Map)
+  'mapFile': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'string'
+  },
+  'enabledDLC': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'dlcStringArray'
+  },
+  // Players after the first player marked as none seem to be superfluous
+  'playerStatuses': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    'sectionByBuild': {
+      '98650': 4
+    },
+    'type': 'intArray',
+    'values': ['', 'AI', 'Dead', 'Human', 'None']
+  },
+  // Starting with build 310700 this is a list of strings. Before that I'm not sure if it's a list of bytes or not there
+  // at all
+  'playerCivilizations': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    'sectionByBuild': {
+      '310700': 8
+    },
+    'type': 'stringArray'
+  },
+  // This is rare but seems to contain the full path to the save file, e.g.
+  // C:\Users\Username\Documents\My Games\Sid Meier's Civilization 5\Saves\multi\auto\AutoSave_0310 AD-2030.Civ5Save
+  'section19SkipSavePath': {
+    'byteOffsetInSection': 260,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'string'
+  },
+  // This appears to contain the current OS username
+  'section19SkipUsername': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'string'
+  },
+  'section19Skip1': {
+    'byteOffsetInSection': null,
+    'length': 7,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'bytes'
+  },
+  'section19Map': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'string'
+  },
+  'section19Skip2': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'bytes'
+  },
+  // https://gaming.stackexchange.com/a/273907/154341
+  'maxTurns': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'int'
+  },
+  // This seems to be the second place in the file with player names
+  'playerNames2': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    'sectionByBuild': {
+      '98650': 21,
+      '262623': 22,
+      '395070': 23
+    },
+    'type': 'stringArray'
+  },
+  'section23Skip1': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 21,
+      '262623': 22,
+      '395070': 23
+    },
+    'type': 'int'
+  },
+  // https://steamcommunity.com/app/8930/discussions/0/864973761026018000/#c619568192863618582
+  'turnTimerLength': {
+    'byteOffsetInSection': null,
+    'length': 4,
+    'sectionByBuild': {
+      '98650': 21,
+      '262623': 22,
+      '395070': 23
+    },
+    'type': 'int'
+  },
+  'playerColours': {
+    'byteOffsetInSection': 4,
+    // Length is number of items, not bytes
+    'length': 64,
+    // This is technically incorrect; before build 310700 this property exists, but it's a list of bytes instead of a
+    // list of strings, and there isn't much value in adding the extra complexity for old save games. For reference, the
+    // correct values are:
+    //  '98650': 23,
+    //  '262623': 24,
+    //  '395070': 25
+    'sectionByBuild': {
+      '310700': 24,
+      '395070': 25
+    },
+    'type': 'stringArray'
+  },
+  // https://github.com/Canardlaquay/Civ5SavePrivate
+  'privateGame': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    // As with playerColours, this is technically incorrect, but there isn't much value in implementing this for older
+    // games because 1. it would require implementing playerColours and 2. it's only relevant for multiplayer games,
+    // however logic for identifying multiplayer games before build 230620 hasn't been implemented (see gameMode)
+    'sectionByBuild': {
+      '310700': 24,
+      '395070': 25
+    },
+    'type': 'bool'
+  },
+  'section29Timer1': {
+    'byteOffsetInSection': 269,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'string'
+  },
+  'section29Skip1': {
+    'byteOffsetInSection': null,
+    'length': 12,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bytes'
+  },
+  'section29TurnTimer': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'string'
+  },
+  'section29TxtKeyTurnTimer': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'string'
+  },
+  'section29Timer2': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'string'
+  },
+  'section29Skip2': {
+    'byteOffsetInSection': null,
+    'length': 25,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bytes'
+  },
+  // https://gaming.stackexchange.com/a/273907/154341
+  'timeVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bool'
+  },
+  // https://gaming.stackexchange.com/a/273907/154341
+  'scienceVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bool'
+  },
+  // https://gaming.stackexchange.com/a/273907/154341
+  'dominationVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bool'
+  },
+  // https://gaming.stackexchange.com/a/273907/154341
+  'culturalVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bool'
+  },
+  // https://gaming.stackexchange.com/a/273907/154341
+  'diplomaticVictory': {
+    'byteOffsetInSection': null,
+    'length': 1,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bool'
+  },
+  // This section is 76 bytes long if either expansion pack is installed. Otherwise it's 72 bytes long.
+  'section30Skip1': {
+    'byteOffsetInSection': 4,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'bytes',
+    getLength: function getLength(enabledDLC) {
+      if (enabledDLC.includes('Expansion - Gods and Kings') || enabledDLC.includes('Expansion - Brave New World')) {
+        return 76;
+      } else {
+        return 72;
+      }
+    }
+  },
+  'section30MapSize1': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'string'
+  },
+  'section30TxtKeyMapHelp': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'string'
+  },
+  'section30Skip2': {
+    'byteOffsetInSection': null,
+    'length': 8,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'bytes'
+  },
+  'section30MapSize2': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'string'
+  },
+  'section30TxtKeyMapSize': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'string'
+  },
+  'section30MapSize3': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'string'
+  },
+  // This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed.
+  // Otherwise it's 72 bytes long.
+  'section30Skip3': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'bytes',
+    getLength: function getLength(enabledDLC) {
+      if (enabledDLC.includes('Expansion - Brave New World')) {
+        return 80;
+      } else if (enabledDLC.includes('Expansion - Gods and Kings')) {
+        return 76;
+      } else {
+        return 72;
+      }
+    }
+  },
+  // This is where a large chunk of game options are stored
+  // (http://civilization.wikia.com/wiki/Module:Data/Civ5/BNW/GameOptions)
+  'gameOptionsMap': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 28,
+      '262623': 29,
+      '395070': 30
+    },
+    'type': 'stringToBoolMap'
+  }
 };
 
 /***/ }),

@@ -1,11 +1,11 @@
 {
   "coverage": "100%",
-  "expectCount": 157,
-  "actualCount": 157,
+  "expectCount": 158,
+  "actualCount": 158,
   "files": {
     "src/Civ5Save.js": {
-      "expectCount": 97,
-      "actualCount": 97,
+      "expectCount": 98,
+      "actualCount": 98,
       "undocumentLines": []
     },
     "src/Civ5SaveBoolProperty.js": {

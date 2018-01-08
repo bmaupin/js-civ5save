@@ -307,13 +307,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#alwayspeace",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-alwaysPeace",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-alwaysPeace",
     "src/Civ5Save.js~Civ5Save#alwaysPeace",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#alwayspeace",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-alwaysPeace",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-alwaysPeace",
     "src/Civ5Save.js~Civ5Save#alwaysPeace",
     "member"
   ],
@@ -349,13 +349,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#culturalvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-culturalVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-culturalVictory",
     "src/Civ5Save.js~Civ5Save#culturalVictory",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#culturalvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-culturalVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-culturalVictory",
     "src/Civ5Save.js~Civ5Save#culturalVictory",
     "member"
   ],
@@ -379,13 +379,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#diplomaticvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-diplomaticVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-diplomaticVictory",
     "src/Civ5Save.js~Civ5Save#diplomaticVictory",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#diplomaticvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-diplomaticVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-diplomaticVictory",
     "src/Civ5Save.js~Civ5Save#diplomaticVictory",
     "member"
   ],
@@ -469,25 +469,25 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#newrandomseed",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-newRandomSeed",
-    "src/Civ5Save.js~Civ5Save#newRandomSeed",
-    "member"
-  ],
-  [
-    "src/civ5save.js~civ5save#newrandomseed",
     "class/src/Civ5Save.js~Civ5Save.html#instance-set-newRandomSeed",
     "src/Civ5Save.js~Civ5Save#newRandomSeed",
     "member"
   ],
   [
-    "src/civ5save.js~civ5save#nobarbarians",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noBarbarians",
-    "src/Civ5Save.js~Civ5Save#noBarbarians",
+    "src/civ5save.js~civ5save#newrandomseed",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-newRandomSeed",
+    "src/Civ5Save.js~Civ5Save#newRandomSeed",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#nobarbarians",
     "class/src/Civ5Save.js~Civ5Save.html#instance-set-noBarbarians",
+    "src/Civ5Save.js~Civ5Save#noBarbarians",
+    "member"
+  ],
+  [
+    "src/civ5save.js~civ5save#nobarbarians",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noBarbarians",
     "src/Civ5Save.js~Civ5Save#noBarbarians",
     "member"
   ],
@@ -505,13 +505,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#nocityrazing",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noCityRazing",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noCityRazing",
     "src/Civ5Save.js~Civ5Save#noCityRazing",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#nocityrazing",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noCityRazing",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noCityRazing",
     "src/Civ5Save.js~Civ5Save#noCityRazing",
     "member"
   ],
@@ -529,13 +529,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#noespionage",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noEspionage",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noEspionage",
     "src/Civ5Save.js~Civ5Save#noEspionage",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#noespionage",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noEspionage",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noEspionage",
     "src/Civ5Save.js~Civ5Save#noEspionage",
     "member"
   ],
@@ -565,13 +565,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#noreligion",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noReligion",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noReligion",
     "src/Civ5Save.js~Civ5Save#noReligion",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#noreligion",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noReligion",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noReligion",
     "src/Civ5Save.js~Civ5Save#noReligion",
     "member"
   ],
@@ -601,13 +601,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#onecitychallenge",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-oneCityChallenge",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-oneCityChallenge",
     "src/Civ5Save.js~Civ5Save#oneCityChallenge",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#onecitychallenge",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-oneCityChallenge",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-oneCityChallenge",
     "src/Civ5Save.js~Civ5Save#oneCityChallenge",
     "member"
   ],
@@ -631,13 +631,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#policysaving",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-policySaving",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-policySaving",
     "src/Civ5Save.js~Civ5Save#policySaving",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#policysaving",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-policySaving",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-policySaving",
     "src/Civ5Save.js~Civ5Save#policySaving",
     "member"
   ],
@@ -667,13 +667,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#ragingbarbarians",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-ragingBarbarians",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-ragingBarbarians",
     "src/Civ5Save.js~Civ5Save#ragingBarbarians",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#ragingbarbarians",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-ragingBarbarians",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-ragingBarbarians",
     "src/Civ5Save.js~Civ5Save#ragingBarbarians",
     "member"
   ],
@@ -727,20 +727,14 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#turnmode",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnMode",
-    "src/Civ5Save.js~Civ5Save#turnMode",
-    "member"
-  ],
-  [
-    "src/civ5save.js~civ5save#turnmode",
     "class/src/Civ5Save.js~Civ5Save.html#instance-get-turnMode",
     "src/Civ5Save.js~Civ5Save#turnMode",
     "member"
   ],
   [
-    "src/civ5save.js~civ5save#turntimerenabled",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnTimerEnabled",
-    "src/Civ5Save.js~Civ5Save#turnTimerEnabled",
+    "src/civ5save.js~civ5save#turnmode",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnMode",
+    "src/Civ5Save.js~Civ5Save#turnMode",
     "member"
   ],
   [
@@ -750,14 +744,20 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/civ5save.js~civ5save#turntimerlength",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnTimerLength",
-    "src/Civ5Save.js~Civ5Save#turnTimerLength",
+    "src/civ5save.js~civ5save#turntimerenabled",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnTimerEnabled",
+    "src/Civ5Save.js~Civ5Save#turnTimerEnabled",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#turntimerlength",
     "class/src/Civ5Save.js~Civ5Save.html#instance-get-turnTimerLength",
+    "src/Civ5Save.js~Civ5Save#turnTimerLength",
+    "member"
+  ],
+  [
+    "src/civ5save.js~civ5save#turntimerlength",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnTimerLength",
     "src/Civ5Save.js~Civ5Save#turnTimerLength",
     "member"
   ],
@@ -801,6 +801,12 @@ window.esdocSearchIndex = [
     "src/civ5saveproperty.js",
     "file/src/Civ5SaveProperty.js.html",
     "src/Civ5SaveProperty.js",
+    "file"
+  ],
+  [
+    "src/civ5savepropertydefinitions.js",
+    "file/src/Civ5SavePropertyDefinitions.js.html",
+    "src/Civ5SavePropertyDefinitions.js",
     "file"
   ],
   [
