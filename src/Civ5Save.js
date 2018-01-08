@@ -292,6 +292,9 @@ class Civ5Save {
    */
   _setGameBuild(gameBuildProperty) {
     if (typeof gameBuildProperty !== 'undefined') {
+      /**
+       * @private
+       */
       this._gameBuild = gameBuildProperty.getValue(this._saveData);
     } else {
       this._gameBuild = this._getGameBuild();

@@ -7,7 +7,7 @@ export default {
     },
     'type': 'string',
     // Game build is a later property and not yet defined, so the section will need to be determined without it
-    getSection(saveGameVersion) {
+    getSection() {
       return 1;
     }
   },
@@ -19,7 +19,7 @@ export default {
     },
     'type': 'int',
     // Game build is a later property and not yet defined, so the section will need to be determined without it
-    getSection(saveGameVersion) {
+    getSection() {
       return 1;
     }
   },
