@@ -10,9 +10,6 @@ module.exports = {
     'parserOptions': {
         'sourceType': 'module'
     },
-    'plugins': [
-        'json'
-    ],
     'rules': {
         'indent': [
             'error',
