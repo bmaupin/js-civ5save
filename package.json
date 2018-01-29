@@ -66,7 +66,7 @@
   },
   "scripts": {
     "build": "webpack && NODE_ENV=production webpack && esdoc",
-    "lint": "eslint src/*",
+    "lint": "eslint src/* --ext .js --ext .json",
     "test": "jest --coverage"
   },
   "version": "0.2.0"
