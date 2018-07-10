@@ -173,10 +173,31 @@ export default {
     },
     'type': 'stringArray'
   },
+  // This seems to be very rare (https://github.com/bmaupin/civ5save-editor/issues/6)
+  'section19SkipPlayer1Leader': {
+    'byteOffsetInSection': 4,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'string'
+  },
+  'section19Skip1': {
+    'byteOffsetInSection': null,
+    'length': 252,
+    'sectionByBuild': {
+      '98650': 17,
+      '262623': 18,
+      '395070': 19
+    },
+    'type': 'bytes'
+  },
   // This is rare but seems to contain the full path to the save file, e.g.
   // C:\Users\Username\Documents\My Games\Sid Meier's Civilization 5\Saves\multi\auto\AutoSave_0310 AD-2030.Civ5Save
   'section19SkipSavePath': {
-    'byteOffsetInSection': 260,
+    'byteOffsetInSection': null,
     'length': null,
     'sectionByBuild': {
       '98650': 17,
@@ -196,7 +217,7 @@ export default {
     },
     'type': 'string'
   },
-  'section19Skip1': {
+  'section19Skip2': {
     'byteOffsetInSection': null,
     'length': 7,
     'sectionByBuild': {
@@ -216,7 +237,7 @@ export default {
     },
     'type': 'string'
   },
-  'section19Skip2': {
+  'section19Skip3': {
     'byteOffsetInSection': null,
     'length': 4,
     'sectionByBuild': {
