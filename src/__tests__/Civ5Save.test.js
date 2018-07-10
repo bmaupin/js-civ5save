@@ -1048,17 +1048,22 @@ test('Open broken save game', async () => {
 
 // https://github.com/bmaupin/civ5save-editor/issues/3
 test('Test issue 3 (section19SkipSavePath)', async () => {
-  const TEST_SAVEGAME_ISSUE3 = path.join(__dirname, 'resources', 'issue3.Civ5Save');
-  let fileBlob = await getFileBlob(TEST_SAVEGAME_ISSUE3);
+  let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue3.Civ5Save'));
   let savegame = await Civ5Save.fromFile(fileBlob);
   expect(savegame.maxTurns).toBe(330);
 });
 
 // https://github.com/bmaupin/civ5save-editor/issues/4
 test('Test issue 4 (gameBuild)', async () => {
-  const TEST_SAVEGAME_ISSUE4 = path.join(__dirname, 'resources', 'issue4.Civ5Save');
-  let fileBlob = await getFileBlob(TEST_SAVEGAME_ISSUE4);
+  let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue4.Civ5Save'));
   let savegame = await Civ5Save.fromFile(fileBlob);
   expect(savegame.gameBuild).toBe('403694');
   expect(savegame.maxTurns).toBe(500);
+});
+
+// https://github.com/bmaupin/civ5save-editor/issues/6
+test('Test issue 6 ', async () => {
+  let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue6.Civ5Save'));
+  let savegame = await Civ5Save.fromFile(fileBlob);
+  expect(savegame.maxTurns).toBe(0);
 });
