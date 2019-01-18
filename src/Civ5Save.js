@@ -621,7 +621,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set alwaysPeace(newValue) {
-    this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
+    this._setGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
   }
 
   /**
@@ -638,7 +638,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set alwaysWar(newValue) {
-    this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
+    this._setGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
   }
 
   /**
@@ -655,7 +655,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set completeKills(newValue) {
-    this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
+    this._setGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
   }
 
   /**
@@ -672,7 +672,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set lockMods(newValue) {
-    this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);
+    this._setGameOption('GAMEOPTION_LOCK_MODS', newValue);
   }
 
   /**
@@ -689,7 +689,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set newRandomSeed(newValue) {
-    this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
+    this._setGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
   }
 
   /**
@@ -706,7 +706,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noBarbarians(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
+    this._setGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
   }
 
   /**
@@ -723,7 +723,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noChangingWarPeace(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
+    this._setGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
   }
 
   /**
@@ -740,7 +740,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noCityRazing(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
+    this._setGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
   }
 
   /**
@@ -757,7 +757,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noCultureOverviewUI(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
+    this._setGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
   }
 
   /**
@@ -774,7 +774,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noEspionage(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
+    this._setGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
   }
 
   /**
@@ -791,7 +791,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noHappiness(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
+    this._setGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
   }
 
   /**
@@ -808,7 +808,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noPolicies(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);
+    this._setGameOption('GAMEOPTION_NO_POLICIES', newValue);
   }
 
   /**
@@ -825,7 +825,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noReligion(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);
+    this._setGameOption('GAMEOPTION_NO_RELIGION', newValue);
   }
 
   /**
@@ -842,7 +842,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noScience(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);
+    this._setGameOption('GAMEOPTION_NO_SCIENCE', newValue);
   }
 
   /**
@@ -859,7 +859,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set noWorldCongress(newValue) {
-    this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);
+    this._setGameOption('GAMEOPTION_NO_LEAGUES', newValue);
   }
 
   /**
@@ -876,7 +876,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set oneCityChallenge(newValue) {
-    this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
+    this._setGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
   }
 
   /**
@@ -895,7 +895,7 @@ class Civ5Save {
    * @see https://github.com/Bownairo/Civ5SaveEditor
    */
   set pitboss(newValue) {
-    this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
+    this._setGameOption('GAMEOPTION_PITBOSS', newValue);
   }
 
   /**
@@ -912,7 +912,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set policySaving(newValue) {
-    this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);
+    this._setGameOption('GAMEOPTION_POLICY_SAVING', newValue);
   }
 
   /**
@@ -929,7 +929,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set promotionSaving(newValue) {
-    this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
+    this._setGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
   }
 
   /**
@@ -946,7 +946,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set ragingBarbarians(newValue) {
-    this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
+    this._setGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
   }
 
   /**
@@ -963,7 +963,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set randomPersonalities(newValue) {
-    this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
+    this._setGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
   }
 
   /**
@@ -980,7 +980,7 @@ class Civ5Save {
    * @type {boolean}
    */
   set turnTimerEnabled(newValue) {
-    this._setNewGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);
+    this._setGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);
   }
 
   /**
@@ -1009,14 +1009,14 @@ class Civ5Save {
    */
   set turnMode(newValue) {
     if (newValue === Civ5Save.TURN_MODES.HYBRID) {
-      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', true);
-      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
+      this._setGameOption('GAMEOPTION_DYNAMIC_TURNS', true);
+      this._setGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
     } else if (newValue === Civ5Save.TURN_MODES.SIMULTANEOUS) {
-      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
-      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', true);
+      this._setGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
+      this._setGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', true);
     } else if (newValue === Civ5Save.TURN_MODES.SEQUENTIAL) {
-      this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
-      this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
+      this._setGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
+      this._setGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
     }
   }
 
@@ -1084,8 +1084,8 @@ class Civ5Save {
   /**
    * @private
    */
-  _setNewGameOption(newGameOptionKey, newGameOptionValue) {
-    let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
+  _setGameOption(gameOptionKey, gameOptionNewValue) {
+    let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, gameOptionKey, gameOptionNewValue);
     if (!this._isNullOrUndefined(newSaveData)) {
       this._saveData = newSaveData;
     }
