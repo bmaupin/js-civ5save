@@ -308,6 +308,7 @@ class Civ5Save {
    * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply
    * the spot is there but empty).
    * @type {string|undefined}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get gameVersion() {
     return this._getPropertyIfDefined('gameVersion');
@@ -316,6 +317,7 @@ class Civ5Save {
   /**
    * Current turn.
    * @type {number}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get currentTurn() {
     return this._getPropertyIfDefined('currentTurn');
@@ -338,6 +340,7 @@ class Civ5Save {
   /**
    * Game difficulty.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get difficulty() {
     return this._getBeautifiedPropertyIfDefined('difficulty');
@@ -346,6 +349,7 @@ class Civ5Save {
   /**
    * Starting era.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get startingEra() {
     return this._getBeautifiedPropertyIfDefined('startingEra');
@@ -354,6 +358,7 @@ class Civ5Save {
   /**
    * Current era.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get currentEra() {
     return this._getBeautifiedPropertyIfDefined('currentEra');
@@ -362,6 +367,7 @@ class Civ5Save {
   /**
    * Game pace.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get gamePace() {
     return this._getBeautifiedPropertyIfDefined('gamePace');
@@ -370,6 +376,7 @@ class Civ5Save {
   /**
    * Map size.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get mapSize() {
     return this._getBeautifiedPropertyIfDefined('mapSize');
@@ -378,6 +385,7 @@ class Civ5Save {
   /**
    * Map file.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get mapFile() {
     let mapFileValue = this._getPropertyIfDefined('mapFile');
@@ -441,6 +449,7 @@ class Civ5Save {
   /**
    * Max turns.
    * @type {number}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get maxTurns() {
     return this._getPropertyIfDefined('maxTurns');
@@ -458,6 +467,7 @@ class Civ5Save {
    * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.
    *     Otherwise, it is in minutes.
    * @type {number}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get turnTimerLength() {
     return this._getPropertyIfDefined('turnTimerLength');
@@ -478,6 +488,7 @@ class Civ5Save {
    * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn't
    * implemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get privateGame() {
     return this._getPropertyIfDefined('privateGame');
@@ -494,6 +505,7 @@ class Civ5Save {
   /**
    * Time victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get timeVictory() {
     return this._getPropertyIfDefined('timeVictory');
@@ -510,6 +522,7 @@ class Civ5Save {
   /**
    * Science victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get scienceVictory() {
     return this._getPropertyIfDefined('scienceVictory');
@@ -526,6 +539,7 @@ class Civ5Save {
   /**
    * Domination victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get dominationVictory() {
     return this._getPropertyIfDefined('dominationVictory');
@@ -542,6 +556,7 @@ class Civ5Save {
   /**
    * Cultural victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get culturalVictory() {
     return this._getPropertyIfDefined('culturalVictory');
@@ -558,6 +573,7 @@ class Civ5Save {
   /**
    * Diplomatic victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get diplomaticVictory() {
     return this._getPropertyIfDefined('diplomaticVictory');
@@ -966,7 +982,11 @@ class Civ5Save {
    */
   _getPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
-      return this._properties[propertyName].getValue(this._saveData);
+      try {
+        return this._properties[propertyName].getValue(this._saveData);
+      } catch (e) {
+        throw new ParseError(`Failure parsing save at property ${propertyName}`);
+      }
     }
   }
 
@@ -975,7 +995,11 @@ class Civ5Save {
    */
   _getBeautifiedPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
-      return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+      try {
+        return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+      } catch (e) {
+        throw new ParseError(`Failure parsing save at property ${propertyName}`);
+      }
     }
   }
 
