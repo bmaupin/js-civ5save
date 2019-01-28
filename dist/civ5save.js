@@ -159,8 +159,8 @@ module.exports = $export;
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var store      = __webpack_require__(38)('wks')
-  , uid        = __webpack_require__(27)
+var store      = __webpack_require__(39)('wks')
+  , uid        = __webpack_require__(29)
   , Symbol     = __webpack_require__(1).Symbol
   , USE_SYMBOL = typeof Symbol == 'function';
 
@@ -192,10 +192,10 @@ exports.default = function (instance, Constructor) {
 
 var anObject       = __webpack_require__(9)
   , IE8_DOM_DEFINE = __webpack_require__(56)
-  , toPrimitive    = __webpack_require__(41)
+  , toPrimitive    = __webpack_require__(42)
   , dP             = Object.defineProperty;
 
-exports.f = __webpack_require__(7) ? Object.defineProperty : function defineProperty(O, P, Attributes){
+exports.f = __webpack_require__(8) ? Object.defineProperty : function defineProperty(O, P, Attributes){
   anObject(O);
   P = toPrimitive(P, true);
   anObject(Attributes);
@@ -217,15 +217,6 @@ module.exports = function(it){
 
 /***/ }),
 /* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// Thank's IE8 for his funny defineProperty
-module.exports = !__webpack_require__(10)(function(){
-  return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
-});
-
-/***/ }),
-/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -256,6 +247,15 @@ exports.default = function () {
     return Constructor;
   };
 }();
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Thank's IE8 for his funny defineProperty
+module.exports = !__webpack_require__(10)(function(){
+  return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
+});
 
 /***/ }),
 /* 9 */
@@ -310,7 +310,7 @@ module.exports = function(fn, that, length){
 
 var dP         = __webpack_require__(5)
   , createDesc = __webpack_require__(22);
-module.exports = __webpack_require__(7) ? function(object, key, value){
+module.exports = __webpack_require__(8) ? function(object, key, value){
   return dP.f(object, key, createDesc(1, value));
 } : function(object, key, value){
   object[key] = value;
@@ -331,7 +331,7 @@ module.exports = function(it, key){
 /***/ (function(module, exports, __webpack_require__) {
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = __webpack_require__(44)
+var IObject = __webpack_require__(45)
   , defined = __webpack_require__(20);
 module.exports = function(it){
   return IObject(defined(it));
@@ -382,7 +382,7 @@ exports.default = function (self, call) {
 
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
 var $keys       = __webpack_require__(59)
-  , enumBugKeys = __webpack_require__(45);
+  , enumBugKeys = __webpack_require__(46);
 
 module.exports = Object.keys || function keys(O){
   return $keys(O, enumBugKeys);
@@ -472,15 +472,15 @@ module.exports = {};
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
 var anObject    = __webpack_require__(9)
   , dPs         = __webpack_require__(86)
-  , enumBugKeys = __webpack_require__(45)
-  , IE_PROTO    = __webpack_require__(37)('IE_PROTO')
+  , enumBugKeys = __webpack_require__(46)
+  , IE_PROTO    = __webpack_require__(38)('IE_PROTO')
   , Empty       = function(){ /* empty */ }
   , PROTOTYPE   = 'prototype';
 
 // Create object with fake `null` prototype: use iframe Object with cleared prototype
 var createDict = function(){
   // Thrash, waste and sodomy: IE GC bug
-  var iframe = __webpack_require__(40)('iframe')
+  var iframe = __webpack_require__(41)('iframe')
     , i      = enumBugKeys.length
     , lt     = '<'
     , gt     = '>'
@@ -536,189 +536,6 @@ module.exports = function(it, tag, stat){
 
 /***/ }),
 /* 27 */
-/***/ (function(module, exports) {
-
-var id = 0
-  , px = Math.random();
-module.exports = function(key){
-  return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
-};
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $at  = __webpack_require__(84)(true);
-
-// 21.1.3.27 String.prototype[@@iterator]()
-__webpack_require__(43)(String, 'String', function(iterated){
-  this._t = String(iterated); // target
-  this._i = 0;                // next index
-// 21.1.5.2.1 %StringIteratorPrototype%.next()
-}, function(){
-  var O     = this._t
-    , index = this._i
-    , point;
-  if(index >= O.length)return {value: undefined, done: true};
-  point = $at(O, index);
-  this._i += point.length;
-  return {value: point, done: false};
-});
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports) {
-
-module.exports = true;
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 7.1.15 ToLength
-var toInteger = __webpack_require__(42)
-  , min       = Math.min;
-module.exports = function(it){
-  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
-};
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var META     = __webpack_require__(27)('meta')
-  , isObject = __webpack_require__(6)
-  , has      = __webpack_require__(13)
-  , setDesc  = __webpack_require__(5).f
-  , id       = 0;
-var isExtensible = Object.isExtensible || function(){
-  return true;
-};
-var FREEZE = !__webpack_require__(10)(function(){
-  return isExtensible(Object.preventExtensions({}));
-});
-var setMeta = function(it){
-  setDesc(it, META, {value: {
-    i: 'O' + ++id, // object ID
-    w: {}          // weak collections IDs
-  }});
-};
-var fastKey = function(it, create){
-  // return primitive with prefix
-  if(!isObject(it))return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-  if(!has(it, META)){
-    // can't set metadata to uncaught frozen object
-    if(!isExtensible(it))return 'F';
-    // not necessary to add metadata
-    if(!create)return 'E';
-    // add missing metadata
-    setMeta(it);
-  // return object ID
-  } return it[META].i;
-};
-var getWeak = function(it, create){
-  if(!has(it, META)){
-    // can't set metadata to uncaught frozen object
-    if(!isExtensible(it))return true;
-    // not necessary to add metadata
-    if(!create)return false;
-    // add missing metadata
-    setMeta(it);
-  // return hash weak collections IDs
-  } return it[META].w;
-};
-// add metadata on freeze-family methods calling
-var onFreeze = function(it){
-  if(FREEZE && meta.NEED && isExtensible(it) && !has(it, META))setMeta(it);
-  return it;
-};
-var meta = module.exports = {
-  KEY:      META,
-  NEED:     false,
-  fastKey:  fastKey,
-  getWeak:  getWeak,
-  onFreeze: onFreeze
-};
-
-/***/ }),
-/* 32 */
-/***/ (function(module, exports) {
-
-exports.f = {}.propertyIsEnumerable;
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var ctx         = __webpack_require__(11)
-  , call        = __webpack_require__(68)
-  , isArrayIter = __webpack_require__(69)
-  , anObject    = __webpack_require__(9)
-  , toLength    = __webpack_require__(30)
-  , getIterFn   = __webpack_require__(70)
-  , BREAK       = {}
-  , RETURN      = {};
-var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
-  var iterFn = ITERATOR ? function(){ return iterable; } : getIterFn(iterable)
-    , f      = ctx(fn, that, entries ? 2 : 1)
-    , index  = 0
-    , length, step, iterator, result;
-  if(typeof iterFn != 'function')throw TypeError(iterable + ' is not iterable!');
-  // fast case for arrays with default iterator
-  if(isArrayIter(iterFn))for(length = toLength(iterable.length); length > index; index++){
-    result = entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
-    if(result === BREAK || result === RETURN)return result;
-  } else for(iterator = iterFn.call(iterable); !(step = iterator.next()).done; ){
-    result = call(iterator, f, step.value, entries);
-    if(result === BREAK || result === RETURN)return result;
-  }
-};
-exports.BREAK  = BREAK;
-exports.RETURN = RETURN;
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _classCallCheck2 = __webpack_require__(4);
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore
- */
-var Civ5SaveProperty =
-/**
- * @ignore
- */
-function Civ5SaveProperty(byteOffset, length) {
-  (0, _classCallCheck3.default)(this, Civ5SaveProperty);
-
-  /**
-   * @ignore
-   */
-  this.byteOffset = byteOffset;
-  /**
-   * @ignore
-   */
-  this.length = length;
-};
-
-exports.default = Civ5SaveProperty;
-
-/***/ }),
-/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -736,7 +553,7 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -748,7 +565,7 @@ var _inherits2 = __webpack_require__(19);
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
-var _Civ5SaveProperty2 = __webpack_require__(34);
+var _Civ5SaveProperty2 = __webpack_require__(36);
 
 var _Civ5SaveProperty3 = _interopRequireDefault(_Civ5SaveProperty2);
 
@@ -799,7 +616,7 @@ var Civ5SaveIntProperty = function (_Civ5SaveProperty) {
 exports.default = Civ5SaveIntProperty;
 
 /***/ }),
-/* 36 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -817,7 +634,7 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -829,7 +646,7 @@ var _inherits2 = __webpack_require__(19);
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
-var _Civ5SaveProperty2 = __webpack_require__(34);
+var _Civ5SaveProperty2 = __webpack_require__(36);
 
 var _Civ5SaveProperty3 = _interopRequireDefault(_Civ5SaveProperty2);
 
@@ -895,17 +712,206 @@ var Civ5SaveStringProperty = function (_Civ5SaveProperty) {
 exports.default = Civ5SaveStringProperty;
 
 /***/ }),
+/* 29 */
+/***/ (function(module, exports) {
+
+var id = 0
+  , px = Math.random();
+module.exports = function(key){
+  return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
+};
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $at  = __webpack_require__(84)(true);
+
+// 21.1.3.27 String.prototype[@@iterator]()
+__webpack_require__(44)(String, 'String', function(iterated){
+  this._t = String(iterated); // target
+  this._i = 0;                // next index
+// 21.1.5.2.1 %StringIteratorPrototype%.next()
+}, function(){
+  var O     = this._t
+    , index = this._i
+    , point;
+  if(index >= O.length)return {value: undefined, done: true};
+  point = $at(O, index);
+  this._i += point.length;
+  return {value: point, done: false};
+});
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports) {
+
+module.exports = true;
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// 7.1.15 ToLength
+var toInteger = __webpack_require__(43)
+  , min       = Math.min;
+module.exports = function(it){
+  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
+};
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var META     = __webpack_require__(29)('meta')
+  , isObject = __webpack_require__(6)
+  , has      = __webpack_require__(13)
+  , setDesc  = __webpack_require__(5).f
+  , id       = 0;
+var isExtensible = Object.isExtensible || function(){
+  return true;
+};
+var FREEZE = !__webpack_require__(10)(function(){
+  return isExtensible(Object.preventExtensions({}));
+});
+var setMeta = function(it){
+  setDesc(it, META, {value: {
+    i: 'O' + ++id, // object ID
+    w: {}          // weak collections IDs
+  }});
+};
+var fastKey = function(it, create){
+  // return primitive with prefix
+  if(!isObject(it))return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+  if(!has(it, META)){
+    // can't set metadata to uncaught frozen object
+    if(!isExtensible(it))return 'F';
+    // not necessary to add metadata
+    if(!create)return 'E';
+    // add missing metadata
+    setMeta(it);
+  // return object ID
+  } return it[META].i;
+};
+var getWeak = function(it, create){
+  if(!has(it, META)){
+    // can't set metadata to uncaught frozen object
+    if(!isExtensible(it))return true;
+    // not necessary to add metadata
+    if(!create)return false;
+    // add missing metadata
+    setMeta(it);
+  // return hash weak collections IDs
+  } return it[META].w;
+};
+// add metadata on freeze-family methods calling
+var onFreeze = function(it){
+  if(FREEZE && meta.NEED && isExtensible(it) && !has(it, META))setMeta(it);
+  return it;
+};
+var meta = module.exports = {
+  KEY:      META,
+  NEED:     false,
+  fastKey:  fastKey,
+  getWeak:  getWeak,
+  onFreeze: onFreeze
+};
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports) {
+
+exports.f = {}.propertyIsEnumerable;
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var ctx         = __webpack_require__(11)
+  , call        = __webpack_require__(68)
+  , isArrayIter = __webpack_require__(69)
+  , anObject    = __webpack_require__(9)
+  , toLength    = __webpack_require__(32)
+  , getIterFn   = __webpack_require__(70)
+  , BREAK       = {}
+  , RETURN      = {};
+var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
+  var iterFn = ITERATOR ? function(){ return iterable; } : getIterFn(iterable)
+    , f      = ctx(fn, that, entries ? 2 : 1)
+    , index  = 0
+    , length, step, iterator, result;
+  if(typeof iterFn != 'function')throw TypeError(iterable + ' is not iterable!');
+  // fast case for arrays with default iterator
+  if(isArrayIter(iterFn))for(length = toLength(iterable.length); length > index; index++){
+    result = entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
+    if(result === BREAK || result === RETURN)return result;
+  } else for(iterator = iterFn.call(iterable); !(step = iterator.next()).done; ){
+    result = call(iterator, f, step.value, entries);
+    if(result === BREAK || result === RETURN)return result;
+  }
+};
+exports.BREAK  = BREAK;
+exports.RETURN = RETURN;
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _classCallCheck2 = __webpack_require__(4);
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore
+ */
+var Civ5SaveProperty =
+/**
+ * @ignore
+ */
+function Civ5SaveProperty(byteOffset, length) {
+  (0, _classCallCheck3.default)(this, Civ5SaveProperty);
+
+  /**
+   * @ignore
+   */
+  this.byteOffset = byteOffset;
+  /**
+   * @ignore
+   */
+  this.length = length;
+};
+
+exports.default = Civ5SaveProperty;
+
+/***/ }),
 /* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var shared = __webpack_require__(38)('keys')
-  , uid    = __webpack_require__(27);
+module.exports = { "default": __webpack_require__(148), __esModule: true };
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var shared = __webpack_require__(39)('keys')
+  , uid    = __webpack_require__(29);
 module.exports = function(key){
   return shared[key] || (shared[key] = uid(key));
 };
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(1)
@@ -916,7 +922,7 @@ module.exports = function(key){
 };
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // most Object methods by ES6 should accept primitives
@@ -931,7 +937,7 @@ module.exports = function(KEY, exec){
 };
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(6)
@@ -943,7 +949,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
@@ -960,7 +966,7 @@ module.exports = function(it, S){
 };
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports) {
 
 // 7.1.4 ToInteger
@@ -971,12 +977,12 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var LIBRARY        = __webpack_require__(29)
+var LIBRARY        = __webpack_require__(31)
   , $export        = __webpack_require__(2)
   , redefine       = __webpack_require__(58)
   , hide           = __webpack_require__(12)
@@ -1047,7 +1053,7 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
 };
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
@@ -1057,7 +1063,7 @@ module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
 };
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports) {
 
 // IE 8- don't enum bug keys
@@ -1066,7 +1072,7 @@ module.exports = (
 ).split(',');
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(89);
@@ -1084,19 +1090,19 @@ for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList'
 }
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports.f = __webpack_require__(3);
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global         = __webpack_require__(1)
   , core           = __webpack_require__(0)
-  , LIBRARY        = __webpack_require__(29)
-  , wksExt         = __webpack_require__(47)
+  , LIBRARY        = __webpack_require__(31)
+  , wksExt         = __webpack_require__(48)
   , defineProperty = __webpack_require__(5).f;
 module.exports = function(name){
   var $Symbol = core.Symbol || (core.Symbol = LIBRARY ? {} : global.Symbol || {});
@@ -1104,19 +1110,19 @@ module.exports = function(name){
 };
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports) {
 
 exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports) {
 
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
@@ -1144,7 +1150,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = function(it, Constructor, name, forbiddenField){
@@ -1154,7 +1160,7 @@ module.exports = function(it, Constructor, name, forbiddenField){
 };
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var hide = __webpack_require__(12);
@@ -1166,19 +1172,13 @@ module.exports = function(target, src, safe){
 };
 
 /***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(148), __esModule: true };
-
-/***/ }),
 /* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
 var has         = __webpack_require__(13)
   , toObject    = __webpack_require__(16)
-  , IE_PROTO    = __webpack_require__(37)('IE_PROTO')
+  , IE_PROTO    = __webpack_require__(38)('IE_PROTO')
   , ObjectProto = Object.prototype;
 
 module.exports = Object.getPrototypeOf || function(O){
@@ -1193,8 +1193,8 @@ module.exports = Object.getPrototypeOf || function(O){
 /* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = !__webpack_require__(7) && !__webpack_require__(10)(function(){
-  return Object.defineProperty(__webpack_require__(40)('div'), 'a', {get: function(){ return 7; }}).a != 7;
+module.exports = !__webpack_require__(8) && !__webpack_require__(10)(function(){
+  return Object.defineProperty(__webpack_require__(41)('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
 
 /***/ }),
@@ -1237,7 +1237,7 @@ module.exports = __webpack_require__(12);
 var has          = __webpack_require__(13)
   , toIObject    = __webpack_require__(14)
   , arrayIndexOf = __webpack_require__(87)(false)
-  , IE_PROTO     = __webpack_require__(37)('IE_PROTO');
+  , IE_PROTO     = __webpack_require__(38)('IE_PROTO');
 
 module.exports = function(object, names){
   var O      = toIObject(object)
@@ -1282,7 +1282,7 @@ module.exports = Array.isArray || function isArray(arg){
 
 // 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
 var $keys      = __webpack_require__(59)
-  , hiddenKeys = __webpack_require__(45).concat('length', 'prototype');
+  , hiddenKeys = __webpack_require__(46).concat('length', 'prototype');
 
 exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
   return $keys(O, hiddenKeys);
@@ -1292,15 +1292,15 @@ exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
 /* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var pIE            = __webpack_require__(32)
+var pIE            = __webpack_require__(34)
   , createDesc     = __webpack_require__(22)
   , toIObject      = __webpack_require__(14)
-  , toPrimitive    = __webpack_require__(41)
+  , toPrimitive    = __webpack_require__(42)
   , has            = __webpack_require__(13)
   , IE8_DOM_DEFINE = __webpack_require__(56)
   , gOPD           = Object.getOwnPropertyDescriptor;
 
-exports.f = __webpack_require__(7) ? gOPD : function getOwnPropertyDescriptor(O, P){
+exports.f = __webpack_require__(8) ? gOPD : function getOwnPropertyDescriptor(O, P){
   O = toIObject(O);
   P = toPrimitive(P, true);
   if(IE8_DOM_DEFINE)try {
@@ -1361,7 +1361,7 @@ module.exports = function(it){
 /* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var classof   = __webpack_require__(51)
+var classof   = __webpack_require__(52)
   , ITERATOR  = __webpack_require__(3)('iterator')
   , Iterators = __webpack_require__(23);
 module.exports = __webpack_require__(0).getIteratorMethod = function(it){
@@ -1377,7 +1377,7 @@ module.exports = __webpack_require__(0).getIteratorMethod = function(it){
 var ctx                = __webpack_require__(11)
   , invoke             = __webpack_require__(72)
   , html               = __webpack_require__(60)
-  , cel                = __webpack_require__(40)
+  , cel                = __webpack_require__(41)
   , global             = __webpack_require__(1)
   , process            = global.process
   , setTask            = global.setImmediate
@@ -1480,7 +1480,7 @@ module.exports = function(fn, args, that){
 var global      = __webpack_require__(1)
   , core        = __webpack_require__(0)
   , dP          = __webpack_require__(5)
-  , DESCRIPTORS = __webpack_require__(7)
+  , DESCRIPTORS = __webpack_require__(8)
   , SPECIES     = __webpack_require__(3)('species');
 
 module.exports = function(KEY){
@@ -1565,7 +1565,7 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -1656,7 +1656,7 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -1668,7 +1668,7 @@ var _inherits2 = __webpack_require__(19);
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
-var _Civ5SaveProperty2 = __webpack_require__(34);
+var _Civ5SaveProperty2 = __webpack_require__(36);
 
 var _Civ5SaveProperty3 = _interopRequireDefault(_Civ5SaveProperty2);
 
@@ -1774,7 +1774,7 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -1790,7 +1790,7 @@ var _Civ5SavePropertyFactory = __webpack_require__(146);
 
 var _Civ5SavePropertyFactory2 = _interopRequireDefault(_Civ5SavePropertyFactory);
 
-var _ExtendableError3 = __webpack_require__(153);
+var _ExtendableError3 = __webpack_require__(154);
 
 var _ExtendableError4 = _interopRequireDefault(_ExtendableError3);
 
@@ -2031,6 +2031,7 @@ var Civ5Save = function () {
      * the save file. Starting with build 230620, this will return the game build that was last used to save the save
      * file.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2095,6 +2096,7 @@ var Civ5Save = function () {
      * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply
      * the spot is there but empty).
      * @type {string|undefined}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2103,22 +2105,32 @@ var Civ5Save = function () {
 
     /**
      * @private
+     * @throws {ParseError} Error while parsing the save file.
      */
     value: function _getPropertyIfDefined(propertyName) {
       if (this._properties.hasOwnProperty(propertyName)) {
-        return this._properties[propertyName].getValue(this._saveData);
+        try {
+          return this._properties[propertyName].getValue(this._saveData);
+        } catch (e) {
+          throw new ParseError('Failure parsing save at property ' + propertyName);
+        }
       }
     }
 
     /**
      * @private
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: '_getBeautifiedPropertyIfDefined',
     value: function _getBeautifiedPropertyIfDefined(propertyName) {
       if (this._properties.hasOwnProperty(propertyName)) {
-        return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+        try {
+          return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+        } catch (e) {
+          throw new ParseError('Failure parsing save at property ' + propertyName);
+        }
       }
     }
 
@@ -2151,12 +2163,27 @@ var Civ5Save = function () {
 
     /**
      * @private
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
-    key: '_setNewGameOption',
-    value: function _setNewGameOption(newGameOptionKey, newGameOptionValue) {
-      var newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
+    key: '_getGameOption',
+    value: function _getGameOption(gameOptionKey) {
+      try {
+        return this._properties.gameOptionsMap.getValue(this._saveData, gameOptionKey);
+      } catch (e) {
+        throw new ParseError('Failure parsing save at property ' + gameOptionKey);
+      }
+    }
+
+    /**
+     * @private
+     */
+
+  }, {
+    key: '_setGameOption',
+    value: function _setGameOption(gameOptionKey, gameOptionNewValue) {
+      var newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, gameOptionKey, gameOptionNewValue);
       if (!this._isNullOrUndefined(newSaveData)) {
         this._saveData = newSaveData;
       }
@@ -2164,7 +2191,11 @@ var Civ5Save = function () {
   }, {
     key: 'gameBuild',
     get: function get() {
-      return this._gameBuild;
+      try {
+        return this._gameBuild;
+      } catch (e) {
+        throw new ParseError('Failure parsing save at property gameBuild');
+      }
     }
   }, {
     key: 'gameVersion',
@@ -2175,6 +2206,7 @@ var Civ5Save = function () {
     /**
      * Current turn.
      * @type {number}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2190,19 +2222,25 @@ var Civ5Save = function () {
      * of its value is unknown. `undefined` is used instead of `null` because `null` might incorrectly imply the value is
      * empty.
      * @type {string|undefined}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'gameMode',
     get: function get() {
       if (Number(this.gameBuild) >= 230620) {
-        return _Civ5SavePropertyDefinitions2.default.gameMode.values[this._properties.gameMode.getValue(this._saveData)];
+        try {
+          return _Civ5SavePropertyDefinitions2.default.gameMode.values[this._properties.gameMode.getValue(this._saveData)];
+        } catch (e) {
+          throw new ParseError('Failure parsing save at property gameMode');
+        }
       }
     }
 
     /**
      * Game difficulty.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2214,6 +2252,7 @@ var Civ5Save = function () {
     /**
      * Starting era.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2225,6 +2264,7 @@ var Civ5Save = function () {
     /**
      * Current era.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2236,6 +2276,7 @@ var Civ5Save = function () {
     /**
      * Game pace.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2247,6 +2288,7 @@ var Civ5Save = function () {
     /**
      * Map size.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2258,6 +2300,7 @@ var Civ5Save = function () {
     /**
      * Map file.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2272,13 +2315,36 @@ var Civ5Save = function () {
     /**
      * List of enabled DLC.
      * @type {Array}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'enabledDLC',
     get: function get() {
       if (this._properties.hasOwnProperty('enabledDLC')) {
-        return this._properties.enabledDLC.getArray();
+        try {
+          return this._properties.enabledDLC.getArray();
+        } catch (e) {
+          throw new ParseError('Failure parsing save at property enabledDLC');
+        }
+      }
+    }
+
+    /**
+     * List of enabled mods.
+     * @type {Array}
+     * @throws {ParseError} Error while parsing the save file.
+     */
+
+  }, {
+    key: 'enabledMods',
+    get: function get() {
+      if (this._properties.hasOwnProperty('enabledMods')) {
+        try {
+          return this._properties.enabledMods.getArray();
+        } catch (e) {
+          throw new ParseError('Failure parsing save at property enabledMods');
+        }
       }
     }
 
@@ -2290,6 +2356,7 @@ var Civ5Save = function () {
      * Status is one of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,
      *     `Civ5Save.PLAYER_STATUSES.NONE`.
      * @type {Array.<{civilization: string|undefined, status: number}>}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2315,7 +2382,11 @@ var Civ5Save = function () {
             }
             player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);
           } else if (i === 0 && this._properties.hasOwnProperty('player1Civilization')) {
-            player.civilization = this._beautifyPropertyValue(this._properties.player1Civilization.getValue(this._saveData));
+            try {
+              player.civilization = this._beautifyPropertyValue(this._properties.player1Civilization.getValue(this._saveData));
+            } catch (e) {
+              throw new ParseError('Failure parsing save at property players');
+            }
           }
 
           this._players.push(player);
@@ -2328,6 +2399,7 @@ var Civ5Save = function () {
     /**
      * Max turns.
      * @type {number}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2349,6 +2421,7 @@ var Civ5Save = function () {
      * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.
      *     Otherwise, it is in minutes.
      * @type {number}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2373,6 +2446,7 @@ var Civ5Save = function () {
      * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn't
      * implemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2393,6 +2467,7 @@ var Civ5Save = function () {
     /**
      * Time victory.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2413,6 +2488,7 @@ var Civ5Save = function () {
     /**
      * Science victory.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2433,6 +2509,7 @@ var Civ5Save = function () {
     /**
      * Domination victory.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2453,6 +2530,7 @@ var Civ5Save = function () {
     /**
      * Cultural victory.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2473,6 +2551,7 @@ var Civ5Save = function () {
     /**
      * Diplomatic victory.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
@@ -2493,12 +2572,13 @@ var Civ5Save = function () {
     /**
      * Always peace.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'alwaysPeace',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_PEACE');
+      return this._getGameOption('GAMEOPTION_ALWAYS_PEACE');
     }
 
     /**
@@ -2507,18 +2587,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
+      this._setGameOption('GAMEOPTION_ALWAYS_PEACE', newValue);
     }
 
     /**
      * Always war.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'alwaysWar',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ALWAYS_WAR');
+      return this._getGameOption('GAMEOPTION_ALWAYS_WAR');
     }
 
     /**
@@ -2527,18 +2608,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
+      this._setGameOption('GAMEOPTION_ALWAYS_WAR', newValue);
     }
 
     /**
      * Complete kills.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'completeKills',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_COMPLETE_KILLS');
+      return this._getGameOption('GAMEOPTION_COMPLETE_KILLS');
     }
 
     /**
@@ -2547,18 +2629,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
+      this._setGameOption('GAMEOPTION_COMPLETE_KILLS', newValue);
     }
 
     /**
      * Lock mods.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'lockMods',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_LOCK_MODS');
+      return this._getGameOption('GAMEOPTION_LOCK_MODS');
     }
 
     /**
@@ -2567,18 +2650,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_LOCK_MODS', newValue);
+      this._setGameOption('GAMEOPTION_LOCK_MODS', newValue);
     }
 
     /**
      * New random seed.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'newRandomSeed',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NEW_RANDOM_SEED');
+      return this._getGameOption('GAMEOPTION_NEW_RANDOM_SEED');
     }
 
     /**
@@ -2587,18 +2671,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
+      this._setGameOption('GAMEOPTION_NEW_RANDOM_SEED', newValue);
     }
 
     /**
      * No barbarians.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noBarbarians',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_BARBARIANS');
+      return this._getGameOption('GAMEOPTION_NO_BARBARIANS');
     }
 
     /**
@@ -2607,18 +2692,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
+      this._setGameOption('GAMEOPTION_NO_BARBARIANS', newValue);
     }
 
     /**
      * No changing war or peace.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noChangingWarPeace',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CHANGING_WAR_PEACE');
+      return this._getGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE');
     }
 
     /**
@@ -2627,18 +2713,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
+      this._setGameOption('GAMEOPTION_NO_CHANGING_WAR_PEACE', newValue);
     }
 
     /**
      * No city razing.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noCityRazing',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CITY_RAZING');
+      return this._getGameOption('GAMEOPTION_NO_CITY_RAZING');
     }
 
     /**
@@ -2647,18 +2734,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
+      this._setGameOption('GAMEOPTION_NO_CITY_RAZING', newValue);
     }
 
     /**
      * No cultural overview UI.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noCultureOverviewUI',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_CULTURE_OVERVIEW_UI');
+      return this._getGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI');
     }
 
     /**
@@ -2667,18 +2755,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
+      this._setGameOption('GAMEOPTION_NO_CULTURE_OVERVIEW_UI', newValue);
     }
 
     /**
      * No espionage.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noEspionage',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_ESPIONAGE');
+      return this._getGameOption('GAMEOPTION_NO_ESPIONAGE');
     }
 
     /**
@@ -2687,18 +2776,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
+      this._setGameOption('GAMEOPTION_NO_ESPIONAGE', newValue);
     }
 
     /**
      * No happiness.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noHappiness',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_HAPPINESS');
+      return this._getGameOption('GAMEOPTION_NO_HAPPINESS');
     }
 
     /**
@@ -2707,18 +2797,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
+      this._setGameOption('GAMEOPTION_NO_HAPPINESS', newValue);
     }
 
     /**
      * No policies.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noPolicies',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_POLICIES');
+      return this._getGameOption('GAMEOPTION_NO_POLICIES');
     }
 
     /**
@@ -2727,18 +2818,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_POLICIES', newValue);
+      this._setGameOption('GAMEOPTION_NO_POLICIES', newValue);
     }
 
     /**
      * No religion.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noReligion',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_RELIGION');
+      return this._getGameOption('GAMEOPTION_NO_RELIGION');
     }
 
     /**
@@ -2747,18 +2839,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_RELIGION', newValue);
+      this._setGameOption('GAMEOPTION_NO_RELIGION', newValue);
     }
 
     /**
      * No science.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noScience',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_SCIENCE');
+      return this._getGameOption('GAMEOPTION_NO_SCIENCE');
     }
 
     /**
@@ -2767,18 +2860,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_SCIENCE', newValue);
+      this._setGameOption('GAMEOPTION_NO_SCIENCE', newValue);
     }
 
     /**
      * No world congress.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'noWorldCongress',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_NO_LEAGUES');
+      return this._getGameOption('GAMEOPTION_NO_LEAGUES');
     }
 
     /**
@@ -2787,18 +2881,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_NO_LEAGUES', newValue);
+      this._setGameOption('GAMEOPTION_NO_LEAGUES', newValue);
     }
 
     /**
      * One-city challenge.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'oneCityChallenge',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_ONE_CITY_CHALLENGE');
+      return this._getGameOption('GAMEOPTION_ONE_CITY_CHALLENGE');
     }
 
     /**
@@ -2807,19 +2902,20 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
+      this._setGameOption('GAMEOPTION_ONE_CITY_CHALLENGE', newValue);
     }
 
     /**
      * Pitboss.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      * @see https://github.com/Bownairo/Civ5SaveEditor
      */
 
   }, {
     key: 'pitboss',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PITBOSS');
+      return this._getGameOption('GAMEOPTION_PITBOSS');
     }
 
     /**
@@ -2829,18 +2925,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_PITBOSS', newValue);
+      this._setGameOption('GAMEOPTION_PITBOSS', newValue);
     }
 
     /**
      * Policy saving.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'policySaving',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_POLICY_SAVING');
+      return this._getGameOption('GAMEOPTION_POLICY_SAVING');
     }
 
     /**
@@ -2849,18 +2946,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_POLICY_SAVING', newValue);
+      this._setGameOption('GAMEOPTION_POLICY_SAVING', newValue);
     }
 
     /**
      * Promotion saving.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'promotionSaving',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_PROMOTION_SAVING');
+      return this._getGameOption('GAMEOPTION_PROMOTION_SAVING');
     }
 
     /**
@@ -2869,18 +2967,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
+      this._setGameOption('GAMEOPTION_PROMOTION_SAVING', newValue);
     }
 
     /**
      * Raging barbarians.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'ragingBarbarians',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RAGING_BARBARIANS');
+      return this._getGameOption('GAMEOPTION_RAGING_BARBARIANS');
     }
 
     /**
@@ -2889,18 +2988,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
+      this._setGameOption('GAMEOPTION_RAGING_BARBARIANS', newValue);
     }
 
     /**
      * Random personalities.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'randomPersonalities',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_RANDOM_PERSONALITIES');
+      return this._getGameOption('GAMEOPTION_RANDOM_PERSONALITIES');
     }
 
     /**
@@ -2909,18 +3009,19 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
+      this._setGameOption('GAMEOPTION_RANDOM_PERSONALITIES', newValue);
     }
 
     /**
      * Turn timer enabled.
      * @type {boolean}
+     * @throws {ParseError} Error while parsing the save file.
      */
 
   }, {
     key: 'turnTimerEnabled',
     get: function get() {
-      return this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_END_TURN_TIMER_ENABLED');
+      return this._getGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED');
     }
 
     /**
@@ -2929,24 +3030,25 @@ var Civ5Save = function () {
      */
     ,
     set: function set(newValue) {
-      this._setNewGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);
+      this._setGameOption('GAMEOPTION_END_TURN_TIMER_ENABLED', newValue);
     }
 
     /**
      * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or
      *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.
      * @type {string}
+     * @throws {ParseError} Error while parsing the save file.
      * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
      */
 
   }, {
     key: 'turnMode',
     get: function get() {
-      if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === true) {
+      if (this._getGameOption('GAMEOPTION_DYNAMIC_TURNS') === true) {
         return Civ5Save.TURN_MODES.HYBRID;
-      } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === true) {
+      } else if (this._getGameOption('GAMEOPTION_SIMULTANEOUS_TURNS') === true) {
         return Civ5Save.TURN_MODES.SIMULTANEOUS;
-      } else if (this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_DYNAMIC_TURNS') === false && this._properties.gameOptionsMap.getValue(this._saveData, 'GAMEOPTION_SIMULTANEOUS_TURNS') === false) {
+      } else if (this._getGameOption('GAMEOPTION_DYNAMIC_TURNS') === false && this._getGameOption('GAMEOPTION_SIMULTANEOUS_TURNS') === false) {
         return Civ5Save.TURN_MODES.SEQUENTIAL;
       }
     }
@@ -2960,14 +3062,14 @@ var Civ5Save = function () {
     ,
     set: function set(newValue) {
       if (newValue === Civ5Save.TURN_MODES.HYBRID) {
-        this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', true);
-        this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
+        this._setGameOption('GAMEOPTION_DYNAMIC_TURNS', true);
+        this._setGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
       } else if (newValue === Civ5Save.TURN_MODES.SIMULTANEOUS) {
-        this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
-        this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', true);
+        this._setGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
+        this._setGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', true);
       } else if (newValue === Civ5Save.TURN_MODES.SEQUENTIAL) {
-        this._setNewGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
-        this._setNewGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
+        this._setGameOption('GAMEOPTION_DYNAMIC_TURNS', false);
+        this._setGameOption('GAMEOPTION_SIMULTANEOUS_TURNS', false);
       }
     }
   }], [{
@@ -3098,7 +3200,7 @@ module.exports = __webpack_require__(0).Object.getPrototypeOf;
 var toObject        = __webpack_require__(16)
   , $getPrototypeOf = __webpack_require__(55);
 
-__webpack_require__(39)('getPrototypeOf', function(){
+__webpack_require__(40)('getPrototypeOf', function(){
   return function getPrototypeOf(it){
     return $getPrototypeOf(toObject(it));
   };
@@ -3114,15 +3216,15 @@ module.exports = { "default": __webpack_require__(83), __esModule: true };
 /* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(28);
-__webpack_require__(46);
-module.exports = __webpack_require__(47).f('iterator');
+__webpack_require__(30);
+__webpack_require__(47);
+module.exports = __webpack_require__(48).f('iterator');
 
 /***/ }),
 /* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__(42)
+var toInteger = __webpack_require__(43)
   , defined   = __webpack_require__(20);
 // true  -> String#at
 // false -> String#codePointAt
@@ -3167,7 +3269,7 @@ var dP       = __webpack_require__(5)
   , anObject = __webpack_require__(9)
   , getKeys  = __webpack_require__(18);
 
-module.exports = __webpack_require__(7) ? Object.defineProperties : function defineProperties(O, Properties){
+module.exports = __webpack_require__(8) ? Object.defineProperties : function defineProperties(O, Properties){
   anObject(O);
   var keys   = getKeys(Properties)
     , length = keys.length
@@ -3184,7 +3286,7 @@ module.exports = __webpack_require__(7) ? Object.defineProperties : function def
 // false -> Array#indexOf
 // true  -> Array#includes
 var toIObject = __webpack_require__(14)
-  , toLength  = __webpack_require__(30)
+  , toLength  = __webpack_require__(32)
   , toIndex   = __webpack_require__(88);
 module.exports = function(IS_INCLUDES){
   return function($this, el, fromIndex){
@@ -3207,7 +3309,7 @@ module.exports = function(IS_INCLUDES){
 /* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__(42)
+var toInteger = __webpack_require__(43)
   , max       = Math.max
   , min       = Math.min;
 module.exports = function(index, length){
@@ -3230,7 +3332,7 @@ var addToUnscopables = __webpack_require__(90)
 // 22.1.3.13 Array.prototype.keys()
 // 22.1.3.29 Array.prototype.values()
 // 22.1.3.30 Array.prototype[@@iterator]()
-module.exports = __webpack_require__(43)(Array, 'Array', function(iterated, kind){
+module.exports = __webpack_require__(44)(Array, 'Array', function(iterated, kind){
   this._t = toIObject(iterated); // target
   this._i = 0;                   // next index
   this._k = kind;                // kind
@@ -3272,7 +3374,7 @@ module.exports = { "default": __webpack_require__(92), __esModule: true };
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(93);
-__webpack_require__(50);
+__webpack_require__(51);
 __webpack_require__(97);
 __webpack_require__(98);
 module.exports = __webpack_require__(0).Symbol;
@@ -3286,23 +3388,23 @@ module.exports = __webpack_require__(0).Symbol;
 // ECMAScript 6 symbols shim
 var global         = __webpack_require__(1)
   , has            = __webpack_require__(13)
-  , DESCRIPTORS    = __webpack_require__(7)
+  , DESCRIPTORS    = __webpack_require__(8)
   , $export        = __webpack_require__(2)
   , redefine       = __webpack_require__(58)
-  , META           = __webpack_require__(31).KEY
+  , META           = __webpack_require__(33).KEY
   , $fails         = __webpack_require__(10)
-  , shared         = __webpack_require__(38)
+  , shared         = __webpack_require__(39)
   , setToStringTag = __webpack_require__(26)
-  , uid            = __webpack_require__(27)
+  , uid            = __webpack_require__(29)
   , wks            = __webpack_require__(3)
-  , wksExt         = __webpack_require__(47)
-  , wksDefine      = __webpack_require__(48)
+  , wksExt         = __webpack_require__(48)
+  , wksDefine      = __webpack_require__(49)
   , keyOf          = __webpack_require__(94)
   , enumKeys       = __webpack_require__(95)
   , isArray        = __webpack_require__(62)
   , anObject       = __webpack_require__(9)
   , toIObject      = __webpack_require__(14)
-  , toPrimitive    = __webpack_require__(41)
+  , toPrimitive    = __webpack_require__(42)
   , createDesc     = __webpack_require__(22)
   , _create        = __webpack_require__(24)
   , gOPNExt        = __webpack_require__(96)
@@ -3432,10 +3534,10 @@ if(!USE_NATIVE){
   $GOPD.f = $getOwnPropertyDescriptor;
   $DP.f   = $defineProperty;
   __webpack_require__(63).f = gOPNExt.f = $getOwnPropertyNames;
-  __webpack_require__(32).f  = $propertyIsEnumerable;
-  __webpack_require__(49).f = $getOwnPropertySymbols;
+  __webpack_require__(34).f  = $propertyIsEnumerable;
+  __webpack_require__(50).f = $getOwnPropertySymbols;
 
-  if(DESCRIPTORS && !__webpack_require__(29)){
+  if(DESCRIPTORS && !__webpack_require__(31)){
     redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
   }
 
@@ -3539,8 +3641,8 @@ module.exports = function(object, el){
 
 // all enumerable object keys, includes symbols
 var getKeys = __webpack_require__(18)
-  , gOPS    = __webpack_require__(49)
-  , pIE     = __webpack_require__(32);
+  , gOPS    = __webpack_require__(50)
+  , pIE     = __webpack_require__(34);
 module.exports = function(it){
   var result     = getKeys(it)
     , getSymbols = gOPS.f;
@@ -3582,13 +3684,13 @@ module.exports.f = function getOwnPropertyNames(it){
 /* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(48)('asyncIterator');
+__webpack_require__(49)('asyncIterator');
 
 /***/ }),
 /* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(48)('observable');
+__webpack_require__(49)('observable');
 
 /***/ }),
 /* 99 */
@@ -3657,9 +3759,9 @@ $export($export.S, 'Object', {create: __webpack_require__(24)});
 /* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(50);
-__webpack_require__(28);
-__webpack_require__(46);
+__webpack_require__(51);
+__webpack_require__(30);
+__webpack_require__(47);
 __webpack_require__(105);
 module.exports = __webpack_require__(0).Promise;
 
@@ -3669,15 +3771,15 @@ module.exports = __webpack_require__(0).Promise;
 
 "use strict";
 
-var LIBRARY            = __webpack_require__(29)
+var LIBRARY            = __webpack_require__(31)
   , global             = __webpack_require__(1)
   , ctx                = __webpack_require__(11)
-  , classof            = __webpack_require__(51)
+  , classof            = __webpack_require__(52)
   , $export            = __webpack_require__(2)
   , isObject           = __webpack_require__(6)
   , aFunction          = __webpack_require__(21)
-  , anInstance         = __webpack_require__(52)
-  , forOf              = __webpack_require__(33)
+  , anInstance         = __webpack_require__(53)
+  , forOf              = __webpack_require__(35)
   , speciesConstructor = __webpack_require__(106)
   , task               = __webpack_require__(71).set
   , microtask          = __webpack_require__(107)()
@@ -3872,7 +3974,7 @@ if(!USE_NATIVE){
     this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
     this._n = false;          // <- notify
   };
-  Internal.prototype = __webpack_require__(53)($Promise.prototype, {
+  Internal.prototype = __webpack_require__(54)($Promise.prototype, {
     // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
     then: function then(onFulfilled, onRejected){
       var reaction    = newPromiseCapability(speciesConstructor(this, $Promise));
@@ -4967,7 +5069,7 @@ module.exports = __webpack_require__(0).Object.keys;
 var toObject = __webpack_require__(16)
   , $keys    = __webpack_require__(18);
 
-__webpack_require__(39)('keys', function(){
+__webpack_require__(40)('keys', function(){
   return function keys(it){
     return $keys(toObject(it));
   };
@@ -5003,10 +5105,10 @@ $export($export.S + $export.F, 'Object', {assign: __webpack_require__(123)});
 
 // 19.1.2.1 Object.assign(target, source, ...)
 var getKeys  = __webpack_require__(18)
-  , gOPS     = __webpack_require__(49)
-  , pIE      = __webpack_require__(32)
+  , gOPS     = __webpack_require__(50)
+  , pIE      = __webpack_require__(34)
   , toObject = __webpack_require__(16)
-  , IObject  = __webpack_require__(44)
+  , IObject  = __webpack_require__(45)
   , $assign  = Object.assign;
 
 // should work with symbols and should have deterministic property order (V8 bug)
@@ -5038,9 +5140,9 @@ module.exports = !$assign || __webpack_require__(10)(function(){
 /* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(50);
-__webpack_require__(28);
-__webpack_require__(46);
+__webpack_require__(51);
+__webpack_require__(30);
+__webpack_require__(47);
 __webpack_require__(125);
 __webpack_require__(131);
 module.exports = __webpack_require__(0).Map;
@@ -5076,16 +5178,16 @@ module.exports = __webpack_require__(127)('Map', function(get){
 
 var dP          = __webpack_require__(5).f
   , create      = __webpack_require__(24)
-  , redefineAll = __webpack_require__(53)
+  , redefineAll = __webpack_require__(54)
   , ctx         = __webpack_require__(11)
-  , anInstance  = __webpack_require__(52)
+  , anInstance  = __webpack_require__(53)
   , defined     = __webpack_require__(20)
-  , forOf       = __webpack_require__(33)
-  , $iterDefine = __webpack_require__(43)
+  , forOf       = __webpack_require__(35)
+  , $iterDefine = __webpack_require__(44)
   , step        = __webpack_require__(61)
   , setSpecies  = __webpack_require__(73)
-  , DESCRIPTORS = __webpack_require__(7)
-  , fastKey     = __webpack_require__(31).fastKey
+  , DESCRIPTORS = __webpack_require__(8)
+  , fastKey     = __webpack_require__(33).fastKey
   , SIZE        = DESCRIPTORS ? '_s' : 'size';
 
 var getEntry = function(that, key){
@@ -5224,17 +5326,17 @@ module.exports = {
 
 var global         = __webpack_require__(1)
   , $export        = __webpack_require__(2)
-  , meta           = __webpack_require__(31)
+  , meta           = __webpack_require__(33)
   , fails          = __webpack_require__(10)
   , hide           = __webpack_require__(12)
-  , redefineAll    = __webpack_require__(53)
-  , forOf          = __webpack_require__(33)
-  , anInstance     = __webpack_require__(52)
+  , redefineAll    = __webpack_require__(54)
+  , forOf          = __webpack_require__(35)
+  , anInstance     = __webpack_require__(53)
   , isObject       = __webpack_require__(6)
   , setToStringTag = __webpack_require__(26)
   , dP             = __webpack_require__(5).f
   , each           = __webpack_require__(128)(0)
-  , DESCRIPTORS    = __webpack_require__(7);
+  , DESCRIPTORS    = __webpack_require__(8);
 
 module.exports = function(NAME, wrapper, methods, common, IS_MAP, IS_WEAK){
   var Base  = global[NAME]
@@ -5293,9 +5395,9 @@ module.exports = function(NAME, wrapper, methods, common, IS_MAP, IS_WEAK){
 // 5 -> Array#find
 // 6 -> Array#findIndex
 var ctx      = __webpack_require__(11)
-  , IObject  = __webpack_require__(44)
+  , IObject  = __webpack_require__(45)
   , toObject = __webpack_require__(16)
-  , toLength = __webpack_require__(30)
+  , toLength = __webpack_require__(32)
   , asc      = __webpack_require__(129);
 module.exports = function(TYPE, $create){
   var IS_MAP        = TYPE == 1
@@ -5376,7 +5478,7 @@ $export($export.P + $export.R, 'Map', {toJSON: __webpack_require__(132)('Map')})
 /***/ (function(module, exports, __webpack_require__) {
 
 // https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var classof = __webpack_require__(51)
+var classof = __webpack_require__(52)
   , from    = __webpack_require__(133);
 module.exports = function(NAME){
   return function toJSON(){
@@ -5389,7 +5491,7 @@ module.exports = function(NAME){
 /* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var forOf = __webpack_require__(33);
+var forOf = __webpack_require__(35);
 
 module.exports = function(iter, ITERATOR){
   var result = [];
@@ -5420,7 +5522,7 @@ module.exports = function defineProperty(it, key, desc){
 
 var $export = __webpack_require__(2);
 // 19.1.2.4 / 15.2.3.6 Object.defineProperty(O, P, Attributes)
-$export($export.S + $export.F * !__webpack_require__(7), 'Object', {defineProperty: __webpack_require__(5).f});
+$export($export.S + $export.F * !__webpack_require__(8), 'Object', {defineProperty: __webpack_require__(5).f});
 
 /***/ }),
 /* 137 */
@@ -5432,7 +5534,7 @@ module.exports = { "default": __webpack_require__(138), __esModule: true };
 /* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(28);
+__webpack_require__(30);
 __webpack_require__(139);
 module.exports = __webpack_require__(0).Array.from;
 
@@ -5447,7 +5549,7 @@ var ctx            = __webpack_require__(11)
   , toObject       = __webpack_require__(16)
   , call           = __webpack_require__(68)
   , isArrayIter    = __webpack_require__(69)
-  , toLength       = __webpack_require__(30)
+  , toLength       = __webpack_require__(32)
   , createProperty = __webpack_require__(140)
   , getIterFn      = __webpack_require__(70);
 
@@ -5741,6 +5843,14 @@ exports.default = {
       '98650': 1
     },
     'type': 'dlcStringArray'
+  },
+  'enabledMods': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'modsStringArray'
   },
   // Players after the first player marked as none seem to be superfluous
   'playerStatuses': {
@@ -6154,7 +6264,7 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -6170,23 +6280,27 @@ var _Civ5SaveIntArray = __webpack_require__(150);
 
 var _Civ5SaveIntArray2 = _interopRequireDefault(_Civ5SaveIntArray);
 
-var _Civ5SaveIntProperty = __webpack_require__(35);
+var _Civ5SaveIntProperty = __webpack_require__(27);
 
 var _Civ5SaveIntProperty2 = _interopRequireDefault(_Civ5SaveIntProperty);
 
-var _Civ5SaveProperty = __webpack_require__(34);
+var _Civ5SaveModsStringArray = __webpack_require__(151);
+
+var _Civ5SaveModsStringArray2 = _interopRequireDefault(_Civ5SaveModsStringArray);
+
+var _Civ5SaveProperty = __webpack_require__(36);
 
 var _Civ5SaveProperty2 = _interopRequireDefault(_Civ5SaveProperty);
 
-var _Civ5SaveStringArray = __webpack_require__(151);
+var _Civ5SaveStringArray = __webpack_require__(152);
 
 var _Civ5SaveStringArray2 = _interopRequireDefault(_Civ5SaveStringArray);
 
-var _Civ5SaveStringProperty = __webpack_require__(36);
+var _Civ5SaveStringProperty = __webpack_require__(28);
 
 var _Civ5SaveStringProperty2 = _interopRequireDefault(_Civ5SaveStringProperty);
 
-var _Civ5SaveStringToBoolMap = __webpack_require__(152);
+var _Civ5SaveStringToBoolMap = __webpack_require__(153);
 
 var _Civ5SaveStringToBoolMap2 = _interopRequireDefault(_Civ5SaveStringToBoolMap);
 
@@ -6223,6 +6337,9 @@ var Civ5SavePropertyFactory = function () {
         case 'intArray':
           return new _Civ5SaveIntArray2.default(byteOffset, length, saveData);
 
+        case 'modsStringArray':
+          return new _Civ5SaveModsStringArray2.default(byteOffset, saveData);
+
         case 'string':
           return new _Civ5SaveStringProperty2.default(byteOffset, length, saveData);
 
@@ -6253,7 +6370,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _freeze = __webpack_require__(54);
+var _freeze = __webpack_require__(37);
 
 var _freeze2 = _interopRequireDefault(_freeze);
 
@@ -6261,15 +6378,15 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _Civ5SaveIntProperty = __webpack_require__(35);
+var _Civ5SaveIntProperty = __webpack_require__(27);
 
 var _Civ5SaveIntProperty2 = _interopRequireDefault(_Civ5SaveIntProperty);
 
-var _Civ5SaveStringProperty = __webpack_require__(36);
+var _Civ5SaveStringProperty = __webpack_require__(28);
 
 var _Civ5SaveStringProperty2 = _interopRequireDefault(_Civ5SaveStringProperty);
 
@@ -6358,9 +6475,9 @@ module.exports = __webpack_require__(0).Object.freeze;
 
 // 19.1.2.5 Object.freeze(O)
 var isObject = __webpack_require__(6)
-  , meta     = __webpack_require__(31).onFreeze;
+  , meta     = __webpack_require__(33).onFreeze;
 
-__webpack_require__(39)('freeze', function($freeze){
+__webpack_require__(40)('freeze', function($freeze){
   return function freeze(it){
     return $freeze && isObject(it) ? $freeze(meta(it)) : it;
   };
@@ -6377,7 +6494,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _freeze = __webpack_require__(54);
+var _freeze = __webpack_require__(37);
 
 var _freeze2 = _interopRequireDefault(_freeze);
 
@@ -6385,11 +6502,11 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _Civ5SaveIntProperty = __webpack_require__(35);
+var _Civ5SaveIntProperty = __webpack_require__(27);
 
 var _Civ5SaveIntProperty2 = _interopRequireDefault(_Civ5SaveIntProperty);
 
@@ -6455,7 +6572,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _freeze = __webpack_require__(54);
+var _freeze = __webpack_require__(37);
 
 var _freeze2 = _interopRequireDefault(_freeze);
 
@@ -6463,11 +6580,118 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _Civ5SaveStringProperty = __webpack_require__(36);
+var _Civ5SaveIntProperty = __webpack_require__(27);
+
+var _Civ5SaveIntProperty2 = _interopRequireDefault(_Civ5SaveIntProperty);
+
+var _Civ5SaveStringProperty = __webpack_require__(28);
+
+var _Civ5SaveStringProperty2 = _interopRequireDefault(_Civ5SaveStringProperty);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore
+ */
+var Civ5SaveModsStringArray = function () {
+  /**
+   * @ignore
+   */
+  function Civ5SaveModsStringArray(byteOffset, saveData) {
+    (0, _classCallCheck3.default)(this, Civ5SaveModsStringArray);
+
+    /**
+     * @ignore
+     */
+    this.byteOffset = byteOffset;
+    /**
+     * @ignore
+     */
+    this.length = 4;
+    /**
+     * @private
+     */
+    this._array = new Array();
+    /**
+     * @private
+     */
+    this._size = new _Civ5SaveIntProperty2.default(this.byteOffset, 4, saveData);
+
+    if (this._getSize(saveData) > 0) {
+      var currentByteOffset = this.byteOffset + 4;
+      for (var i = 0; i < this._getSize(saveData); i++) {
+        var modId = new _Civ5SaveStringProperty2.default(currentByteOffset, null, saveData);
+        currentByteOffset += modId.length;
+
+        // Not sure what these extra bytes represent
+        currentByteOffset += 4;
+
+        var modName = new _Civ5SaveStringProperty2.default(currentByteOffset, null, saveData);
+        currentByteOffset += modName.length;
+
+        this._array.push(modName.getValue(saveData));
+      }
+
+      this.length = currentByteOffset - this.byteOffset;
+    }
+
+    (0, _freeze2.default)(this._array);
+  }
+
+  /**
+   * @private
+   */
+
+
+  (0, _createClass3.default)(Civ5SaveModsStringArray, [{
+    key: '_getSize',
+    value: function _getSize(saveData) {
+      return this._size.getValue(saveData);
+    }
+
+    /**
+     * @ignore
+     */
+
+  }, {
+    key: 'getArray',
+    value: function getArray() {
+      return this._array;
+    }
+  }]);
+  return Civ5SaveModsStringArray;
+}();
+
+exports.default = Civ5SaveModsStringArray;
+
+/***/ }),
+/* 152 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _freeze = __webpack_require__(37);
+
+var _freeze2 = _interopRequireDefault(_freeze);
+
+var _classCallCheck2 = __webpack_require__(4);
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = __webpack_require__(7);
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _Civ5SaveStringProperty = __webpack_require__(28);
 
 var _Civ5SaveStringProperty2 = _interopRequireDefault(_Civ5SaveStringProperty);
 
@@ -6523,7 +6747,7 @@ var Civ5SaveStringArray = function () {
 exports.default = Civ5SaveStringArray;
 
 /***/ }),
-/* 152 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6541,7 +6765,7 @@ var _classCallCheck2 = __webpack_require__(4);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = __webpack_require__(8);
+var _createClass2 = __webpack_require__(7);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -6553,11 +6777,11 @@ var _Civ5SaveDataView = __webpack_require__(77);
 
 var _Civ5SaveDataView2 = _interopRequireDefault(_Civ5SaveDataView);
 
-var _Civ5SaveIntProperty = __webpack_require__(35);
+var _Civ5SaveIntProperty = __webpack_require__(27);
 
 var _Civ5SaveIntProperty2 = _interopRequireDefault(_Civ5SaveIntProperty);
 
-var _Civ5SaveStringProperty = __webpack_require__(36);
+var _Civ5SaveStringProperty = __webpack_require__(28);
 
 var _Civ5SaveStringProperty2 = _interopRequireDefault(_Civ5SaveStringProperty);
 
@@ -6748,7 +6972,7 @@ var Civ5SaveStringToBoolMap = function () {
 exports.default = Civ5SaveStringToBoolMap;
 
 /***/ }),
-/* 153 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

@@ -41,6 +41,7 @@
 import Civ5SaveDLCStringArray from &apos;./Civ5SaveDLCStringArray&apos;;
 import Civ5SaveIntArray from &apos;./Civ5SaveIntArray&apos;;
 import Civ5SaveIntProperty from &apos;./Civ5SaveIntProperty&apos;;
+import Civ5SaveModsStringArray from &apos;./Civ5SaveModsStringArray&apos;;
 import Civ5SaveProperty from &apos;./Civ5SaveProperty&apos;;
 import Civ5SaveStringArray from &apos;./Civ5SaveStringArray&apos;;
 import Civ5SaveStringProperty from &apos;./Civ5SaveStringProperty&apos;;
@@ -69,6 +70,9 @@ export default class Civ5SavePropertyFactory {
 
     case &apos;intArray&apos;:
       return new Civ5SaveIntArray(byteOffset, length, saveData);
+
+    case &apos;modsStringArray&apos;:
+      return new Civ5SaveModsStringArray(byteOffset, saveData);
 
     case &apos;string&apos;:
       return new Civ5SaveStringProperty(byteOffset, length, saveData);
