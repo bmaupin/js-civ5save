@@ -285,9 +285,14 @@ class Civ5Save {
    * the save file. Starting with build 230620, this will return the game build that was last used to save the save
    * file.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get gameBuild() {
-    return this._gameBuild;
+    try {
+      return this._gameBuild;
+    } catch (e) {
+      throw new ParseError(&apos;Failure parsing save at property gameBuild&apos;);
+    }
   }
 
   /**
@@ -347,6 +352,7 @@ class Civ5Save {
    * instead of `null` because older save files do not have a spot for this information (`null` might incorrectly imply
    * the spot is there but empty).
    * @type {string|undefined}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get gameVersion() {
     return this._getPropertyIfDefined(&apos;gameVersion&apos;);
@@ -355,6 +361,7 @@ class Civ5Save {
   /**
    * Current turn.
    * @type {number}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get currentTurn() {
     return this._getPropertyIfDefined(&apos;currentTurn&apos;);
@@ -367,16 +374,22 @@ class Civ5Save {
    * of its value is unknown. `undefined` is used instead of `null` because `null` might incorrectly imply the value is
    * empty.
    * @type {string|undefined}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get gameMode() {
     if (Number(this.gameBuild) &gt;= 230620) {
-      return Civ5SavePropertyDefinitions.gameMode.values[this._properties.gameMode.getValue(this._saveData)];
+      try {
+        return Civ5SavePropertyDefinitions.gameMode.values[this._properties.gameMode.getValue(this._saveData)];
+      } catch (e) {
+        throw new ParseError(&apos;Failure parsing save at property gameMode&apos;);
+      }
     }
   }
 
   /**
    * Game difficulty.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get difficulty() {
     return this._getBeautifiedPropertyIfDefined(&apos;difficulty&apos;);
@@ -385,6 +398,7 @@ class Civ5Save {
   /**
    * Starting era.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get startingEra() {
     return this._getBeautifiedPropertyIfDefined(&apos;startingEra&apos;);
@@ -393,6 +407,7 @@ class Civ5Save {
   /**
    * Current era.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get currentEra() {
     return this._getBeautifiedPropertyIfDefined(&apos;currentEra&apos;);
@@ -401,6 +416,7 @@ class Civ5Save {
   /**
    * Game pace.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get gamePace() {
     return this._getBeautifiedPropertyIfDefined(&apos;gamePace&apos;);
@@ -409,6 +425,7 @@ class Civ5Save {
   /**
    * Map size.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get mapSize() {
     return this._getBeautifiedPropertyIfDefined(&apos;mapSize&apos;);
@@ -417,6 +434,7 @@ class Civ5Save {
   /**
    * Map file.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get mapFile() {
     let mapFileValue = this._getPropertyIfDefined(&apos;mapFile&apos;);
@@ -428,10 +446,30 @@ class Civ5Save {
   /**
    * List of enabled DLC.
    * @type {Array}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get enabledDLC() {
     if (this._properties.hasOwnProperty(&apos;enabledDLC&apos;)) {
-      return this._properties.enabledDLC.getArray();
+      try {
+        return this._properties.enabledDLC.getArray();
+      } catch (e) {
+        throw new ParseError(&apos;Failure parsing save at property enabledDLC&apos;);
+      }
+    }
+  }
+
+  /**
+   * List of enabled mods.
+   * @type {Array}
+   * @throws {ParseError} Error while parsing the save file.
+   */
+  get enabledMods() {
+    if (this._properties.hasOwnProperty(&apos;enabledMods&apos;)) {
+      try {
+        return this._properties.enabledMods.getArray();
+      } catch (e) {
+        throw new ParseError(&apos;Failure parsing save at property enabledMods&apos;);
+      }
     }
   }
 
@@ -443,6 +481,7 @@ class Civ5Save {
    * Status is one of `Civ5Save.PLAYER_STATUSES.AI`, `Civ5Save.PLAYER_STATUSES.DEAD`, `Civ5Save.PLAYER_STATUSES.HUMAN`,
    *     `Civ5Save.PLAYER_STATUSES.NONE`.
    * @type {Array.&lt;{civilization: string|undefined, status: number}&gt;}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get players() {
     if (this._isNullOrUndefined(this._players)) {
@@ -466,8 +505,12 @@ class Civ5Save {
           player.civilization = this._beautifyPropertyValue(this._properties.playerCivilizations.getArray()[i]);
 
         } else if (i === 0 &amp;&amp; this._properties.hasOwnProperty(&apos;player1Civilization&apos;)) {
-          player.civilization = this._beautifyPropertyValue(
-            this._properties.player1Civilization.getValue(this._saveData));
+          try {
+            player.civilization = this._beautifyPropertyValue(
+              this._properties.player1Civilization.getValue(this._saveData));
+          } catch (e) {
+            throw new ParseError(&apos;Failure parsing save at property players&apos;);
+          }
         }
 
         this._players.push(player);
@@ -480,6 +523,7 @@ class Civ5Save {
   /**
    * Max turns.
    * @type {number}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get maxTurns() {
     return this._getPropertyIfDefined(&apos;maxTurns&apos;);
@@ -497,6 +541,7 @@ class Civ5Save {
    * Turn timer length for multiplayer games. If pitboss is enabled, this value represents turn timer in hours.
    *     Otherwise, it is in minutes.
    * @type {number}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get turnTimerLength() {
     return this._getPropertyIfDefined(&apos;turnTimerLength&apos;);
@@ -517,6 +562,7 @@ class Civ5Save {
    * Note that this will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700 because it isn&apos;t
    * implemented. `undefined` is used instead of `null` because `null` might incorrectly imply the value is empty.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get privateGame() {
     return this._getPropertyIfDefined(&apos;privateGame&apos;);
@@ -533,6 +579,7 @@ class Civ5Save {
   /**
    * Time victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get timeVictory() {
     return this._getPropertyIfDefined(&apos;timeVictory&apos;);
@@ -549,6 +596,7 @@ class Civ5Save {
   /**
    * Science victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get scienceVictory() {
     return this._getPropertyIfDefined(&apos;scienceVictory&apos;);
@@ -565,6 +613,7 @@ class Civ5Save {
   /**
    * Domination victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get dominationVictory() {
     return this._getPropertyIfDefined(&apos;dominationVictory&apos;);
@@ -581,6 +630,7 @@ class Civ5Save {
   /**
    * Cultural victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get culturalVictory() {
     return this._getPropertyIfDefined(&apos;culturalVictory&apos;);
@@ -597,6 +647,7 @@ class Civ5Save {
   /**
    * Diplomatic victory.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get diplomaticVictory() {
     return this._getPropertyIfDefined(&apos;diplomaticVictory&apos;);
@@ -613,9 +664,10 @@ class Civ5Save {
   /**
    * Always peace.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get alwaysPeace() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_ALWAYS_PEACE&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_ALWAYS_PEACE&apos;);
   }
 
   /**
@@ -623,15 +675,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set alwaysPeace(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_ALWAYS_PEACE&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_ALWAYS_PEACE&apos;, newValue);
   }
 
   /**
    * Always war.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get alwaysWar() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_ALWAYS_WAR&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_ALWAYS_WAR&apos;);
   }
 
   /**
@@ -639,15 +692,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set alwaysWar(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_ALWAYS_WAR&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_ALWAYS_WAR&apos;, newValue);
   }
 
   /**
    * Complete kills.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get completeKills() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_COMPLETE_KILLS&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_COMPLETE_KILLS&apos;);
   }
 
   /**
@@ -655,15 +709,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set completeKills(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_COMPLETE_KILLS&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_COMPLETE_KILLS&apos;, newValue);
   }
 
   /**
    * Lock mods.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get lockMods() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_LOCK_MODS&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_LOCK_MODS&apos;);
   }
 
   /**
@@ -671,15 +726,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set lockMods(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_LOCK_MODS&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_LOCK_MODS&apos;, newValue);
   }
 
   /**
    * New random seed.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get newRandomSeed() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NEW_RANDOM_SEED&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NEW_RANDOM_SEED&apos;);
   }
 
   /**
@@ -687,15 +743,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set newRandomSeed(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NEW_RANDOM_SEED&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NEW_RANDOM_SEED&apos;, newValue);
   }
 
   /**
    * No barbarians.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noBarbarians() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_BARBARIANS&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_BARBARIANS&apos;);
   }
 
   /**
@@ -703,15 +760,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noBarbarians(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_BARBARIANS&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_BARBARIANS&apos;, newValue);
   }
 
   /**
    * No changing war or peace.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noChangingWarPeace() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_CHANGING_WAR_PEACE&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_CHANGING_WAR_PEACE&apos;);
   }
 
   /**
@@ -719,15 +777,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noChangingWarPeace(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_CHANGING_WAR_PEACE&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_CHANGING_WAR_PEACE&apos;, newValue);
   }
 
   /**
    * No city razing.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noCityRazing() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_CITY_RAZING&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_CITY_RAZING&apos;);
   }
 
   /**
@@ -735,15 +794,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noCityRazing(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_CITY_RAZING&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_CITY_RAZING&apos;, newValue);
   }
 
   /**
    * No cultural overview UI.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noCultureOverviewUI() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_CULTURE_OVERVIEW_UI&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_CULTURE_OVERVIEW_UI&apos;);
   }
 
   /**
@@ -751,15 +811,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noCultureOverviewUI(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_CULTURE_OVERVIEW_UI&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_CULTURE_OVERVIEW_UI&apos;, newValue);
   }
 
   /**
    * No espionage.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noEspionage() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_ESPIONAGE&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_ESPIONAGE&apos;);
   }
 
   /**
@@ -767,15 +828,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noEspionage(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_ESPIONAGE&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_ESPIONAGE&apos;, newValue);
   }
 
   /**
    * No happiness.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noHappiness() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_HAPPINESS&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_HAPPINESS&apos;);
   }
 
   /**
@@ -783,15 +845,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noHappiness(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_HAPPINESS&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_HAPPINESS&apos;, newValue);
   }
 
   /**
    * No policies.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noPolicies() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_POLICIES&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_POLICIES&apos;);
   }
 
   /**
@@ -799,15 +862,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noPolicies(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_POLICIES&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_POLICIES&apos;, newValue);
   }
 
   /**
    * No religion.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noReligion() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_RELIGION&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_RELIGION&apos;);
   }
 
   /**
@@ -815,15 +879,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noReligion(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_RELIGION&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_RELIGION&apos;, newValue);
   }
 
   /**
    * No science.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noScience() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_SCIENCE&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_SCIENCE&apos;);
   }
 
   /**
@@ -831,15 +896,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noScience(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_SCIENCE&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_SCIENCE&apos;, newValue);
   }
 
   /**
    * No world congress.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get noWorldCongress() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_NO_LEAGUES&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_NO_LEAGUES&apos;);
   }
 
   /**
@@ -847,15 +913,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set noWorldCongress(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_NO_LEAGUES&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_NO_LEAGUES&apos;, newValue);
   }
 
   /**
    * One-city challenge.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get oneCityChallenge() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_ONE_CITY_CHALLENGE&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_ONE_CITY_CHALLENGE&apos;);
   }
 
   /**
@@ -863,16 +930,17 @@ class Civ5Save {
    * @type {boolean}
    */
   set oneCityChallenge(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_ONE_CITY_CHALLENGE&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_ONE_CITY_CHALLENGE&apos;, newValue);
   }
 
   /**
    * Pitboss.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    * @see https://github.com/Bownairo/Civ5SaveEditor
    */
   get pitboss() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_PITBOSS&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_PITBOSS&apos;);
   }
 
   /**
@@ -881,15 +949,16 @@ class Civ5Save {
    * @see https://github.com/Bownairo/Civ5SaveEditor
    */
   set pitboss(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_PITBOSS&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_PITBOSS&apos;, newValue);
   }
 
   /**
    * Policy saving.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get policySaving() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_POLICY_SAVING&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_POLICY_SAVING&apos;);
   }
 
   /**
@@ -897,15 +966,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set policySaving(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_POLICY_SAVING&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_POLICY_SAVING&apos;, newValue);
   }
 
   /**
    * Promotion saving.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get promotionSaving() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_PROMOTION_SAVING&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_PROMOTION_SAVING&apos;);
   }
 
   /**
@@ -913,15 +983,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set promotionSaving(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_PROMOTION_SAVING&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_PROMOTION_SAVING&apos;, newValue);
   }
 
   /**
    * Raging barbarians.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get ragingBarbarians() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_RAGING_BARBARIANS&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_RAGING_BARBARIANS&apos;);
   }
 
   /**
@@ -929,15 +1000,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set ragingBarbarians(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_RAGING_BARBARIANS&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_RAGING_BARBARIANS&apos;, newValue);
   }
 
   /**
    * Random personalities.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get randomPersonalities() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_RANDOM_PERSONALITIES&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_RANDOM_PERSONALITIES&apos;);
   }
 
   /**
@@ -945,15 +1017,16 @@ class Civ5Save {
    * @type {boolean}
    */
   set randomPersonalities(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_RANDOM_PERSONALITIES&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_RANDOM_PERSONALITIES&apos;, newValue);
   }
 
   /**
    * Turn timer enabled.
    * @type {boolean}
+   * @throws {ParseError} Error while parsing the save file.
    */
   get turnTimerEnabled() {
-    return this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_END_TURN_TIMER_ENABLED&apos;);
+    return this._getGameOption(&apos;GAMEOPTION_END_TURN_TIMER_ENABLED&apos;);
   }
 
   /**
@@ -961,22 +1034,23 @@ class Civ5Save {
    * @type {boolean}
    */
   set turnTimerEnabled(newValue) {
-    this._setNewGameOption(&apos;GAMEOPTION_END_TURN_TIMER_ENABLED&apos;, newValue);
+    this._setGameOption(&apos;GAMEOPTION_END_TURN_TIMER_ENABLED&apos;, newValue);
   }
 
   /**
    * Turn mode: one of `Civ5Save.TURN_MODES.HYBRID`, `Civ5Save.TURN_MODES.SEQUENTIAL`, or
    *     `Civ5Save.TURN_MODES.SIMULTANEOUS`.
    * @type {string}
+   * @throws {ParseError} Error while parsing the save file.
    * @see http://blog.frank-mich.com/civilization-v-how-to-change-turn-type-of-a-started-game/
    */
   get turnMode() {
-    if (this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_DYNAMIC_TURNS&apos;) === true) {
+    if (this._getGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;) === true) {
       return Civ5Save.TURN_MODES.HYBRID;
-    } else if (this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;) === true) {
+    } else if (this._getGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;) === true) {
       return Civ5Save.TURN_MODES.SIMULTANEOUS;
-    } else if (this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_DYNAMIC_TURNS&apos;) === false &amp;&amp;
-      this._properties.gameOptionsMap.getValue(this._saveData, &apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;) === false) {
+    } else if (this._getGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;) === false &amp;&amp;
+      this._getGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;) === false) {
       return Civ5Save.TURN_MODES.SEQUENTIAL;
     }
   }
@@ -989,32 +1063,42 @@ class Civ5Save {
    */
   set turnMode(newValue) {
     if (newValue === Civ5Save.TURN_MODES.HYBRID) {
-      this._setNewGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;, true);
-      this._setNewGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;, false);
+      this._setGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;, true);
+      this._setGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;, false);
     } else if (newValue === Civ5Save.TURN_MODES.SIMULTANEOUS) {
-      this._setNewGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;, false);
-      this._setNewGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;, true);
+      this._setGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;, false);
+      this._setGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;, true);
     } else if (newValue === Civ5Save.TURN_MODES.SEQUENTIAL) {
-      this._setNewGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;, false);
-      this._setNewGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;, false);
+      this._setGameOption(&apos;GAMEOPTION_DYNAMIC_TURNS&apos;, false);
+      this._setGameOption(&apos;GAMEOPTION_SIMULTANEOUS_TURNS&apos;, false);
     }
   }
 
   /**
    * @private
+   * @throws {ParseError} Error while parsing the save file.
    */
   _getPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
-      return this._properties[propertyName].getValue(this._saveData);
+      try {
+        return this._properties[propertyName].getValue(this._saveData);
+      } catch (e) {
+        throw new ParseError(`Failure parsing save at property ${propertyName}`);
+      }
     }
   }
 
   /**
    * @private
+   * @throws {ParseError} Error while parsing the save file.
    */
   _getBeautifiedPropertyIfDefined(propertyName) {
     if (this._properties.hasOwnProperty(propertyName)) {
-      return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+      try {
+        return this._beautifyPropertyValue(this._properties[propertyName].getValue(this._saveData));
+      } catch (e) {
+        throw new ParseError(`Failure parsing save at property ${propertyName}`);
+      }
     }
   }
 
@@ -1041,9 +1125,21 @@ class Civ5Save {
 
   /**
    * @private
+   * @throws {ParseError} Error while parsing the save file.
    */
-  _setNewGameOption(newGameOptionKey, newGameOptionValue) {
-    let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, newGameOptionKey, newGameOptionValue);
+  _getGameOption(gameOptionKey) {
+    try {
+      return this._properties.gameOptionsMap.getValue(this._saveData, gameOptionKey);
+    } catch (e) {
+      throw new ParseError(`Failure parsing save at property ${gameOptionKey}`);
+    }
+  }
+
+  /**
+   * @private
+   */
+  _setGameOption(gameOptionKey, gameOptionNewValue) {
+    let newSaveData = this._properties.gameOptionsMap.setValue(this._saveData, gameOptionKey, gameOptionNewValue);
     if (!this._isNullOrUndefined(newSaveData)) {
       this._saveData = newSaveData;
     }

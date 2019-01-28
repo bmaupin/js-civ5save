@@ -379,13 +379,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#diplomaticvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-diplomaticVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-diplomaticVictory",
     "src/Civ5Save.js~Civ5Save#diplomaticVictory",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#diplomaticvictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-diplomaticVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-diplomaticVictory",
     "src/Civ5Save.js~Civ5Save#diplomaticVictory",
     "member"
   ],
@@ -405,6 +405,12 @@ window.esdocSearchIndex = [
     "src/civ5save.js~civ5save#enableddlc",
     "class/src/Civ5Save.js~Civ5Save.html#instance-get-enabledDLC",
     "src/Civ5Save.js~Civ5Save#enabledDLC",
+    "member"
+  ],
+  [
+    "src/civ5save.js~civ5save#enabledmods",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-enabledMods",
+    "src/Civ5Save.js~Civ5Save#enabledMods",
     "member"
   ],
   [
@@ -433,13 +439,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#lockmods",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-lockMods",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-lockMods",
     "src/Civ5Save.js~Civ5Save#lockMods",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#lockmods",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-lockMods",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-lockMods",
     "src/Civ5Save.js~Civ5Save#lockMods",
     "member"
   ],
@@ -481,13 +487,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#nobarbarians",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noBarbarians",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noBarbarians",
     "src/Civ5Save.js~Civ5Save#noBarbarians",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#nobarbarians",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noBarbarians",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noBarbarians",
     "src/Civ5Save.js~Civ5Save#noBarbarians",
     "member"
   ],
@@ -517,25 +523,25 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#nocultureoverviewui",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noCultureOverviewUI",
-    "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
-    "member"
-  ],
-  [
-    "src/civ5save.js~civ5save#nocultureoverviewui",
     "class/src/Civ5Save.js~Civ5Save.html#instance-set-noCultureOverviewUI",
     "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
     "member"
   ],
   [
-    "src/civ5save.js~civ5save#noespionage",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noEspionage",
-    "src/Civ5Save.js~Civ5Save#noEspionage",
+    "src/civ5save.js~civ5save#nocultureoverviewui",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noCultureOverviewUI",
+    "src/Civ5Save.js~Civ5Save#noCultureOverviewUI",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#noespionage",
     "class/src/Civ5Save.js~Civ5Save.html#instance-get-noEspionage",
+    "src/Civ5Save.js~Civ5Save#noEspionage",
+    "member"
+  ],
+  [
+    "src/civ5save.js~civ5save#noespionage",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noEspionage",
     "src/Civ5Save.js~Civ5Save#noEspionage",
     "member"
   ],
@@ -577,25 +583,25 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#noscience",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noScience",
-    "src/Civ5Save.js~Civ5Save#noScience",
-    "member"
-  ],
-  [
-    "src/civ5save.js~civ5save#noscience",
     "class/src/Civ5Save.js~Civ5Save.html#instance-set-noScience",
     "src/Civ5Save.js~Civ5Save#noScience",
     "member"
   ],
   [
-    "src/civ5save.js~civ5save#noworldcongress",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noWorldCongress",
-    "src/Civ5Save.js~Civ5Save#noWorldCongress",
+    "src/civ5save.js~civ5save#noscience",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-noScience",
+    "src/Civ5Save.js~Civ5Save#noScience",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#noworldcongress",
     "class/src/Civ5Save.js~Civ5Save.html#instance-get-noWorldCongress",
+    "src/Civ5Save.js~Civ5Save#noWorldCongress",
+    "member"
+  ],
+  [
+    "src/civ5save.js~civ5save#noworldcongress",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-noWorldCongress",
     "src/Civ5Save.js~Civ5Save#noWorldCongress",
     "member"
   ],
@@ -709,13 +715,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#timevictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-timeVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-timeVictory",
     "src/Civ5Save.js~Civ5Save#timeVictory",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#timevictory",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-timeVictory",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-timeVictory",
     "src/Civ5Save.js~Civ5Save#timeVictory",
     "member"
   ],
@@ -727,13 +733,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#turnmode",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-turnMode",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnMode",
     "src/Civ5Save.js~Civ5Save#turnMode",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#turnmode",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnMode",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-turnMode",
     "src/Civ5Save.js~Civ5Save#turnMode",
     "member"
   ],
@@ -751,13 +757,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/civ5save.js~civ5save#turntimerlength",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-get-turnTimerLength",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnTimerLength",
     "src/Civ5Save.js~Civ5Save#turnTimerLength",
     "member"
   ],
   [
     "src/civ5save.js~civ5save#turntimerlength",
-    "class/src/Civ5Save.js~Civ5Save.html#instance-set-turnTimerLength",
+    "class/src/Civ5Save.js~Civ5Save.html#instance-get-turnTimerLength",
     "src/Civ5Save.js~Civ5Save#turnTimerLength",
     "member"
   ],
@@ -795,6 +801,12 @@ window.esdocSearchIndex = [
     "src/civ5saveintproperty.js",
     "file/src/Civ5SaveIntProperty.js.html",
     "src/Civ5SaveIntProperty.js",
+    "file"
+  ],
+  [
+    "src/civ5savemodsstringarray.js",
+    "file/src/Civ5SaveModsStringArray.js.html",
+    "src/Civ5SaveModsStringArray.js",
     "file"
   ],
   [
