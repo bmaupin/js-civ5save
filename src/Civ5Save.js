@@ -420,6 +420,21 @@ class Civ5Save {
   }
 
   /**
+   * List of enabled mods.
+   * @type {Array}
+   * @throws {ParseError} Error while parsing the save file.
+   */
+  get enabledMods() {
+    if (this._properties.hasOwnProperty('enabledMods')) {
+      try {
+        return this._properties.enabledMods.getArray();
+      } catch (e) {
+        throw new ParseError('Failure parsing save at property enabledMods');
+      }
+    }
+  }
+
+  /**
    * List of players as objects with their civilization and status as properties.
    *
    * Civilization will be `undefined` if [gameBuild](#instance-get-gameBuild) is less than 310700.

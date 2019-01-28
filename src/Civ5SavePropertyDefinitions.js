@@ -145,6 +145,14 @@ export default {
     },
     'type': 'dlcStringArray'
   },
+  'enabledMods': {
+    'byteOffsetInSection': null,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 1
+    },
+    'type': 'modsStringArray'
+  },
   // Players after the first player marked as none seem to be superfluous
   'playerStatuses': {
     'byteOffsetInSection': 4,
