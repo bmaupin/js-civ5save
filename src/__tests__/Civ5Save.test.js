@@ -202,6 +202,16 @@ test('Get enabled DLC', () => {
   ]);
 });
 
+test('Get enabled Mods', () => {
+  expect(savegame10017.enabledMods).toEqual([]);
+  expect(savegame101135.enabledMods).toEqual([]);
+  expect(savegame101221.enabledMods).toEqual([
+    'Conquest of the New World',
+  ]);
+  expect(savegame10213.enabledMods).toEqual([]);
+  expect(savegame103279.enabledMods).toEqual([]);
+});
+
 test('Get players', () => {
   expect(savegame10017.players).toEqual([
     {
@@ -1062,8 +1072,27 @@ test('Test issue 4 (gameBuild)', async () => {
 });
 
 // https://github.com/bmaupin/civ5save-editor/issues/6
-test('Test issue 6 ', async () => {
+test('Test issue 6', async () => {
   let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue6.Civ5Save'));
   let savegame = await Civ5Save.fromFile(fileBlob);
   expect(savegame.maxTurns).toBe(0);
+});
+
+// https://github.com/bmaupin/civ5save-editor/issues/8
+test('Test issue 8', async () => {
+  let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue8a.Civ5Save'));
+  let savegame = await Civ5Save.fromFile(fileBlob);
+  // TODO: This won't pass until issue 8 is resolved
+  // expect(savegame.timeVictory).toBe(true);
+  expect(() => {
+    savegame.timeVictory;
+  }).toThrowError('Failure parsing save at property timeVictory');
+
+  expect(savegame.enabledMods).toEqual([
+    '(1) Community Patch',
+    '(2) Community Balance Overhaul',
+    '(3) City-State Diplomacy Mod for CBP',
+    '(4) C4DF - CBP',
+    '(5) More Luxuries - CBO Edition (5-14b)',
+  ]);
 });
