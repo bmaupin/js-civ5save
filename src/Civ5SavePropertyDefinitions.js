@@ -154,7 +154,7 @@ export default {
     'type': 'modsStringArray'
   },
   // Players after the first player marked as none seem to be superfluous
-  // SDK: CvGameCoreSource/blob/master/CvGameCoreDLLUtil/include/CvEnums.h#L1920
+  // See SlotStatus in the SDK: CvGameCoreSource/CvGameCoreDLLUtil/include/CvEnums.h
   'playerStatuses': {
     'byteOffsetInSection': 4,
     // Length is number of items, not bytes

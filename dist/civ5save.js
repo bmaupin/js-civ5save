@@ -1906,7 +1906,7 @@ var Civ5Save = function () {
 
         var propertyLength = propertyDefinition.length;
         if (propertyDefinition.hasOwnProperty('getLength')) {
-          propertyLength = propertyDefinition.getLength(properties.enabledDLC.getArray());
+          propertyLength = propertyDefinition.getLength(properties.enabledDLC.getArray(), properties.enabledMods.getArray());
         }
 
         var propertyByteOffset = 0;
@@ -5853,6 +5853,7 @@ exports.default = {
     'type': 'modsStringArray'
   },
   // Players after the first player marked as none seem to be superfluous
+  // See SlotStatus in the SDK: CvGameCoreSource/CvGameCoreDLLUtil/include/CvEnums.h
   'playerStatuses': {
     'byteOffsetInSection': 4,
     // Length is number of items, not bytes
@@ -6021,8 +6022,26 @@ exports.default = {
     },
     'type': 'bool'
   },
+  'section29Skip1': {
+    'byteOffsetInSection': 4,
+    'length': null,
+    'sectionByBuild': {
+      '98650': 27,
+      '262623': 28,
+      '395070': 29
+    },
+    'type': 'bytes',
+    getLength: function getLength(enabledDLC, enabledMods) {
+      var length = 265;
+      if (enabledMods.includes('(1) Community Patch')) {
+        // Account for 0xDEADBEEF and mod version number (https://github.com/LoneGazebo/Community-Patch-DLL/blob/72137235dbab0c78d0c65a4b2ea33bad85b9ef61/CvGameCoreDLL_Expansion2/CustomMods.h#L1334)
+        length += 8;
+      }
+      return length;
+    }
+  },
   'section29Timer1': {
-    'byteOffsetInSection': 269,
+    'byteOffsetInSection': null,
     'length': null,
     'sectionByBuild': {
       '98650': 27,
@@ -6031,7 +6050,7 @@ exports.default = {
     },
     'type': 'string'
   },
-  'section29Skip1': {
+  'section29Skip2': {
     'byteOffsetInSection': null,
     'length': 12,
     'sectionByBuild': {
@@ -6071,7 +6090,7 @@ exports.default = {
     },
     'type': 'string'
   },
-  'section29Skip2': {
+  'section29Skip3': {
     'byteOffsetInSection': null,
     'length': 25,
     'sectionByBuild': {
@@ -6136,7 +6155,6 @@ exports.default = {
     },
     'type': 'bool'
   },
-  // This section is 76 bytes long if either expansion pack is installed. Otherwise it's 72 bytes long.
   'section30Skip1': {
     'byteOffsetInSection': 4,
     'length': null,
@@ -6146,12 +6164,16 @@ exports.default = {
       '395070': 30
     },
     'type': 'bytes',
-    getLength: function getLength(enabledDLC) {
+    getLength: function getLength(enabledDLC, enabledMods) {
+      var length = 72;
       if (enabledDLC.includes('Expansion - Gods and Kings') || enabledDLC.includes('Expansion - Brave New World')) {
-        return 76;
-      } else {
-        return 72;
+        length += 4;
       }
+      if (enabledMods.includes('(1) Community Patch')) {
+        // Account for 0xDEADBEEF and mod version number (https://github.com/LoneGazebo/Community-Patch-DLL/blob/72137235dbab0c78d0c65a4b2ea33bad85b9ef61/CvGameCoreDLL_Expansion2/CustomMods.h#L1334)
+        length += 8;
+      }
+      return length;
     }
   },
   'section30MapSize1': {
@@ -6214,9 +6236,10 @@ exports.default = {
     },
     'type': 'string'
   },
-  // This section is 80 bytes long if Brave New World is installed. It's 76 bytes if only Gods and Kings is installed.
-  // Otherwise it's 72 bytes long.
-  'section30Skip3': {
+  // A bunch of map properties which differ based on the map size, 4 bytes per property
+  // See CvWorldInfo::readFrom in the SDK: CvGameCoreSource/CvGameCoreDLL_Expansion2/CvInfos.cpp for the order of values
+  // See steamassets/assets/dlc/expansion2/gameplay/xml/gameinfo/civ5worlds.xml for values based on map size
+  'worldInfo': {
     'byteOffsetInSection': null,
     'length': null,
     'sectionByBuild': {
@@ -6225,14 +6248,21 @@ exports.default = {
       '395070': 30
     },
     'type': 'bytes',
-    getLength: function getLength(enabledDLC) {
+    getLength: function getLength(enabledDLC, enabledMods) {
+      var length = 72;
       if (enabledDLC.includes('Expansion - Brave New World')) {
-        return 80;
+        // Brave New World added MaxActiveReligions and NumCitiesTechCostMod
+        length += 8;
       } else if (enabledDLC.includes('Expansion - Gods and Kings')) {
-        return 76;
-      } else {
-        return 72;
+        // Gods and Kings added MaxActiveReligions
+        length += 4;
       }
+      // Community Patch adds multiple new properties
+      // See CvWorldInfo::readFrom in https://github.com/LoneGazebo/Community-Patch-DLL/blob/master/CvGameCoreDLL_Expansion2/CvInfos.cpp
+      if (enabledMods.includes('(1) Community Patch')) {
+        length += 20;
+      }
+      return length;
     }
   },
   // This is where a large chunk of game options are stored
