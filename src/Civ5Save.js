@@ -125,7 +125,9 @@ class Civ5Save {
 
       let propertyLength = propertyDefinition.length;
       if (propertyDefinition.hasOwnProperty('getLength')) {
-        propertyLength = propertyDefinition.getLength(properties.enabledDLC.getArray());
+        propertyLength = propertyDefinition.getLength(
+          properties.enabledDLC.getArray(),
+          properties.enabledMods.getArray());
       }
 
       let propertyByteOffset = 0;
