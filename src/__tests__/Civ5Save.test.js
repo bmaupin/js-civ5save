@@ -1080,14 +1080,8 @@ test('Test issue 6', async () => {
 
 // https://github.com/bmaupin/civ5save-editor/issues/8
 test('Test issue 8', async () => {
-  let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue8a.Civ5Save'));
+  let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue8.Civ5Save'));
   let savegame = await Civ5Save.fromFile(fileBlob);
-  // TODO: This won't pass until issue 8 is resolved
-  // expect(savegame.timeVictory).toBe(true);
-  expect(() => {
-    savegame.timeVictory;
-  }).toThrowError('Failure parsing save at property timeVictory');
-
   expect(savegame.enabledMods).toEqual([
     '(1) Community Patch',
     '(2) Community Balance Overhaul',
@@ -1095,4 +1089,6 @@ test('Test issue 8', async () => {
     '(4) C4DF - CBP',
     '(5) More Luxuries - CBO Edition (5-14b)',
   ]);
+  expect(savegame.timeVictory).toBe(true);
+  expect(savegame.noWorldCongress).toBe(false);
 });
