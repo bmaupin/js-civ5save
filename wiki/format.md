@@ -16,11 +16,14 @@
 |  | String | `GAMESPEED_STANDARD`<br>`GAMESPEED_QUICK` | Game pace |
 |  | String | `WORLDSIZE_DUEL`<br>`WORLDSIZE_SMALL` | Map size |
 |  | String | `Assets\Maps\Continents.lua`<br>`Assets\Maps\Earth_Duel.Civ5Map` | Map |
-| 3 |  |  | Player names (for human players) |
-| 4 |  |  | Player statuses |
-| 7 |  |  | Player difficulties? |
-| 8 |  |  | Player civilizations |
-| 9 |  |  | Leaders |
+| 2 |  |  | `civilizations` in the SDK?? |
+| 3 |  |  | Player names (for human players) (`nicknames` in the SDK) |
+| 4 |  |  | Player statuses (`slotStatus` in the SDK) |
+| 5 |  |  | `slotClaims` in the SDK?? |
+| 6 |  |  | `teamTypes` in the SDK?? |
+| 7 |  |  | Player difficulties? (`handicapTypes` in the SDK) |
+| 8 |  |  | Player civilizations (`civilizationKeys` in the SDK) |
+| 9 |  |  | Leaders (`leaderKeys` in the SDK) |
 | 14 |  |  | Climate |
 | 17 |  |  | Player difficulties? |
 | 18 |  |  | Player difficulties? |
@@ -82,6 +85,16 @@ Builds and versions
 | 388272 | 1.0.3.70 |
 | 395070 | 1.0.3.142 |
 | 403694 | 1.0.3.279 |
+
+
+## SDK
+- CvGameCoreSource/CvGameCoreDLL_Expansion2/CvPreGame.cpp
+    - Might help in determining some of the overall structure of the savegame (e.g. slotStatus)
+- CvGameCoreSource/CvGameCoreDLLUtil/include/CvEnums.h
+    - Contains some enums and values, which may or may not help in determining values for specific properties (e.g. SlotStatus)
+- CvGameCoreSource/CvGameCoreDLL_Expansion2/CvInfos.cpp
+    - Contains some advanced types, which may be serialized directly into the savegame (e.g. CvWorldInfo)
+
 
 References:
 ---
