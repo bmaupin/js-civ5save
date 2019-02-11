@@ -15,6 +15,21 @@
 
 For an example of actual usage, see https://github.com/bmaupin/civ5save-editor
 
+
+### Goals
+- Support for properties which can be changed by modifying the uncompressed header of the file
+- Support for all versions of the base game, including DLC and expansion packs
+- Support for the latest version only of mods (at least the most popular ones)
+
+
+### Non-goals
+- Support for properties which can be changed in game (e.g. quick combat)
+- Support for properties which have no effect when changed after a game's started
+- Support for properties in the compressed section of the file
+- Support for anything other than the latest version of a particular mod
+- Support for other Civilization games
+
+
 ### Installation
 
     yarn add civ5save
@@ -22,6 +37,7 @@ For an example of actual usage, see https://github.com/bmaupin/civ5save-editor
 Or:
 
     npm install civ5save
+
 
 ### Development
 
@@ -33,13 +49,16 @@ Or:
        cd js-civ5save
        yarn install
 
+
 ### Testing
 
     yarn test
 
+
 ### Building (includes documentation)
 
     yarn build
+
 
 ### Credits
 
