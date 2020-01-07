@@ -1092,3 +1092,12 @@ test('Test issue 8', async () => {
   expect(savegame.timeVictory).toBe(true);
   expect(savegame.noWorldCongress).toBe(false);
 });
+
+// https://github.com/bmaupin/civ5save-editor/issues/15
+test('Test issue 15', async () => {
+  let fileBlob = await getFileBlob(path.join(__dirname, 'resources', 'issue15.Civ5Save'));
+  let savegame = await Civ5Save.fromFile(fileBlob);
+  expect(savegame.gameVersion).toBe('1.0.3.279 (180925)');
+  expect(savegame.gameBuild).toBe('403694');
+  expect(savegame.maxTurns).toBe(330);
+});
