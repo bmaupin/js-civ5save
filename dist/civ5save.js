@@ -2084,6 +2084,11 @@ var Civ5Save = function () {
          * @private
          */
         this._gameBuild = gameBuildProperty.getValue(this._saveData);
+
+        // Ugly hack to work around https://github.com/bmaupin/civ5save-editor/issues/15. C'mon Aspyr! :P
+        if (this._gameBuild === '180925') {
+          this._gameBuild = '403694';
+        }
       } else {
         this._gameBuild = this._getGameBuild();
       }
