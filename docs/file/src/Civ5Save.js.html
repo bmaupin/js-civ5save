@@ -342,6 +342,11 @@ class Civ5Save {
        * @private
        */
       this._gameBuild = gameBuildProperty.getValue(this._saveData);
+
+      // Ugly hack to work around https://github.com/bmaupin/civ5save-editor/issues/15. C&apos;mon Aspyr! :P
+      if (this._gameBuild === &apos;180925&apos;) {
+        this._gameBuild = &apos;403694&apos;;
+      }
     } else {
       this._gameBuild = this._getGameBuild();
     }

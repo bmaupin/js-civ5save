@@ -49,6 +49,18 @@
 <li>Support for reading and writing certain multiplayer options (pitboss, private game, turn mode, turn timer)</li>
 </ul>
 <p>For an example of actual usage, see <a href="https://github.com/bmaupin/civ5save-editor">https://github.com/bmaupin/civ5save-editor</a></p>
+<h3 id="goals">Goals</h3><ul>
+<li>Support for properties which can be changed by modifying the uncompressed header of the file</li>
+<li>Support for all versions of the base game, including DLC and expansion packs</li>
+<li>Support for the latest version only of mods (at least the most popular ones)</li>
+</ul>
+<h3 id="non-goals">Non-goals</h3><ul>
+<li>Support for properties which can be changed in game (e.g. quick combat)</li>
+<li>Support for properties which have no effect when changed after a game&apos;s started</li>
+<li>Support for properties in the compressed section of the file</li>
+<li>Support for anything other than the latest version of a particular mod</li>
+<li>Support for other Civilization games</li>
+</ul>
 <h3 id="installation">Installation</h3><pre><code><code class="source-code prettyprint">yarn add civ5save</code>
 </code></pre><p>Or:</p>
 <pre><code><code class="source-code prettyprint">npm install civ5save</code>
