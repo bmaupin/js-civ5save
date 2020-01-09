@@ -32,32 +32,24 @@ For an example of actual usage, see https://github.com/bmaupin/civ5save-editor
 
 ### Installation
 
-    yarn add civ5save
-
-Or:
-
     npm install civ5save
 
 
 ### Development
 
-1. Install Yarn (https://yarnpkg.com/docs/install)
-
-2. Clone the repository and install dependencies
-
-       git clone https://github.com/bmaupin/js-civ5save.git
-       cd js-civ5save
-       yarn install
+    git clone https://github.com/bmaupin/js-civ5save.git
+    cd js-civ5save
+    npm install
 
 
 ### Testing
 
-    yarn test
+    npm test
 
 
 ### Building (includes documentation)
 
-    yarn build
+    npm run build
 
 
 ### Credits
