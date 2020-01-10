@@ -1,5 +1,4 @@
 const env = process.env.NODE_ENV;
-const MinifyPlugin = require('babel-minify-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -11,17 +10,6 @@ module.exports = {
         exclude: /node_modules/,
         test: /\.js$/,
         use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: ['env'],
-              plugins: [
-                ['babel-plugin-transform-builtin-extend', { globals: ["DataView"] }],
-                // Fix ReferenceError: regeneratorRuntime is not defined (https://stackoverflow.com/a/36821986/399105)
-                ['transform-runtime']
-              ]
-            }
-          },
           { loader: 'eslint-loader' }
         ]
       }
@@ -34,7 +22,4 @@ module.exports = {
     libraryTarget: 'umd',
     path: path.resolve(__dirname, 'dist')
   },
-  plugins: env === 'production' ? [
-    new MinifyPlugin()
-  ] : [],
 };
