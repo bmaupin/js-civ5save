@@ -15,9 +15,9 @@
     "esdoc": "^1.0.2",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^4.2.0",
-    "eslint-loader": "^1.9.0",
     "jest": "^24.9.0",
-    "webpack": "^3.3.0"
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
   },
   "esdoc": {
     "source": "./src",
@@ -61,7 +61,7 @@
     "url": "https://github.com/bmaupin/js-civ5save.git"
   },
   "scripts": {
-    "build": "webpack && NODE_ENV=production webpack && esdoc",
+    "build": "npm run lint && webpack --mode=development && webpack --mode=production && esdoc",
     "lint": "eslint src/* --ext .js --ext .json",
     "test": "jest --coverage"
   },
