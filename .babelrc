@@ -1,8 +1,4 @@
 {
-  "plugins": [
-    ["babel-plugin-transform-builtin-extend", {
-      globals: ["DataView"]
-    }]
-  ],
-  "presets": ["env"]
+  "plugins": ["@babel/plugin-transform-runtime"],
+  "presets": ["@babel/preset-env"]
 }
