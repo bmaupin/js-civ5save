@@ -10,7 +10,8 @@ class Civ5Save {
   /**
    * Create a Civ5Save object.
    *
-   * As an alternative, a static factory method is available for more convenient instantiation from a file: [fromFile](#static-method-fromFile)
+   * As an alternative, a static factory method is available for more convenient instantiation from a file:
+   * [fromFile](#static-method-fromFile)
    * @param {DataView} saveData - The save file contents.
    * @throws {InvalidSignatureError} Invalid file signature.
    * @throws {ParseError} Error while parsing the save file.

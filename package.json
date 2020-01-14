@@ -65,5 +65,5 @@
     "lint": "eslint src/* --ext .js --ext .json",
     "test": "jest --coverage"
   },
-  "version": "0.3.2"
+  "version": "1.0.0"
 }
